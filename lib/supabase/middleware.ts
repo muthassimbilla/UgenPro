@@ -1,22 +1,23 @@
-import { createServerClient, type CookieOptions } from "@supabase/ssr"
+import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
 export async function updateSession(request: NextRequest) {
-  const origin = request.headers.get("origin")
+  // Handle CORS for different domains
+  const origin = request.headers.get('origin')
   const allowedOrigins = [
-    "http://localhost:3000",
-    "http://localhost:3001",
-    "https://ugenpro.site",
-    "https://www.ugenpro.site",
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://ugenpro.site',
+    'https://www.ugenpro.site'
   ]
 
   // Set CORS headers if origin is allowed
-  const response = NextResponse.next()
-  if (origin && allowedOrigins.includes(origin)) {
-    response.headers.set("Access-Control-Allow-Origin", origin)
-    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    response.headers.set("Access-Control-Allow-Credentials", "true")
+  let response = NextResponse.next()
+  if (origin && allowedOrigins.some(allowed => origin.includes(allowed.replace(/^https?:\/\//, '')))) {
+    response.headers.set('Access-Control-Allow-Origin', origin)
+    response.headers.set('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    response.headers.set('Access-Control-Allow-Headers', 'Content-Type, Authorization')
+    response.headers.set('Access-Control-Allow-Credentials', 'true')
   }
 
   if (request.nextUrl.pathname.startsWith("/api/")) {
@@ -33,7 +34,7 @@ export async function updateSession(request: NextRequest) {
         getAll() {
           return request.cookies.getAll()
         },
-        setAll(cookiesToSet: { name: string; value: string; options?: CookieOptions }[]) {
+        setAll(cookiesToSet) {
           cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value))
           supabaseResponse = NextResponse.next({
             request,

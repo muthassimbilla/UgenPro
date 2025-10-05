@@ -6,9 +6,9 @@
 
 #### **Step 1: Site URL Configuration**
 **Site URL** field এ এই value দিন:
-\`\`\`
+```
 https://www.ugenpro.site
-\`\`\`
+```
 
 #### **Step 2: Redirect URLs যোগ করুন**
 **"Add URL"** button এ ক্লিক করে এই URLs যোগ করুন:
@@ -22,20 +22,20 @@ https://www.ugenpro.site
 
 #### **Step 3: CORS Configuration**
 **CORS Origins** section এ এই URLs যোগ করুন:
-\`\`\`
+```
 https://www.ugenpro.site
 https://ugenpro.site
-\`\`\`
+```
 
 ## 🔧 **Complete Configuration List:**
 
 ### **Site URL:**
-\`\`\`
+```
 https://www.ugenpro.site
-\`\`\`
+```
 
 ### **Redirect URLs:**
-\`\`\`
+```
 https://www.ugenpro.site/auth/callback
 https://www.ugenpro.site/login
 https://www.ugenpro.site/signup
@@ -44,22 +44,22 @@ https://www.ugenpro.site/change-password
 https://www.ugenpro.site/profile
 https://www.ugenpro.site/adminbilla
 https://www.ugenpro.site/adminbilla/login
-\`\`\`
+```
 
 ### **CORS Origins:**
-\`\`\`
+```
 https://www.ugenpro.site
 https://ugenpro.site
-\`\`\`
+```
 
 ## 🌍 **Production Environment Variables:**
 
 ### **Netlify/Vercel এ Environment Variables:**
-\`\`\`
+```
 NEXT_PUBLIC_SUPABASE_URL=https://pozoauxismiqgytbsjic.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvem9hdXhpc21pcWd5dGJzamljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MTkyNjksImV4cCI6MjA3MDM5NTI2OX0.RiZZ0Phft_U3XShCvWwKpeFQtwve3ZfCaX9WETPfBGU
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1c2Jjanluam1pd29tZm12am9tIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTI2MjEzMywiZXhwIjoyMDc0ODM4MTMzfQ.IAhVdaxsLc1eRdz67llEfcAYUqkAjOW8XHAUJPTy0I0
-\`\`\`
+```
 
 ## 🎯 **Domain Configuration Steps:**
 
@@ -81,13 +81,13 @@ SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhY
 ## 🔍 **Testing Steps:**
 
 ### **1. Domain Test:**
-\`\`\`bash
+```bash
 # Test domain accessibility
 curl -I https://www.ugenpro.site
 
 # Test Supabase connection
 curl -I https://pozoauxismiqgytbsjic.supabase.co
-\`\`\`
+```
 
 ### **2. Browser Test:**
 1. **https://www.ugenpro.site** এ যান
@@ -96,7 +96,7 @@ curl -I https://pozoauxismiqgytbsjic.supabase.co
 4. **Admin panel:** https://www.ugenpro.site/adminbilla
 
 ### **3. Console Test:**
-\`\`\`javascript
+```javascript
 // Browser console এ run করুন
 console.log('Domain:', window.location.origin)
 console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
@@ -109,7 +109,7 @@ fetch('https://pozoauxismiqgytbsjic.supabase.co/rest/v1/', {
 }).then(response => {
   console.log('Supabase connection:', response.ok ? '✅ Success' : '❌ Failed')
 })
-\`\`\`
+```
 
 ## ⚠️ **Important Notes:**
 
@@ -152,7 +152,7 @@ fetch('https://pozoauxismiqgytbsjic.supabase.co/rest/v1/', {
 4. **Environment Error:** Hosting platform এ variables check করুন
 
 ### **Debug Commands:**
-\`\`\`bash
+```bash
 # Check domain status
 nslookup www.ugenpro.site
 
@@ -161,7 +161,7 @@ openssl s_client -connect www.ugenpro.site:443
 
 # Test Supabase connection
 curl -H "apikey: YOUR_ANON_KEY" https://pozoauxismiqgytbsjic.supabase.co/rest/v1/
-\`\`\`
+```
 
 ## ✅ **Success Indicators:**
 
