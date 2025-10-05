@@ -125,22 +125,57 @@ export class AuthService {
 
       const supabase = createClient()
 
+      console.log("[v0] Supabase client created, attempting signInWithPassword...")
+
+      // Validate credentials before sending
+      if (!credentials.email || !credentials.password) {
+        throw new Error("Email and password are required")
+      }
+
       const ipPromise = this.getUserCurrentIP().catch(() => "unknown")
 
       // Sign in with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: credentials.email,
+        email: credentials.email.trim(),
         password: credentials.password,
       })
 
       if (error) {
-        console.error("[v0] Login error:", error)
-        throw new Error(error.message)
+        console.error("[v0] Supabase auth error details:", {
+          message: error.message,
+          status: error.status,
+          name: error.name,
+        })
+
+        // Handle specific error cases
+        if (error.message.includes("Email not confirmed")) {
+          throw new Error(
+            "Please verify your email address before logging in. Check your inbox for the verification link.",
+          )
+        }
+
+        if (error.message.includes("Invalid login credentials")) {
+          throw new Error("Invalid email or password. Please check your credentials and try again.")
+        }
+
+        if (error.message.includes("Email link is invalid or has expired")) {
+          throw new Error("Your verification link has expired. Please request a new one.")
+        }
+
+        if (error.status === 400) {
+          throw new Error("Invalid login request. Please check your email and password.")
+        }
+
+        // Generic error
+        throw new Error(error.message || "Login failed. Please try again.")
       }
 
       if (!data.user) {
+        console.error("[v0] No user data returned from login")
         throw new Error("No user data returned from login")
       }
+
+      console.log("[v0] Supabase auth successful, fetching profile...")
 
       const [profileResponse, currentIP] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", data.user.id).single(),

@@ -1,12 +1,26 @@
 import { createBrowserClient } from "@supabase/ssr"
 
 export function createClient() {
-  return createBrowserClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+  if (!supabaseUrl || !supabaseAnonKey) {
+    console.error("[v0] Missing Supabase environment variables:", {
+      hasUrl: !!supabaseUrl,
+      hasKey: !!supabaseAnonKey,
+    })
+    throw new Error("Supabase configuration is missing. Please check your environment variables.")
+  }
+
+  console.log("[v0] Creating Supabase client with URL:", supabaseUrl)
+
+  return createBrowserClient(supabaseUrl, supabaseAnonKey, {
     auth: {
       flowType: "pkce",
       autoRefreshToken: true,
       detectSessionInUrl: true,
       persistSession: true,
+      storageKey: "ugenpro-auth",
     },
   })
 }
