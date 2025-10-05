@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, memo, useTransition } from "react"
+import { useState, useEffect, useCallback, useTransition } from "react"
 import ClientOnly from "@/components/client-only"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
@@ -13,7 +13,7 @@ import AuthHero from "@/components/auth/auth-hero"
 import AuthForm from "@/components/auth/auth-form"
 import LoadingOverlay from "@/components/loading-overlay"
 
-const LoginPage = memo(function LoginPage() {
+export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login, user, loading: authLoading } = useAuth()
@@ -197,7 +197,7 @@ const LoginPage = memo(function LoginPage() {
     const timer = setTimeout(() => {
       setIsInitialized(true)
     }, 100)
-    
+
     return () => clearTimeout(timer)
   }, [])
 
@@ -236,6 +236,4 @@ const LoginPage = memo(function LoginPage() {
       </AuthLayout>
     </ClientOnly>
   )
-})
-
-export default LoginPage
+}

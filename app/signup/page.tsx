@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useCallback, memo, useEffect } from "react"
+import { useState, useCallback, useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
 import { setClientFlashMessage } from "@/lib/flash-messages"
@@ -11,7 +11,7 @@ import AuthHero from "@/components/auth/auth-hero"
 import AuthForm from "@/components/auth/auth-form"
 import { useAuth } from "@/lib/auth-context"
 
-const SignupPage = memo(function SignupPage() {
+function SignupPage() {
   const router = useRouter()
   const { isOnline, retryConnection, isReconnecting } = useNetwork()
   const { user } = useAuth()
@@ -203,6 +203,6 @@ const SignupPage = memo(function SignupPage() {
       </div>
     </AuthLayout>
   )
-})
+}
 
 export default SignupPage
