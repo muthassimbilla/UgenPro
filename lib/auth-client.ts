@@ -69,7 +69,7 @@ export class AuthService {
         process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL ||
         (isLocalhost
           ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/login"
-          : "https://ugenpro.site/login")
+          : "https://www.ugenpro.site/login")
 
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
@@ -296,7 +296,7 @@ export class AuthService {
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
       const redirectUrl = isLocalhost
         ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/reset-password"
-        : "https://ugenpro.site/reset-password"
+        : "https://www.ugenpro.site/reset-password"
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
