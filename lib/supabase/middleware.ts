@@ -63,7 +63,9 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/adminbilla") &&
     !request.nextUrl.pathname.startsWith("/contact") &&
-    request.nextUrl.pathname !== "/"
+    request.nextUrl.pathname !== "/" &&
+    request.nextUrl.pathname !== "/forgot-password" &&
+    request.nextUrl.pathname !== "/reset-password"
   ) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
