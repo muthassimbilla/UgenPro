@@ -17,11 +17,11 @@ export function DashboardLayout({ children, title = "UGen Pro Creative" }: Dashb
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:flex lg:flex-shrink-0">
+      <aside className="hidden lg:block lg:flex-shrink-0">
         <SidebarNav />
       </aside>
 
-      {/* Sidebar - Mobile */}
+      {/* Sidebar - Mobile (only shows when sidebarOpen is true AND on mobile) */}
       {sidebarOpen && (
         <>
           <div
