@@ -40,14 +40,16 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
 
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled ? "glass-strong shadow-color border-b border-border/50 shadow-2xl" : "glass backdrop-blur-md shadow-lg"
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "glass-strong border-b border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
+          : "glass backdrop-blur-md"
       }`}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-xl transition-transform group-hover:scale-110 shadow-glow">
-            <img src="/logo.jpg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
+            <img src="/ugenpro-logo.svg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
           </div>
           <span className="font-bold text-xl gradient-text">UGen Pro</span>
         </Link>
@@ -77,15 +79,19 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
           <ThemeToggle />
 
           <Link href="/login" className="hidden sm:block">
-            <Button variant="ghost" size="sm" className="font-semibold hover:bg-card/50 rounded-xl">
+            <Button
+              variant="outline"
+              size="sm"
+              className="font-semibold rounded-xl border-2 border-emerald-500/30 hover:border-emerald-500/50 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm hover:shadow-glow"
+            >
               Sign In
             </Button>
           </Link>
           <Link href="/signup">
-            <Button
-              size="sm"
-              className="bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6"
-            >
+          <Button
+            size="sm"
+            className="bg-[#2B7FFF] hover:bg-[#1a6bff] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10"
+          >
               Get Started
             </Button>
           </Link>
@@ -128,7 +134,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
                 </Button>
               </Link>
               <Link href="/signup" className="block">
-                <Button className="w-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground font-semibold shadow-glow rounded-xl">
+                <Button className="w-full bg-gradient-to-r from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] hover:from-[#7a1fd4] hover:via-[#3a8fef] hover:to-[#ef3b7a] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10">
                   Get Started
                 </Button>
               </Link>

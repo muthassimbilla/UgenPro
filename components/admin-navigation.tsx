@@ -62,11 +62,11 @@ export function AdminNavigation() {
           {/* Logo */}
           <div className="flex items-center justify-between px-6 py-6 border-b border-white/10 relative">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center shadow-lg relative overflow-hidden">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-lg relative overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
-                <Shield className="w-6 h-6 text-white relative z-10" />
+                <img src="/ugenpro-logo.svg" alt="UGen Pro Logo" className="w-full h-full rounded-xl relative z-10" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+              <span className="text-xl font-bold bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 bg-clip-text text-transparent">
                 Admin Panel
               </span>
             </div>
@@ -89,7 +89,7 @@ export function AdminNavigation() {
                     href={item.href}
                     className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 font-medium group relative overflow-hidden ${
                       itemIsActive
-                        ? "bg-gradient-to-r from-red-500/20 to-orange-600/20 text-red-600 dark:text-red-400 shadow-lg border border-red-500/30"
+                        ? "bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 text-emerald-600 dark:text-emerald-400 shadow-lg border border-emerald-500/30"
                         : "text-slate-600 dark:text-slate-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50/50 dark:hover:bg-red-900/20"
                     }`}
                     style={{
@@ -132,7 +132,7 @@ export function AdminNavigation() {
                 border: "1px solid hsl(var(--border))",
               }}
             >
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-red-500 to-orange-600 flex items-center justify-center mr-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center mr-3">
                 <User className="w-5 h-5 text-white" />
               </div>
               <div className="flex-1">
@@ -146,7 +146,7 @@ export function AdminNavigation() {
               onClick={handleLogout}
               variant="outline"
               size="sm"
-              className="w-full bg-gradient-to-r from-red-500/10 to-orange-500/10 border-red-500/30 text-red-600 dark:text-red-400 hover:bg-red-500/20 hover:border-red-500/50 transition-all duration-200"
+              className="w-full bg-gradient-to-r from-emerald-500/10 to-cyan-500/10 border-emerald-500/30 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition-all duration-200"
             >
               <LogOut className="h-4 w-4 mr-2" />
               Logout

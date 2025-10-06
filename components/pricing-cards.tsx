@@ -1,6 +1,4 @@
 "use client"
-
-import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
@@ -26,29 +24,48 @@ const PricingCard = memo(
     return (
       <div className="group h-full">
         <Card
-          className={`h-full hover-lift border rounded-2xl bg-card transition-all duration-300 overflow-hidden flex flex-col ${
-            plan.is_popular ? "ring-2 ring-primary shadow-lg shadow-primary/20" : "border-border"
+          className={`h-full hover-lift border-2 rounded-3xl bg-card/50 backdrop-blur-xl transition-all duration-500 overflow-hidden flex flex-col relative ${
+            plan.is_popular
+              ? "ring-2 ring-primary shadow-2xl shadow-primary/30 border-primary/50 scale-105"
+              : "border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
           }`}
         >
-          {plan.is_popular && (
-            <div className="bg-gradient-to-r from-primary to-chart-2 text-primary-foreground text-center py-2 text-xs font-medium">
-              Most Popular
-            </div>
-          )}
+          <div
+            className={`absolute inset-0 bg-gradient-to-br ${
+              plan.is_popular
+                ? "from-primary/10 via-accent/5 to-transparent"
+                : "from-primary/5 via-transparent to-accent/5"
+            } opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
+          />
 
-          <CardHeader className={`p-8 flex-shrink-0 ${plan.is_popular ? "" : "pt-12"}`}>
+        {plan.is_popular && (
+          <div className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] text-white text-center py-2.5 text-sm font-bold shadow-lg">
+            ⭐ Most Popular
+          </div>
+        )}
+
+          <CardHeader className={`p-8 flex-shrink-0 relative z-10 ${plan.is_popular ? "" : "pt-12"}`}>
             <div className="space-y-4">
-              <h3 className="text-2xl font-bold">{plan.name}</h3>
+              <h3
+                className={`text-2xl font-bold ${plan.is_popular ? "bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent" : ""}`}
+              >
+                {plan.name}
+              </h3>
 
               <div className="flex items-baseline gap-2">
-                <span className="text-5xl font-bold">{plan.price}</span>
-                <span className="text-muted-foreground">/ {plan.duration}</span>
+                <span className="text-5xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                  {plan.price}
+                </span>
+                <span className="text-muted-foreground font-medium">/ {plan.duration}</span>
               </div>
 
               {plan.original_price && (
                 <div className="flex items-center gap-3">
                   <span className="text-sm text-muted-foreground line-through">{plan.original_price}</span>
-                  <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20">
+                  <Badge
+                    variant="secondary"
+                    className="bg-gradient-to-r from-primary/20 to-accent/20 text-primary border-primary/30 font-bold shadow-sm"
+                  >
                     {plan.discount}
                   </Badge>
                 </div>
@@ -56,23 +73,29 @@ const PricingCard = memo(
             </div>
           </CardHeader>
 
-          <CardContent className="p-8 pt-0 flex flex-col flex-1">
+          <CardContent className="p-8 pt-0 flex flex-col flex-1 relative z-10">
             <ul className="space-y-3 flex-1">
               {plan.features.map((feature, idx) => (
-                <li key={idx} className="flex items-start gap-3">
-                  <div className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <li key={idx} className="flex items-start gap-3 group/item">
+                  <div className="w-5 h-5 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 border border-primary/30 flex items-center justify-center flex-shrink-0 mt-0.5 group-hover/item:scale-110 transition-transform duration-300">
                     <Check className="w-3 h-3 text-primary" />
                   </div>
-                  <span className="text-sm leading-relaxed">
-                    {feature.split(' ').map((word, wordIdx) => 
-                      word.toLowerCase() === 'unlimited' ? (
-                        <span key={wordIdx} className="font-bold text-primary bg-primary/10 px-1 rounded">
-                          {word}
-                        </span>
-                      ) : (
-                        <span key={wordIdx}>{word}</span>
+                  <span className="text-sm leading-relaxed text-muted-foreground group-hover/item:text-foreground transition-colors">
+                    {feature
+                      .split(" ")
+                      .map((word, wordIdx) =>
+                        word.toLowerCase() === "unlimited" ? (
+                          <span
+                            key={wordIdx}
+                            className="font-bold text-primary bg-gradient-to-r from-primary/20 to-accent/20 px-1.5 py-0.5 rounded"
+                          >
+                            {word}
+                          </span>
+                        ) : (
+                          <span key={wordIdx}>{word}</span>
+                        ),
                       )
-                    ).reduce((prev, curr, idx) => [prev, idx > 0 ? ' ' : '', curr])}
+                      .reduce((prev, curr, idx) => [prev, idx > 0 ? " " : "", curr])}
                   </span>
                 </li>
               ))}
@@ -88,23 +111,16 @@ const PricingCard = memo(
                       value: plan.price,
                     })
                   }
-                  // Add buy now functionality here
                   console.log(`Buy Now clicked for plan: ${plan.id}`)
                 }}
-                className="w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 text-white shadow-lg hover:shadow-xl hover:scale-105 cursor-pointer border-2 border-transparent"
-                style={{
-                  background: 'linear-gradient(135deg, #8b5cf6, #a855f7)',
-                  border: '2px solid #8b5cf6',
-                  color: 'white',
-                  minHeight: '56px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '18px',
-                  fontWeight: 'bold'
-                }}
+                className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 text-white shadow-lg hover:shadow-2xl hover:scale-105 cursor-pointer border-2 relative overflow-hidden group/btn ${
+                  plan.is_popular
+                    ? "bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] border-[#2B7FFF]/50"
+                    : "bg-[#2B7FFF] border-[#2B7FFF]/50"
+                }`}
               >
-                Buy Now
+                <span className="relative z-10">Buy Now</span>
+                <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
               </button>
             </div>
           </CardContent>

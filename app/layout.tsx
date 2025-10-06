@@ -26,12 +26,12 @@ export const metadata: Metadata = {
   generator: "v0.app",
   icons: {
     icon: [
-      { url: "/favicon.svg", type: "image/svg+xml" },
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/ugenpro-logo.svg", type: "image/svg+xml" },
+      { url: "/favicon-32x32.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/favicon-16x16.ico", sizes: "16x16", type: "image/x-icon" },
     ],
-    shortcut: "/favicon.svg",
-    apple: "/apple-touch-icon.png",
+    shortcut: "/ugenpro-logo.svg",
+    apple: "/ugenpro-logo.svg",
   },
   openGraph: {
     title: "UGen Pro - Advanced Generator Tools Platform",
@@ -41,10 +41,10 @@ export const metadata: Metadata = {
     siteName: "UGen Pro",
     images: [
       {
-        url: "/ugenpro-social-sharing.svg",
+        url: "/ugenpro-social-sharing.jpg",
         width: 1200,
         height: 630,
-        alt: "UGen Pro - Premium Tools For CPA Marketing",
+        alt: "UGen Pro - Advanced Generator Tools Platform",
       },
     ],
     locale: "en_US",
@@ -53,7 +53,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "UGen Pro - Advanced Generator Tools Platform",
     description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
-    images: ["/ugenpro-social-sharing.svg"],
+    images: ["/ugenpro-social-sharing.jpg"],
     creator: "@ugenpro",
   },
   robots: {
@@ -75,8 +75,8 @@ export const viewport: Viewport = {
   maximumScale: 5,
   colorScheme: "light dark",
   themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#4A90E2" },
-    { media: "(prefers-color-scheme: dark)", color: "#4A90E2" },
+    { media: "(prefers-color-scheme: light)", color: "#2B7FFF" },
+    { media: "(prefers-color-scheme: dark)", color: "#2B7FFF" },
   ],
 }
 

@@ -22,7 +22,7 @@ export default function AuthLayout({ children, variant = "login" }: AuthLayoutPr
           title="হোম পেজে ফিরুন"
         >
           {/* Animated background gradient */}
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+          <div className="absolute inset-0 bg-gradient-to-r from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
           {/* Icons with staggered animation */}
           <div className="relative flex items-center gap-1.5 sm:gap-2">
@@ -31,7 +31,7 @@ export default function AuthLayout({ children, variant = "login" }: AuthLayoutPr
           </div>
 
           {/* Text with gradient effect - hidden on very small screens */}
-          <span className="relative text-xs sm:text-sm font-bold bg-gradient-to-r from-slate-700 to-slate-600 dark:from-slate-200 dark:to-slate-300 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-purple-600 dark:group-hover:from-blue-400 dark:group-hover:to-purple-400 transition-all duration-300 hidden xs:inline">
+          <span className="relative text-xs sm:text-sm font-bold bg-gradient-to-r from-slate-700 to-slate-600 dark:from-slate-200 dark:to-slate-300 bg-clip-text text-transparent group-hover:from-[#2B7FFF] group-hover:to-[#4a9fff] dark:group-hover:from-[#2B7FFF] dark:group-hover:to-[#4a9fff] transition-all duration-300 hidden xs:inline">
             Back to Home
           </span>
 

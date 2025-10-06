@@ -203,10 +203,10 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         <div className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
           {/* Header */}
           <div className="text-center space-y-2 pb-4">
-            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center mx-auto mb-4 shadow-lg">
+            <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] flex items-center justify-center mx-auto mb-4 shadow-lg">
               <Key className="w-8 h-8 text-white" />
             </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] bg-clip-text text-transparent">
               Change Password
             </h2>
             <p className="text-muted-foreground text-sm">Update your account password for better security</p>
@@ -363,7 +363,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                 </Button>
                 <Button
                   type="submit"
-                  className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
+                  className="flex-1 h-12 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
                   disabled={loading || isSubmitting}
                 >
                   {loading ? (

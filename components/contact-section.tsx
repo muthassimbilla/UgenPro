@@ -1,7 +1,7 @@
-"use client";
+"use client"
 
-import { motion } from "framer-motion";
-import { MessageCircle, User, ExternalLink } from "lucide-react";
+import { motion } from "framer-motion"
+import { MessageCircle, User, ExternalLink } from "lucide-react"
 
 export function ContactSection() {
   const contactInfo = [
@@ -13,7 +13,7 @@ export function ContactSection() {
       color: "from-cyan-500 to-cyan-600",
       actionText: "Join Channel",
       actionLink: "https://t.me/+DS9l9qeSDfgxODI9",
-      actionIcon: ExternalLink
+      actionIcon: ExternalLink,
     },
     {
       icon: User,
@@ -23,19 +23,19 @@ export function ContactSection() {
       color: "from-purple-500 to-purple-600",
       actionText: "Contact Admin",
       actionLink: "https://t.me/UGenPro_bot",
-      actionIcon: ExternalLink
+      actionIcon: ExternalLink,
     },
-  ];
+  ]
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1
-      }
-    }
-  };
+        staggerChildren: 0.1,
+      },
+    },
+  }
 
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -44,44 +44,46 @@ export function ContactSection() {
       y: 0,
       transition: {
         duration: 0.5,
-        ease: "easeOut"
-      }
-    }
-  };
+        ease: "easeOut",
+      },
+    },
+  }
 
   return (
     <section id="contact" className="relative py-16 md:py-20 overflow-hidden">
-      {/* Background Effects */}
       <div className="absolute inset-0 -z-10">
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-to-r from-primary/20 to-accent/20 rounded-full blur-3xl animate-pulse opacity-60" />
-        <div className="absolute top-3/4 right-1/4 w-48 h-48 bg-gradient-to-r from-accent/15 to-tertiary/15 rounded-full blur-2xl animate-pulse opacity-50" />
-        <div className="absolute bottom-1/4 left-1/3 w-32 h-32 bg-gradient-to-r from-tertiary/20 to-primary/20 rounded-full blur-xl animate-pulse opacity-40" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-[#2B7FFF]/5 via-[#4a9fff]/3 to-background dark:via-[#2B7FFF]/10 dark:via-[#4a9fff]/8" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 rounded-full blur-3xl animate-pulse opacity-70" />
+        <div className="absolute top-3/4 right-1/4 w-64 h-64 bg-gradient-to-r from-[#4a9fff]/18 via-[#2B7FFF]/18 to-[#4a9fff]/18 rounded-full blur-2xl animate-pulse opacity-60" />
+        <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 rounded-full blur-xl animate-pulse opacity-50" />
       </div>
 
       <div className="container mx-auto px-4">
-        {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-primary/60 hover:border-primary text-sm font-bold mb-6 transition-all duration-300 hover:scale-105">
-            <MessageCircle className="w-4 h-4 text-primary" />
-            Contact Us
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF]/80 text-sm font-bold mb-6 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#2B7FFF]/10 to-[#4a9fff]/10 dark:from-[#2B7FFF]/20 dark:to-[#4a9fff]/20">
+            <MessageCircle className="w-4 h-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
+            <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
+              Contact Us
+            </span>
           </div>
-          
+
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight mb-6">
             <span className="text-shadow-lg">Get in</span>
-            <span className="gradient-text-rainbow text-shadow-lg ml-4">Touch</span>
+            <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent text-shadow-lg ml-4">
+              Touch
+            </span>
           </h2>
-          
+
           <p className="text-base md:text-lg text-muted-foreground max-w-2xl mx-auto leading-relaxed">
             We're here to help you succeed. Reach out to our team through any of the channels below.
           </p>
         </motion.div>
 
-        {/* Contact Cards Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
@@ -89,66 +91,71 @@ export function ContactSection() {
           className="flex flex-col sm:flex-row items-center justify-center gap-8 max-w-5xl mx-auto"
         >
           {contactInfo.map((contact, index) => {
-            const IconComponent = contact.icon;
+            const IconComponent = contact.icon
+            const isChannel = index === 0
             return (
-              <motion.div
-                key={index}
-                variants={itemVariants}
-                className="group relative w-full sm:w-96 lg:w-[28rem]"
-              >
-                <div className="group relative overflow-hidden cursor-pointer transition-all duration-500 border-2 border-border rounded-2xl bg-card hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/10 hover:-translate-y-1 h-full">
-                  {/* Background gradient overlay */}
-                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 to-primary/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                  
-                  <div className="p-6 space-y-4 h-full flex flex-col relative z-10">
-                    {/* Icon */}
+              <motion.div key={index} variants={itemVariants} className="group relative w-full sm:w-96 lg:w-[28rem]">
+                <div className="group relative overflow-hidden cursor-pointer transition-all duration-500 rounded-3xl glass hover:glass-strong border-2 border-purple-200/50 hover:border-purple-400/70 dark:border-purple-700/30 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 h-full">
+                  {/* Gradient overlay */}
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-br ${isChannel ? "from-[#4a9fff]/10 via-[#2B7FFF]/10 to-[#4a9fff]/10" : "from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10"} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
+                  />
+
+                  <div className="p-8 space-y-6 h-full flex flex-col relative z-10">
+                    {/* Icon with gradient background */}
                     <div className="flex items-center justify-between">
-                      <div className="p-3 rounded-xl bg-primary/10 border border-primary/20 group-hover:bg-primary/20 transition-all duration-300">
-                        <IconComponent className="h-6 w-6 text-primary" />
+                      <div
+                        className={`p-4 rounded-2xl bg-gradient-to-br ${isChannel ? "from-[#4a9fff]/20 via-[#2B7FFF]/20 to-[#4a9fff]/20" : "from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20"} border-2 ${isChannel ? "border-[#4a9fff]/30" : "border-[#2B7FFF]/30"} group-hover:scale-110 transition-all duration-300 shadow-lg`}
+                      >
+                        <IconComponent
+                          className={`h-7 w-7 ${isChannel ? "text-[#4a9fff] dark:text-[#4a9fff]" : "text-[#2B7FFF] dark:text-[#2B7FFF]"}`}
+                        />
                       </div>
                     </div>
-                    
+
                     {/* Content */}
-                    <div className="space-y-3 flex-1">
-                      {/* Title */}
-                      <h3 className="text-xl font-bold text-foreground">
+                    <div className="space-y-4 flex-1">
+                      {/* Title with gradient */}
+                      <h3
+                        className={`text-2xl font-bold bg-gradient-to-r ${isChannel ? "from-[#4a9fff] via-[#2B7FFF] to-[#4a9fff]" : "from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF]"} bg-clip-text text-transparent`}
+                      >
                         {contact.title}
                       </h3>
-                      
+
                       {/* Description */}
-                      <p className="text-sm text-muted-foreground leading-relaxed">
+                      <p className="text-base text-muted-foreground leading-relaxed font-medium">
                         {contact.description}
                       </p>
-                      
-                      {/* Contact info */}
+
+                      {/* Contact info badge */}
                       <div className="space-y-2">
-                        <span className="block font-mono text-xs bg-card/50 px-2 py-1 rounded border border-border/50">
+                        <span
+                          className={`inline-block font-semibold text-sm px-4 py-2 rounded-xl glass border-2 ${isChannel ? "border-cyan-400/40 text-cyan-700 dark:text-cyan-300" : "border-purple-400/40 text-purple-700 dark:text-purple-300"}`}
+                        >
                           {contact.value}
                         </span>
                       </div>
                     </div>
-                    
-                    {/* Action button */}
+
+                    {/* Action button with gradient */}
                     <a
                       href={contact.actionLink}
-                      target={contact.actionLink.startsWith('http') ? '_blank' : '_self'}
-                      rel={contact.actionLink.startsWith('http') ? 'noopener noreferrer' : undefined}
-                      className="group/btn relative w-full p-2 rounded-lg bg-gradient-to-r from-primary/10 to-accent/10 hover:from-primary hover:to-accent border border-primary/20 hover:border-primary transition-all duration-300 hover:scale-105"
+                      target={contact.actionLink.startsWith("http") ? "_blank" : "_self"}
+                      rel={contact.actionLink.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className={`group/btn relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r ${isChannel ? "from-[#4a9fff] via-[#2B7FFF] to-[#4a9fff] hover:from-[#3a8fef] hover:via-[#1a6bff] hover:to-[#3a8fef]" : "from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] hover:from-[#1a6bff] hover:via-[#3a8fef] hover:to-[#1a6bff]"} text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
                     >
-                      <div className="flex items-center justify-center gap-2">
-                        <contact.actionIcon className="w-4 h-4 text-primary group-hover/btn:text-white transition-colors duration-200" />
-                        <span className="text-xs font-semibold text-primary group-hover/btn:text-white transition-colors duration-200">
-                          {contact.actionText}
-                        </span>
+                      <div className="flex items-center justify-center gap-3">
+                        <contact.actionIcon className="w-5 h-5" />
+                        <span className="text-base">{contact.actionText}</span>
                       </div>
                     </a>
                   </div>
                 </div>
               </motion.div>
-            );
+            )
           })}
         </motion.div>
       </div>
     </section>
-  );
+  )
 }

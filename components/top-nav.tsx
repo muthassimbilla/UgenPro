@@ -34,7 +34,7 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
   return (
     <div className="relative flex h-16 items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-4 sm:px-6 shadow-sm">
       {/* Background decoration */}
-      <div className="absolute inset-0 bg-gradient-to-r from-purple-500/5 via-blue-500/5 to-pink-500/5 opacity-50"></div>
+      <div className="absolute inset-0 bg-gradient-to-r from-[#8e2de2]/5 via-[#4a9fff]/5 to-[#ff4b8a]/5 opacity-50"></div>
 
       <div className="relative flex items-center gap-3">
         <Button
@@ -78,7 +78,7 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
         <Link href="/profile" className="ml-1">
           <div className="group relative">
             <Avatar className="h-9 w-9 cursor-pointer transition-all duration-200 hover:scale-105 ring-2 ring-transparent hover:ring-purple-300 dark:hover:ring-purple-600">
-              <AvatarFallback className="bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 text-white text-sm font-bold">
+              <AvatarFallback className="bg-gradient-to-br from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] text-white text-sm font-bold">
                 {user?.full_name?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || "MU"}
               </AvatarFallback>
             </Avatar>

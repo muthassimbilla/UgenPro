@@ -40,9 +40,9 @@ export function SidebarNav() {
   return (
     <div className="flex h-full w-64 flex-col bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-700 shadow-lg">
       {/* Header */}
-      <div className="flex h-16 items-center gap-3 border-b border-slate-200 dark:border-slate-700 px-4 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-slate-800 dark:to-slate-800">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-purple-500 via-blue-500 to-pink-500 shadow-md">
-          <Sparkles className="h-5 w-5 text-white" />
+      <div className="flex h-16 items-center gap-3 border-b border-slate-200 dark:border-slate-700 px-4 bg-gradient-to-r from-blue-50 to-blue-50 dark:from-slate-800 dark:to-slate-800">
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] shadow-md">
+          <img src="/ugenpro-logo.svg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
         </div>
         <div>
           <h1 className="text-base font-bold text-slate-900 dark:text-white">UGen Pro</h1>

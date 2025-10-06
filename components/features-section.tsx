@@ -87,13 +87,11 @@ export function FeaturesSection() {
 
           <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
             <span className="text-shadow-lg">Everything you need to</span>{" "}
-            <span className="gradient-text-rainbow text-shadow-lg">
-              manage projects
-            </span>
+            <span className="gradient-text-rainbow text-shadow-lg">manage projects</span>
           </h2>
 
           <p className="text-base md:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium">
-            Powerful features designed to help your team work smarter, not harder, with 
+            Powerful features designed to help your team work smarter, not harder, with
             <span className="text-primary font-semibold"> cutting-edge technology</span>.
           </p>
         </motion.div>
@@ -110,26 +108,30 @@ export function FeaturesSection() {
               initial={{ opacity: 0, y: 20 }}
               animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
               transition={{ duration: 0.6, delay: 0.1 * index }}
-              className={`group rounded-2xl border-2 ${feature.borderColor} p-6 bg-gradient-to-br ${feature.color} glass hover:glass-strong transition-all duration-500 hover-lift cursor-pointer relative overflow-hidden`}
+              className={`group rounded-3xl border-2 ${feature.borderColor} p-8 bg-gradient-to-br ${feature.color} backdrop-blur-xl hover:backdrop-blur-2xl transition-all duration-500 hover-lift cursor-pointer relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-primary/20`}
             >
-              {/* Decorative gradient overlay */}
-              <div className={`absolute inset-0 bg-gradient-to-br ${feature.iconBg} opacity-0 group-hover:opacity-10 transition-opacity duration-500 rounded-2xl`} />
-              
+              <div
+                className={`absolute inset-0 bg-gradient-to-br ${feature.iconBg} opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-3xl`}
+              />
+
               <div className="relative z-10">
-                <div className={`mb-4 inline-flex p-3 rounded-xl bg-gradient-to-br ${feature.iconBg} shadow-glow group-hover:scale-110 transition-transform duration-300`}>
-                  <feature.icon className={`h-6 w-6 ${feature.textColor}`} />
+                <div
+                  className={`mb-5 inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-lg group-hover:shadow-2xl group-hover:scale-110 transition-all duration-300 border border-white/20`}
+                >
+                  <feature.icon className={`h-7 w-7 ${feature.textColor}`} />
                 </div>
-                
+
                 <h3 className="text-xl font-bold mb-3 text-foreground group-hover:text-foreground transition-colors">
                   {feature.title}
                 </h3>
-                
+
                 <p className="text-sm text-muted-foreground leading-relaxed group-hover:text-muted-foreground/90 transition-colors">
                   {feature.description}
                 </p>
-                
-                {/* Hover indicator */}
-                <div className={`mt-3 w-8 h-1 bg-gradient-to-r ${feature.iconBg} rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300`} />
+
+                <div
+                  className={`mt-4 w-12 h-1.5 bg-gradient-to-r ${feature.iconBg} rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-glow`}
+                />
               </div>
             </motion.div>
           ))}

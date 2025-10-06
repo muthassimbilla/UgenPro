@@ -21,17 +21,17 @@ export default function SimpleHeader() {
       <div className="flex items-center justify-between h-full px-6 max-w-7xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-3 group cursor-default">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-500 via-indigo-500 to-purple-600 flex items-center justify-center shadow-xl relative overflow-hidden">
+          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 flex items-center justify-center shadow-xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
             <Image
-              src="/logo.jpg"
+              src="/ugenpro-logo.svg"
               alt="UGen Pro Logo"
               width={24}
               height={24}
               className="rounded-lg relative z-10 object-contain w-full h-full"
             />
           </div>
-          <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <span className="text-xl font-bold bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] bg-clip-text text-transparent">
             UGen Pro
           </span>
         </div>
@@ -39,8 +39,8 @@ export default function SimpleHeader() {
         <div className="flex items-center gap-4">
           {/* User Info */}
           {user && (
-            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/50">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center shadow-lg">
+            <div className="flex items-center gap-3 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-blue-50 dark:from-blue-950/30 dark:to-blue-950/30 border border-blue-200/50 dark:border-blue-800/50">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2B7FFF] to-[#4a9fff] flex items-center justify-center shadow-lg">
                 <User className="w-4 h-4 text-white" />
               </div>
               <span className="text-sm font-semibold text-slate-700 dark:text-slate-200">{user.full_name}</span>

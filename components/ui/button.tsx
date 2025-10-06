@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: [
-          "bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700",
-          "text-white shadow-lg shadow-blue-500/25",
-          "hover:shadow-xl hover:shadow-blue-500/40",
-          "hover:from-blue-500 hover:via-blue-600 hover:to-indigo-600",
-          "border border-blue-500/20",
+          "bg-[#2B7FFF]",
+          "text-white shadow-lg shadow-[#2B7FFF]/25",
+          "hover:shadow-xl hover:shadow-[#2B7FFF]/40",
+          "hover:bg-[#1a6bff]",
+          "border border-[#2B7FFF]/20",
           "backdrop-blur-sm",
           "before:absolute before:inset-0 before:bg-gradient-to-r before:from-white/0 before:via-white/10 before:to-white/0",
           "before:translate-x-[-100%] before:group-hover:translate-x-[100%] before:transition-transform before:duration-700",

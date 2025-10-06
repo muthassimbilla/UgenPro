@@ -238,7 +238,7 @@ const AuthForm = memo(function AuthForm({
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all"
+          className="w-full h-11 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white shadow-lg hover:shadow-xl transition-all"
           disabled={loading || isSubmitting}
         >
           {loading ? (
@@ -267,7 +267,7 @@ const AuthForm = memo(function AuthForm({
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <Link
             href={isLogin ? "/signup" : "/login"}
-            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 font-semibold transition-all"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] hover:from-[#1a6bff] hover:to-[#3a8fef] font-semibold transition-all"
           >
             {isLogin ? "Sign up" : "Sign in"}
           </Link>
