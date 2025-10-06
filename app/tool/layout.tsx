@@ -1,15 +1,11 @@
 "use client"
 
-import { DashboardLayout } from "@/components/dashboard-layout"
+import type React from "react"
 
 export default function ToolLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
-  return (
-    <DashboardLayout title="UGen Pro Tools">
-      {children}
-    </DashboardLayout>
-  )
+  return <>{children}</>
 }
