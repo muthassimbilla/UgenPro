@@ -34,7 +34,10 @@ export async function POST(request: NextRequest) {
 
     console.log("[v0] Verifying current password for user:", user.email)
 
-    const { error: signInError } = await supabase.auth.signInWithPassword({
+    const { createClient: createBrowserClient } = await import("@/lib/supabase/client")
+    const verifyClient = createBrowserClient()
+
+    const { error: signInError } = await verifyClient.auth.signInWithPassword({
       email: user.email!,
       password: currentPassword,
     })

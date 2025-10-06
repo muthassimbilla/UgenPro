@@ -8,11 +8,15 @@ import { Badge } from "@/components/ui/badge"
 import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock } from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
+import { useRouter } from "next/navigation"
+import ChangePasswordModal from "@/components/change-password-modal"
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
+  const router = useRouter()
   const [deviceCount, setDeviceCount] = useState<number>(0)
   const [isLoadingDevices, setIsLoadingDevices] = useState(true)
+  const [isChangePasswordModalOpen, setIsChangePasswordModalOpen] = useState(false)
 
   const handleLogout = async () => {
     try {
@@ -135,7 +139,7 @@ export default function ProfilePage() {
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
-                      onClick={() => (window.location.href = "/change-password")}
+                      onClick={() => setIsChangePasswordModalOpen(true)}
                       className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
                     >
                       <Lock className="w-4 h-4 mr-2" />
@@ -361,6 +365,12 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal 
+        isOpen={isChangePasswordModalOpen}
+        onClose={() => setIsChangePasswordModalOpen(false)}
+      />
     </ProtectedRoute>
   )
 }

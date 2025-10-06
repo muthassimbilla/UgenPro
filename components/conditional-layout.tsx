@@ -14,7 +14,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
   const pathname = usePathname()
   const { user, loading } = useAuth()
 
-  // Routes that don't need sidebar (auth pages, landing, premium-tools, account-blocked, and password pages)
   const authRoutes = ["/login", "/signup"]
   const noLayoutRoutes = [
     "/",
@@ -24,7 +23,6 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     "/adminbilla/login",
     "/forgot-password",
     "/reset-password",
-    "/change-password",
   ]
   const isAuthRoute = authRoutes.includes(pathname)
   const isNoLayoutRoute = noLayoutRoutes.includes(pathname) || pathname.startsWith("/adminbilla")
