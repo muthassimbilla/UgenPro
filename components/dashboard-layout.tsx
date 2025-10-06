@@ -17,24 +17,27 @@ export function DashboardLayout({ children, title = "UGen Pro Creative" }: Dashb
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       {/* Sidebar - Desktop */}
-      <aside className="hidden lg:block">
+      <aside className="hidden lg:flex lg:flex-shrink-0">
         <SidebarNav />
       </aside>
 
       {/* Sidebar - Mobile */}
       {sidebarOpen && (
         <>
-          <div className="fixed inset-0 z-40 bg-black/50 lg:hidden" onClick={() => setSidebarOpen(false)} />
-          <aside className="fixed inset-y-0 left-0 z-50 lg:hidden">
+          <div
+            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm lg:hidden transition-opacity"
+            onClick={() => setSidebarOpen(false)}
+          />
+          <aside className="fixed inset-y-0 left-0 z-50 lg:hidden animate-in slide-in-from-left duration-300">
             <SidebarNav />
           </aside>
         </>
       )}
 
       {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
+      <div className="flex flex-1 flex-col overflow-hidden min-w-0">
         <TopNav title={title} onMenuClick={() => setSidebarOpen(!sidebarOpen)} />
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto bg-slate-50 dark:bg-slate-900">{children}</main>
       </div>
     </div>
   )
