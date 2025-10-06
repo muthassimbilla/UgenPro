@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createClient } from "@/lib/supabase/server"
+import { createServiceRoleClient } from "@/lib/supabase/service-role"
 import { verifyAdminAuth } from "@/lib/admin-auth-helper"
 
 // GET - Fetch all notifications history (admin only)
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     }
 
     console.log("[v0] Admin authenticated, fetching notifications history")
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
 
     // Get query params
     const { searchParams } = new URL(request.url)
@@ -43,7 +43,10 @@ export async function GET(request: NextRequest) {
 
     if (error) {
       console.error("[v0] Fetch notifications history error:", error)
-      return NextResponse.json({ error: "Failed to fetch notifications history" }, { status: 500 })
+      return NextResponse.json(
+        { error: "Failed to fetch notifications history", details: error.message },
+        { status: 500 },
+      )
     }
 
     // Get statistics
@@ -70,7 +73,13 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("[v0] Notifications history API error:", error)
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 })
+    return NextResponse.json(
+      {
+        error: "Internal server error",
+        details: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    )
   }
 }
 
@@ -84,7 +93,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const supabase = await createClient()
+    const supabase = createServiceRoleClient()
     const { searchParams } = new URL(request.url)
     const notificationId = searchParams.get("id")
 
