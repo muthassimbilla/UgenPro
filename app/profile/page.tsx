@@ -8,11 +8,9 @@ import { Badge } from "@/components/ui/badge"
 import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock } from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
-import { useRouter } from "next/navigation"
 
 export default function ProfilePage() {
   const { user, logout } = useAuth()
-  const router = useRouter()
   const [deviceCount, setDeviceCount] = useState<number>(0)
   const [isLoadingDevices, setIsLoadingDevices] = useState(true)
 
@@ -137,7 +135,7 @@ export default function ProfilePage() {
                   <div className="flex gap-3">
                     <Button
                       variant="outline"
-                      onClick={() => router.push("/change-password")}
+                      onClick={() => (window.location.href = "/change-password")}
                       className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
                     >
                       <Lock className="w-4 h-4 mr-2" />
