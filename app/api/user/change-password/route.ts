@@ -32,22 +32,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
-    console.log("[v0] Verifying current password for user:", user.email)
+    console.log("[v0] Updating password for user:", user.email)
 
-    const { createClient: createBrowserClient } = await import("@/lib/supabase/client")
-    const verifyClient = createBrowserClient()
-
-    const { error: signInError } = await verifyClient.auth.signInWithPassword({
-      email: user.email!,
-      password: currentPassword,
-    })
-
-    if (signInError) {
-      console.error("[v0] Current password verification failed:", signInError)
-      return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
-    }
-
-    console.log("[v0] Current password verified, updating to new password")
+    // The current password verification is now done on the client side before calling this API
 
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,

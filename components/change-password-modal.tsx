@@ -1,19 +1,13 @@
 "use client"
 
+import type React from "react"
+
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { 
-  Eye, 
-  EyeOff, 
-  Lock, 
-  CheckCircle, 
-  XCircle, 
-  Key,
-  Shield
-} from "lucide-react"
+import { Eye, EyeOff, Lock, CheckCircle, XCircle, Key, Shield } from "lucide-react"
 import { useAuth } from "@/lib/auth-context"
 
 interface ChangePasswordModalProps {
@@ -23,7 +17,7 @@ interface ChangePasswordModalProps {
 
 export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordModalProps) {
   const { user } = useAuth()
-  
+
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -81,10 +75,10 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+
     // Prevent multiple submissions
     if (isSubmitting) return
-    
+
     // Immediate UI feedback
     setIsSubmitting(true)
     setLoading(true)
@@ -115,9 +109,26 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         const { createClient } = await import("@/lib/supabase/client")
         const supabase = createClient()
 
+        console.log("[v0] Verifying current password")
+        const { error: signInError } = await supabase.auth.signInWithPassword({
+          email: user?.email || "",
+          password: formData.currentPassword,
+        })
+
+        if (signInError) {
+          clearTimeout(changePasswordTimeout)
+          setErrors(["Current password is incorrect"])
+          setLoading(false)
+          setIsSubmitting(false)
+          return
+        }
+
         // Get current session
-        const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-        
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
+
         if (sessionError || !session) {
           throw new Error("Session expired. Please login again.")
         }
@@ -127,7 +138,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${session.access_token}`,
+            Authorization: `Bearer ${session.access_token}`,
           },
           body: JSON.stringify({
             currentPassword: formData.currentPassword,
@@ -147,7 +158,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
         // Show success message
         setSuccessMessage("Password changed successfully!")
-        
+
         // Clear form
         setFormData({
           currentPassword: "",
@@ -159,7 +170,6 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
         setTimeout(() => {
           onClose()
         }, 2000)
-
       } catch (changePasswordError) {
         clearTimeout(changePasswordTimeout)
         throw changePasswordError
@@ -199,9 +209,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
               Change Password
             </h2>
-            <p className="text-muted-foreground text-sm">
-              Update your account password for better security
-            </p>
+            <p className="text-muted-foreground text-sm">Update your account password for better security</p>
           </div>
 
           <div className="space-y-4">
@@ -220,7 +228,9 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                 <AlertDescription>
                   <ul className="list-disc list-inside space-y-1 text-sm">
                     {errors.map((error, index) => (
-                      <li key={index} className="font-medium">{error}</li>
+                      <li key={index} className="font-medium">
+                        {error}
+                      </li>
                     ))}
                   </ul>
                 </AlertDescription>
@@ -231,7 +241,10 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Current Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="currentPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Label
+                  htmlFor="currentPassword"
+                  className="text-sm font-semibold text-foreground flex items-center gap-2"
+                >
                   <Lock className="w-4 h-4" />
                   Current Password
                 </Label>
@@ -290,7 +303,10 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
               {/* Confirm Password Field */}
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword" className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <Label
+                  htmlFor="confirmPassword"
+                  className="text-sm font-semibold text-foreground flex items-center gap-2"
+                >
                   <CheckCircle className="w-4 h-4" />
                   Confirm New Password
                 </Label>
@@ -315,7 +331,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                     {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                
+
                 {/* Password Match Indicators */}
                 {formData.confirmPassword && (
                   <div className="flex items-center space-x-2 text-xs">
@@ -336,7 +352,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-2">
-                <Button 
+                <Button
                   type="button"
                   variant="outline"
                   onClick={handleClose}
@@ -345,16 +361,32 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                 >
                   Cancel
                 </Button>
-                <Button 
-                  type="submit" 
-                  className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md" 
+                <Button
+                  type="submit"
+                  className="flex-1 h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 relative overflow-hidden active:scale-[0.98] active:shadow-md"
                   disabled={loading || isSubmitting}
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin spinner h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       <span>Changing...</span>
                     </div>
