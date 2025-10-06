@@ -12,19 +12,7 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children, variant = "login" }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
-      <div className="fixed inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 -left-32 w-64 h-64 bg-blue-400/30 dark:bg-blue-500/20 rounded-full animate-pulse" />
-        <div
-          className="absolute bottom-1/4 -right-32 w-64 h-64 bg-purple-400/30 dark:bg-purple-500/20 rounded-full animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-pink-400/20 dark:bg-pink-500/10 rounded-full animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-      </div>
-
+    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
       {/* Enhanced top navigation */}
       <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between z-20">
         <Link
@@ -35,25 +23,25 @@ export default function AuthLayout({ children, variant = "login" }: AuthLayoutPr
         >
           {/* Animated background gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-purple-500/10 to-pink-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-          
+
           {/* Icons with staggered animation */}
           <div className="relative flex items-center gap-1.5 sm:gap-2">
             <ArrowLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-300 group-hover:-translate-x-1 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
             <Home className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-all duration-300 group-hover:scale-110 group-hover:text-purple-600 dark:group-hover:text-purple-400" />
           </div>
-          
+
           {/* Text with gradient effect - hidden on very small screens */}
           <span className="relative text-xs sm:text-sm font-bold bg-gradient-to-r from-slate-700 to-slate-600 dark:from-slate-200 dark:to-slate-300 bg-clip-text text-transparent group-hover:from-blue-600 group-hover:to-purple-600 dark:group-hover:from-blue-400 dark:group-hover:to-purple-400 transition-all duration-300 hidden xs:inline">
             Back to Home
           </span>
-          
+
           {/* Shine effect */}
           <div className="absolute inset-0 -top-1 -left-1 bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-1000" />
         </Link>
         <AuthThemeToggle />
       </div>
 
-      <div className="w-full max-w-md relative z-10 bg-white/80 dark:bg-slate-800/80 rounded-2xl shadow-2xl border border-purple-200/50 dark:border-purple-500/20 p-8">
+      <div className="w-full max-w-md relative z-10 glass-card border-0 rounded-3xl shadow-2xl p-8 hover:shadow-xl transition-all duration-300">
         {children}
       </div>
     </div>

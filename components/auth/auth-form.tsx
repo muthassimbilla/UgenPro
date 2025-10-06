@@ -128,7 +128,7 @@ const AuthForm = memo(function AuthForm({
               placeholder="Enter your full name"
               value={formData.full_name || ""}
               onChange={onInputChange}
-              className="h-11 focus-visible:ring-purple-500"
+              className="h-11 focus-visible:ring-blue-500"
               required
             />
           </div>
@@ -166,14 +166,14 @@ const AuthForm = memo(function AuthForm({
               placeholder="Enter your password"
               value={formData.password}
               onChange={onInputChange}
-              className="h-11 pr-10 focus-visible:ring-purple-500"
+              className="h-11 pr-10 focus-visible:ring-blue-500"
               required
               autoComplete={isLogin ? "current-password" : "new-password"}
             />
             <button
               type="button"
               onClick={onTogglePassword}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400 transition-colors"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -182,7 +182,7 @@ const AuthForm = memo(function AuthForm({
             <div className="text-right relative z-10">
               <Link
                 href="/forgot-password"
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors font-medium inline-block hover:underline cursor-pointer"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors font-medium inline-block hover:underline cursor-pointer"
               >
                 Forgot password?
               </Link>
@@ -204,13 +204,13 @@ const AuthForm = memo(function AuthForm({
                 placeholder="Re-enter your password"
                 value={formData.confirmPassword || ""}
                 onChange={onInputChange}
-                className="h-11 pr-10 focus-visible:ring-pink-500"
+                className="h-11 pr-10 focus-visible:ring-blue-500"
                 required
               />
               <button
                 type="button"
                 onClick={onToggleConfirmPassword}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-pink-600 dark:hover:text-pink-400 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
               >
                 {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </button>
@@ -238,7 +238,7 @@ const AuthForm = memo(function AuthForm({
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-11 bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 hover:from-blue-700 hover:via-purple-700 hover:to-pink-700 text-white shadow-lg hover:shadow-xl transition-all"
+          className="w-full h-11 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-lg hover:shadow-xl transition-all"
           disabled={loading || isSubmitting}
         >
           {loading ? (
@@ -267,7 +267,7 @@ const AuthForm = memo(function AuthForm({
           {isLogin ? "Don't have an account? " : "Already have an account? "}
           <Link
             href={isLogin ? "/signup" : "/login"}
-            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-purple-600 hover:from-purple-600 hover:to-pink-600 font-semibold transition-all"
+            className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-indigo-600 hover:to-blue-600 font-semibold transition-all"
           >
             {isLogin ? "Sign up" : "Sign in"}
           </Link>
