@@ -1,16 +1,17 @@
 "use client"
 
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AuthService, PasswordUtils } from "@/lib/auth-client"
+import { PasswordUtils } from "@/lib/auth-client"
 import { Eye, EyeOff, Lock, CheckCircle, XCircle, Shield } from "lucide-react"
 import AuthThemeToggle from "@/components/auth-theme-toggle"
+import { createClient } from "@/lib/supabase/client"
 
 export default function ResetPasswordPage() {
   const router = useRouter()
@@ -22,6 +23,46 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirmPassword, setShowConfirmPassword] = useState(false)
+  const [hasValidSession, setHasValidSession] = useState(false)
+  const [checkingSession, setCheckingSession] = useState(true)
+
+  useEffect(() => {
+    const checkRecoverySession = async () => {
+      try {
+        const supabase = createClient()
+
+        // Check if we have a valid session (from email link)
+        const {
+          data: { session },
+          error,
+        } = await supabase.auth.getSession()
+
+        if (error) {
+          console.error("[v0] Session check error:", error)
+          setErrors(["Invalid or expired reset link. Please request a new password reset."])
+          setCheckingSession(false)
+          return
+        }
+
+        if (!session) {
+          console.log("[v0] No recovery session found")
+          setErrors(["Invalid or expired reset link. Please request a new password reset."])
+          setCheckingSession(false)
+          return
+        }
+
+        console.log("[v0] Valid recovery session found")
+        setHasValidSession(true)
+        setCheckingSession(false)
+      } catch (error: any) {
+        console.error("[v0] Recovery session check error:", error)
+        setErrors(["Failed to verify reset link. Please try again."])
+        setCheckingSession(false)
+      }
+    }
+
+    checkRecoverySession()
+  }, [])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -46,8 +87,18 @@ export default function ResetPasswordPage() {
         return
       }
 
-      await AuthService.updatePassword(password)
+      const supabase = createClient()
 
+      const { error: updateError } = await supabase.auth.updateUser({
+        password: password,
+      })
+
+      if (updateError) {
+        console.error("[v0] Password update error:", updateError)
+        throw new Error(updateError.message || "Failed to reset password")
+      }
+
+      console.log("[v0] Password reset successful")
       setSuccess(true)
 
       // Redirect to login after 2 seconds
@@ -60,6 +111,73 @@ export default function ResetPasswordPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (checkingSession) {
+    return (
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="absolute top-6 right-6 z-20">
+          <AuthThemeToggle />
+        </div>
+        <Card className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10 w-full max-w-md">
+          <CardContent className="flex flex-col items-center justify-center py-8">
+            <svg
+              className="animate-spin h-8 w-8 text-blue-500 mb-4"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              ></path>
+            </svg>
+            <p className="text-muted-foreground">Verifying reset link...</p>
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (!hasValidSession) {
+    return (
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+        <div className="absolute top-6 right-6 z-20">
+          <AuthThemeToggle />
+        </div>
+        <div className="w-full max-w-md relative z-10">
+          <Card className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
+            <CardHeader className="text-center space-y-2 pb-4">
+              <CardTitle className="text-2xl font-bold bg-gradient-to-r from-red-600 to-orange-600 bg-clip-text text-transparent">
+                Invalid Reset Link
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <Alert variant="destructive" className="backdrop-blur-sm rounded-xl">
+                <XCircle className="h-5 w-5" />
+                <AlertDescription>
+                  <ul className="list-disc list-inside space-y-1">
+                    {errors.map((error, index) => (
+                      <li key={index} className="font-medium">
+                        {error}
+                      </li>
+                    ))}
+                  </ul>
+                </AlertDescription>
+              </Alert>
+              <Button
+                onClick={() => router.push("/forgot-password")}
+                className="w-full h-12 bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold rounded-xl shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-[1.02]"
+              >
+                Request New Reset Link
+              </Button>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -190,9 +308,25 @@ export default function ResetPasswordPage() {
                 >
                   {loading ? (
                     <div className="flex items-center gap-2">
-                      <svg className="animate-spin spinner h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      <svg
+                        className="animate-spin spinner h-5 w-5 text-white"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                      >
+                        <circle
+                          className="opacity-25"
+                          cx="12"
+                          cy="12"
+                          r="10"
+                          stroke="currentColor"
+                          strokeWidth="4"
+                        ></circle>
+                        <path
+                          className="opacity-75"
+                          fill="currentColor"
+                          d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                        ></path>
                       </svg>
                       <span>Resetting...</span>
                     </div>

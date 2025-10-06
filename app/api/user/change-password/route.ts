@@ -1,5 +1,5 @@
 import { type NextRequest, NextResponse } from "next/server"
-import { createServerSupabaseClient } from "@/lib/auth-server"
+import { createClient } from "@/lib/supabase/server"
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "New password must be different from current password" }, { status: 400 })
     }
 
-    const supabase = createServerSupabaseClient()
+    const supabase = await createClient()
 
     const {
       data: { user },
@@ -32,6 +32,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Not authenticated" }, { status: 401 })
     }
 
+    console.log("[v0] Verifying current password for user:", user.email)
+
     const { error: signInError } = await supabase.auth.signInWithPassword({
       email: user.email!,
       password: currentPassword,
@@ -41,6 +43,8 @@ export async function POST(request: NextRequest) {
       console.error("[v0] Current password verification failed:", signInError)
       return NextResponse.json({ error: "Current password is incorrect" }, { status: 400 })
     }
+
+    console.log("[v0] Current password verified, updating to new password")
 
     const { error: updateError } = await supabase.auth.updateUser({
       password: newPassword,
