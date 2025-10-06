@@ -5,7 +5,7 @@ import { ProtectedRoute } from "@/components/protected-route"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock } from "lucide-react"
+import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock, Mail } from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -225,6 +225,13 @@ export default function ProfilePage() {
                       <span className="text-sm font-medium text-muted-foreground">Full Name</span>
                       <span className="font-semibold">{user?.full_name || "Not provided"}</span>
                     </div>
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                        <Mail className="w-4 h-4" />
+                        Email
+                      </span>
+                      <span className="font-semibold">{user?.email || "Not provided"}</span>
+                    </div>
                     {user?.telegram_username && !user?.telegram_username.includes("@") && (
                       <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
                         <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
@@ -367,10 +374,7 @@ export default function ProfilePage() {
       </div>
 
       {/* Change Password Modal */}
-      <ChangePasswordModal 
-        isOpen={isChangePasswordModalOpen}
-        onClose={() => setIsChangePasswordModalOpen(false)}
-      />
+      <ChangePasswordModal isOpen={isChangePasswordModalOpen} onClose={() => setIsChangePasswordModalOpen(false)} />
     </ProtectedRoute>
   )
 }

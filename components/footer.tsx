@@ -31,23 +31,18 @@ export function Footer() {
       <div className="container relative z-10 mx-auto px-4 py-12">
         {/* Card-based Footer Layout */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-          
           {/* Company Info Card */}
           <div className="glass rounded-2xl p-6 hover:glass-strong transition-all duration-300 shadow-glow hover:shadow-glow-accent">
             <Link href="/" className="inline-flex items-center gap-3 mb-4 group">
               <div className="w-10 h-10 rounded-xl transition-all duration-300 group-hover:scale-110 shadow-glow">
-                <img 
-                  src="/logo.svg" 
-                  alt="UGen Pro Logo" 
-                  className="w-full h-full rounded-xl"
-                />
+                <img src="/logo.jpg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
               </div>
               <span className="font-bold text-xl gradient-text">UGen Pro</span>
             </Link>
             <p className="text-sm text-muted-foreground leading-relaxed mb-4">
               Professional AI-powered tools for developers and teams. Fast, reliable, and built for scale.
             </p>
-            
+
             {/* Social Icons */}
             <div className="flex gap-3">
               <a
@@ -82,22 +77,34 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-4 text-foreground">Quick Links</h3>
             <ul className="space-y-2">
               <li>
-                <Link href="/" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                <Link
+                  href="/"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary"
+                >
                   🏠 Home
                 </Link>
               </li>
               <li>
-                <Link href="#tools" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent">
+                <Link
+                  href="#tools"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent"
+                >
                   🛠️ Tools
                 </Link>
               </li>
               <li>
-                <Link href="#pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary">
+                <Link
+                  href="#pricing"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary"
+                >
                   💰 Pricing
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                <Link
+                  href="/contact"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary"
+                >
                   📞 Contact
                 </Link>
               </li>
@@ -109,29 +116,40 @@ export function Footer() {
             <h3 className="font-bold text-lg mb-4 text-foreground">Support</h3>
             <ul className="space-y-2 mb-4">
               <li>
-                <Link href="/help" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                <Link
+                  href="/help"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary"
+                >
                   📚 Help Center
                 </Link>
               </li>
               <li>
-                <Link href="/docs" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent">
+                <Link
+                  href="/docs"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-accent"
+                >
                   📖 Documentation
                 </Link>
               </li>
               <li>
-                <Link href="/api" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary">
+                <Link
+                  href="/api"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-tertiary"
+                >
                   🔌 API Reference
                 </Link>
               </li>
               <li>
-                <Link href="/community" className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary">
+                <Link
+                  href="/community"
+                  className="text-sm text-muted-foreground hover:text-foreground transition-colors font-medium hover-lift block py-1 hover:text-primary"
+                >
                   👥 Community
                 </Link>
               </li>
             </ul>
           </div>
         </div>
-
       </div>
 
       {showScrollTop && (

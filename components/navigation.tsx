@@ -41,23 +41,15 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "glass-strong shadow-color border-b border-border/50 shadow-2xl"
-          : "glass backdrop-blur-md shadow-lg"
+        scrolled ? "glass-strong shadow-color border-b border-border/50 shadow-2xl" : "glass backdrop-blur-md shadow-lg"
       }`}
     >
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-xl transition-transform group-hover:scale-110 shadow-glow">
-            <img 
-              src="/logo.svg" 
-              alt="UGen Pro Logo" 
-              className="w-full h-full rounded-xl"
-            />
+            <img src="/logo.jpg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
           </div>
-          <span className="font-bold text-xl gradient-text">
-            UGen Pro
-          </span>
+          <span className="font-bold text-xl gradient-text">UGen Pro</span>
         </Link>
 
         {/* Desktop Navigation */}
@@ -97,10 +89,10 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               Get Started
             </Button>
           </Link>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="md:hidden hover:bg-card/50 rounded-xl" 
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden hover:bg-card/50 rounded-xl"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -128,7 +120,10 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             ))}
             <div className="pt-4 flex flex-col gap-3">
               <Link href="/login" className="block">
-                <Button variant="outline" className="w-full rounded-xl border-2 border-border/50 hover:border-primary/50 font-semibold">
+                <Button
+                  variant="outline"
+                  className="w-full rounded-xl border-2 border-border/50 hover:border-primary/50 font-semibold bg-transparent"
+                >
                   Sign In
                 </Button>
               </Link>
