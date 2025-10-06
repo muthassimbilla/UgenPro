@@ -179,10 +179,10 @@ const AuthForm = memo(function AuthForm({
             </button>
           </div>
           {isLogin && (
-            <div className="text-right">
+            <div className="text-right relative z-10">
               <Link
                 href="/forgot-password"
-                className="text-sm text-blue-600 dark:text-blue-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors font-medium"
+                className="text-sm text-blue-600 dark:text-blue-400 hover:text-purple-600 dark:hover:text-purple-400 transition-colors font-medium inline-block hover:underline cursor-pointer"
               >
                 Forgot password?
               </Link>
