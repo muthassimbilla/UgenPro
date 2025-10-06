@@ -15,7 +15,7 @@ Your authentication system is showing a **400 Bad Request** error because the Su
 
 Edit your `.env.local` file and replace the placeholder values:
 
-```env
+\`\`\`env
 # UGen Pro Environment Variables
 NEXT_PUBLIC_SUPABASE_URL=https://pozoauxismiqgytbsjic.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... # Your actual anon key here
@@ -23,39 +23,39 @@ NEXT_PUBLIC_SUPABASE_REDIRECT_URL=https://ugenpro.site/login
 NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL=http://localhost:3000/login
 ADMIN_EMAIL=admin@ugenpro.site
 ADMIN_PASSWORD=your_admin_password_here
-```
+\`\`\`
 
 ### 3. Configure Supabase Dashboard
 
 In your Supabase project dashboard, go to **Authentication > URL Configuration** and add:
 
 **Site URL:**
-```
+\`\`\`
 https://ugenpro.site
-```
+\`\`\`
 
 **Redirect URLs:**
-```
+\`\`\`
 https://ugenpro.site/auth/callback
 https://ugenpro.site/login
 https://ugenpro.site/signup
 https://ugenpro.site/reset-password
 https://ugenpro.site/change-password
 https://ugenpro.site/profile
-```
+\`\`\`
 
 ### 4. Test the Configuration
 
 Run the connection test:
-```bash
+\`\`\`bash
 node scripts/test-supabase-connection.js
-```
+\`\`\`
 
 ### 5. Start the Development Server
 
-```bash
+\`\`\`bash
 npm run dev
-```
+\`\`\`
 
 ## 🔍 Troubleshooting
 

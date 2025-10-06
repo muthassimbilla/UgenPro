@@ -5,12 +5,12 @@
 ### ⚡ **Quick Supabase Configuration:**
 
 #### **1. Site URL:**
-```
+\`\`\`
 https://www.ugenpro.site
-```
+\`\`\`
 
 #### **2. Redirect URLs (Add these one by one):**
-```
+\`\`\`
 https://www.ugenpro.site/auth/callback
 https://www.ugenpro.site/login
 https://www.ugenpro.site/signup
@@ -19,13 +19,13 @@ https://www.ugenpro.site/change-password
 https://www.ugenpro.site/profile
 https://www.ugenpro.site/adminbilla
 https://www.ugenpro.site/adminbilla/login
-```
+\`\`\`
 
 #### **3. CORS Origins:**
-```
+\`\`\`
 https://www.ugenpro.site
 https://ugenpro.site
-```
+\`\`\`
 
 ## 🎯 **Step-by-Step:**
 
@@ -41,11 +41,11 @@ https://ugenpro.site
 ## 🔧 **Environment Variables for Production:**
 
 ### **Netlify/Vercel:**
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=https://pozoauxismiqgytbsjic.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvem9hdXhpc21pcWd5dGJzamljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MTkyNjksImV4cCI6MjA3MDM5NTI2OX0.RiZZ0Phft_U3XShCvWwKpeFQtwve3ZfCaX9WETPfBGU
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR1c2Jjanluam1pd29tZm12am9tIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1OTI2MjEzMywiZXhwIjoyMDc0ODM4MTMzfQ.IAhVdaxsLc1eRdz67llEfcAYUqkAjOW8XHAUJPTy0I0
-```
+\`\`\`
 
 ## ✅ **Testing Checklist:**
 

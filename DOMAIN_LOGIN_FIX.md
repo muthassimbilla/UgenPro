@@ -16,29 +16,29 @@
 2. **Your Project** select করুন
 3. **Settings** → **API** এ যান
 4. **Site URL** section এ নতুন domain যোগ করুন:
-   ```
+   \`\`\`
    https://your-new-domain.com
    https://your-new-domain.netlify.app
    https://your-new-domain.vercel.app
-   ```
+   \`\`\`
 
 5. **Additional Redirect URLs** এ যোগ করুন:
-   ```
+   \`\`\`
    https://your-new-domain.com/auth/callback
    https://your-new-domain.netlify.app/auth/callback
    https://your-new-domain.vercel.app/auth/callback
-   ```
+   \`\`\`
 
 ### Step 2: Environment Variables Setup
 
 #### Netlify এ:
 1. **Netlify Dashboard** → **Site Settings** → **Environment Variables**
 2. এই variables যোগ করুন:
-   ```
+   \`\`\`
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ```
+   \`\`\`
 
 #### Vercel এ:
 1. **Vercel Dashboard** → **Project Settings** → **Environment Variables**
@@ -47,7 +47,7 @@
 ### Step 3: Code Configuration
 
 #### lib/supabase/client.ts আপডেট করুন:
-```typescript
+\`\`\`typescript
 import { createBrowserClient } from "@supabase/ssr"
 
 export function createClient() {
@@ -63,12 +63,12 @@ export function createClient() {
     }
   })
 }
-```
+\`\`\`
 
 ### Step 4: Middleware Configuration
 
 #### middleware.ts আপডেট করুন:
-```typescript
+\`\`\`typescript
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
@@ -93,12 +93,12 @@ export async function updateSession(request: NextRequest) {
 
   // Rest of your middleware code...
 }
-```
+\`\`\`
 
 ### Step 5: Next.js Config Update
 
 #### next.config.mjs:
-```javascript
+\`\`\`javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // ... existing config
@@ -126,12 +126,12 @@ const nextConfig = {
 }
 
 export default nextConfig
-```
+\`\`\`
 
 ## 🔍 Debugging Steps:
 
 ### 1. Browser Console Check:
-```javascript
+\`\`\`javascript
 // Check if Supabase is loaded
 console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 console.log('Current Domain:', window.location.origin)
@@ -140,7 +140,7 @@ console.log('Current Domain:', window.location.origin)
 import { createClient } from '@/lib/supabase/client'
 const supabase = createClient()
 console.log('Supabase Client:', supabase)
-```
+\`\`\`
 
 ### 2. Network Tab Check:
 1. Open Developer Tools
@@ -150,7 +150,7 @@ console.log('Supabase Client:', supabase)
 5. Check for CORS errors
 
 ### 3. Environment Variables Check:
-```javascript
+\`\`\`javascript
 // Add this to your component
 useEffect(() => {
   console.log('Environment Check:', {
@@ -159,12 +159,12 @@ useEffect(() => {
     currentDomain: window.location.origin
   })
 }, [])
-```
+\`\`\`
 
 ## 🚀 Quick Fix Commands:
 
 ### 1. Clear Browser Cache:
-```bash
+\`\`\`bash
 # Chrome/Edge
 Ctrl + Shift + Delete
 
@@ -173,7 +173,7 @@ Ctrl + Shift + Delete
 
 # Safari
 Cmd + Option + E
-```
+\`\`\`
 
 ### 2. Test Different Browsers:
 - Chrome
@@ -205,19 +205,19 @@ Instead of different domains, use subdomains:
 
 ### Option 2: Use Query Parameters
 Pass domain info via URL:
-```
+\`\`\`
 https://yourdomain.com/login?domain=staging
-```
+\`\`\`
 
 ### Option 3: Use Environment-Specific Builds
 Create different builds for different domains:
-```bash
+\`\`\`bash
 # Production build
 npm run build:production
 
 # Staging build
 npm run build:staging
-```
+\`\`\`
 
 ## 📞 Support:
 

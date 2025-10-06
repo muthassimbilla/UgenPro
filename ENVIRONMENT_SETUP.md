@@ -12,24 +12,24 @@
 
 প্রজেক্টের root directory তে `.env.local` file তৈরি করুন:
 
-```bash
+\`\`\`bash
 # Windows
 echo. > .env.local
 
 # Mac/Linux
 touch .env.local
-```
+\`\`\`
 
 ### Step 2: Environment Variables যোগ করুন
 
 `.env.local` file এ এই content যোগ করুন:
 
-```env
+\`\`\`env
 # Supabase Configuration
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url_here
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key_here
 SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
-```
+\`\`\`
 
 ### Step 3: Supabase Credentials পাবেন কোথায়?
 
@@ -38,37 +38,37 @@ SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role_key_here
 3. **Settings** → **API** এ যান
 4. সেখান থেকে credentials copy করুন:
 
-```
+\`\`\`
 Project URL: https://your-project-id.supabase.co
 anon public: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 service_role: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
-```
+\`\`\`
 
 ### Step 4: Example Configuration
 
-```env
+\`\`\`env
 # Example (replace with your actual values)
 NEXT_PUBLIC_SUPABASE_URL=https://abcdefghijklmnop.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiY2RlZmdoaWprbG1ub3AiLCJyb2xlIjoiYW5vbiIsImlhdCI6MTY5ODc2MDAwMCwiZXhwIjoyMDE0MzM2MDAwfQ.example_signature_here
 SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImFiY2RlZmdoaWprbG1ub3AiLCJyb2xlIjoic2VydmljZV9yb2xlIiwiaWF0IjoxNjk4NzYwMDAwLCJleHAiOjIwMTQzMzYwMDB9.example_service_role_signature_here
-```
+\`\`\`
 
 ### Step 5: Development Server Restart করুন
 
-```bash
+\`\`\`bash
 # Stop current server (Ctrl+C)
 # Then restart
 npm run dev
-```
+\`\`\`
 
 ## 🔍 Testing Steps:
 
 ### 1. Environment Variables Check:
 Browser console এ এই command run করুন:
-```javascript
+\`\`\`javascript
 console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 console.log('Has Anon Key:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
-```
+\`\`\`
 
 ### 2. Login Test:
 1. http://localhost:3000/login এ যান
@@ -89,7 +89,7 @@ console.log('Has Anon Key:', !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
 
 ## 🚀 Quick Commands:
 
-```bash
+\`\`\`bash
 # Create .env.local file
 echo. > .env.local
 
@@ -98,7 +98,7 @@ npm run dev
 
 # Check if server is running
 curl http://localhost:3000
-```
+\`\`\`
 
 ## 📞 Troubleshooting:
 
@@ -112,7 +112,7 @@ curl http://localhost:3000
 
 ### Common Errors:
 
-```
+\`\`\`
 Error: Missing Supabase URL
 → Check NEXT_PUBLIC_SUPABASE_URL
 
@@ -121,7 +121,7 @@ Error: Missing Supabase Key
 
 Error: Invalid credentials
 → Check if credentials are correct
-```
+\`\`\`
 
 ## ✅ Success Checklist:
 

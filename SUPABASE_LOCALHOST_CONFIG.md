@@ -17,18 +17,18 @@
 1. **Settings** → **Authentication** এ যান
 2. **Site URL** section এ এই URLs যোগ করুন:
 
-```
+\`\`\`
 http://localhost:3000
 http://localhost:3001
 http://127.0.0.1:3000
 http://127.0.0.1:3001
-```
+\`\`\`
 
 ### Step 3: Redirect URLs Configuration
 
 **Additional Redirect URLs** section এ এই URLs যোগ করুন:
 
-```
+\`\`\`
 http://localhost:3000/auth/callback
 http://localhost:3001/auth/callback
 http://127.0.0.1:3000/auth/callback
@@ -37,18 +37,18 @@ http://localhost:3000/login
 http://localhost:3001/login
 http://localhost:3000/signup
 http://localhost:3001/signup
-```
+\`\`\`
 
 ### Step 4: CORS Configuration
 
 **CORS Origins** section এ এই URLs যোগ করুন:
 
-```
+\`\`\`
 http://localhost:3000
 http://localhost:3001
 http://127.0.0.1:3000
 http://127.0.0.1:3001
-```
+\`\`\`
 
 ### Step 5: Email Configuration (যদি Email Auth ব্যবহার করেন)
 
@@ -59,7 +59,7 @@ http://127.0.0.1:3001
 ## 🔍 Detailed Configuration:
 
 ### Authentication Settings:
-```
+\`\`\`
 Site URL: http://localhost:3001
 Additional Redirect URLs:
 - http://localhost:3000/auth/callback
@@ -68,16 +68,16 @@ Additional Redirect URLs:
 - http://localhost:3001/login
 - http://localhost:3000/signup
 - http://localhost:3001/signup
-```
+\`\`\`
 
 ### CORS Settings:
-```
+\`\`\`
 Allowed Origins:
 - http://localhost:3000
 - http://localhost:3001
 - http://127.0.0.1:3000
 - http://127.0.0.1:3001
-```
+\`\`\`
 
 ## 🚀 Testing Steps:
 
@@ -91,11 +91,11 @@ Allowed Origins:
 3. **Signup page** এ যান: http://localhost:3001/signup
 
 ### 3. Browser Console Check:
-```javascript
+\`\`\`javascript
 // Console এ এই command run করুন
 console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 console.log('Current URL:', window.location.origin)
-```
+\`\`\`
 
 ### 4. Network Tab Check:
 1. **Developer Tools** → **Network tab**
@@ -126,7 +126,7 @@ console.log('Current URL:', window.location.origin)
 ## 🎯 Quick Fix Commands:
 
 ### Browser Console Test:
-```javascript
+\`\`\`javascript
 // Test Supabase connection
 import { createClient } from '@supabase/supabase-js'
 const supabase = createClient(
@@ -134,7 +134,7 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBvem9hdXhpc21pcWd5dGJzamljIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ4MTkyNjksImV4cCI6MjA3MDM5NTI2OX0.RiZZ0Phft_U3XShCvWwKpeFQtwve3ZfCaX9WETPfBGU'
 )
 console.log('Supabase Client:', supabase)
-```
+\`\`\`
 
 ## 📞 Troubleshooting:
 

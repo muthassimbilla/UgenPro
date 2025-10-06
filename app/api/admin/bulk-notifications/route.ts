@@ -1,28 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { verifyAdminAuth } from "@/lib/admin-auth-helper"
 
 // POST - Send bulk notifications (admin only)
 export async function POST(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const authHeader = request.headers.get("Authorization")
+    const authResult = await verifyAdminAuth(authHeader)
 
-    // Get admin user from session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    if (!authResult.isValid) {
+      console.log("[v0] Unauthorized access attempt to bulk notifications")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 })
-    }
-
+    console.log("[v0] Admin authenticated, processing bulk notification request")
+    const supabase = await createClient()
     const body = await request.json()
     const { userIds, title, message, type = "info", link, sendToAll } = body
 
@@ -34,10 +26,7 @@ export async function POST(request: NextRequest) {
 
     // If sendToAll is true, get all user IDs
     if (sendToAll) {
-      const { data: allUsers, error: usersError } = await supabase
-        .from("profiles")
-        .select("id")
-        .not("id", "is", null)
+      const { data: allUsers, error: usersError } = await supabase.from("profiles").select("id").not("id", "is", null)
 
       if (usersError) {
         console.error("[v0] Error fetching all users:", usersError)
@@ -51,6 +40,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "No users specified" }, { status: 400 })
     }
 
+    console.log("[v0] Creating notifications for", targetUserIds.length, "users")
+
     // Create notifications for all specified users
     const notifications = targetUserIds.map((userId: string) => ({
       user_id: userId,
@@ -60,16 +51,14 @@ export async function POST(request: NextRequest) {
       link,
     }))
 
-    const { data: createdNotifications, error } = await supabase
-      .from("notifications")
-      .insert(notifications)
-      .select()
+    const { data: createdNotifications, error } = await supabase.from("notifications").insert(notifications).select()
 
     if (error) {
       console.error("[v0] Bulk create notifications error:", error)
       return NextResponse.json({ error: "Failed to create bulk notifications" }, { status: 500 })
     }
 
+    console.log("[v0] Successfully created", createdNotifications?.length || 0, "notifications")
     return NextResponse.json({
       success: true,
       message: `Successfully sent ${createdNotifications?.length || 0} notifications`,
@@ -85,24 +74,15 @@ export async function POST(request: NextRequest) {
 // GET - Get bulk notification templates (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const authHeader = request.headers.get("Authorization")
+    const authResult = await verifyAdminAuth(authHeader)
 
-    // Get admin user from session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    if (!authResult.isValid) {
+      console.log("[v0] Unauthorized access attempt to notification templates")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 })
-    }
+    console.log("[v0] Admin authenticated, returning notification templates")
 
     // Return predefined notification templates
     const templates = [

@@ -15,9 +15,6 @@ import {
   User,
   Clock,
   Plus,
-  Filter,
-  Search,
-  Trash2,
   Eye,
   Loader2,
 } from "lucide-react"
@@ -72,7 +69,7 @@ export default function AdminNotificationsPage() {
     link: "",
   })
   const [templates, setTemplates] = useState<any[]>([])
-  const [selectedTemplate, setSelectedTemplate] = useState<string>("")
+  const [selectedTemplate, setSelectedTemplate] = useState<string>("custom")
 
   useEffect(() => {
     if (!isLoading && !admin) {
@@ -108,20 +105,35 @@ export default function AdminNotificationsPage() {
   const loadNotifications = async () => {
     try {
       setIsLoadingNotifications(true)
+      const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
+
+      console.log("[v0] Loading notifications with session token:", sessionToken ? "present" : "missing")
+
       const response = await fetch("/api/admin/notifications-history", {
         headers: {
-          Authorization: `Bearer ${admin?.id || "admin-token"}`,
+          Authorization: `Bearer ${sessionToken || ""}`,
         },
       })
 
       if (response.ok) {
         const data = await response.json()
+        console.log("[v0] Loaded", data.notifications?.length || 0, "notifications")
         setNotifications(data.notifications || [])
       } else {
-        console.error("Failed to load notifications:", response.status)
+        console.error("[v0] Failed to load notifications:", response.status, await response.text())
+        toast({
+          title: "ত্রুটি",
+          description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
+          variant: "destructive",
+        })
       }
     } catch (error) {
-      console.error("Error loading notifications:", error)
+      console.error("[v0] Error loading notifications:", error)
+      toast({
+        title: "ত্রুটি",
+        description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
+        variant: "destructive",
+      })
     } finally {
       setIsLoadingNotifications(false)
     }
@@ -129,20 +141,25 @@ export default function AdminNotificationsPage() {
 
   const loadTemplates = async () => {
     try {
+      const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
+
+      console.log("[v0] Loading templates with session token:", sessionToken ? "present" : "missing")
+
       const response = await fetch("/api/admin/bulk-notifications", {
         headers: {
-          Authorization: `Bearer ${admin?.id || "admin-token"}`,
+          Authorization: `Bearer ${sessionToken || ""}`,
         },
       })
 
       if (response.ok) {
         const data = await response.json()
+        console.log("[v0] Loaded", data.templates?.length || 0, "templates")
         setTemplates(data.templates || [])
       } else {
-        console.error("Failed to load templates:", response.status)
+        console.error("[v0] Failed to load templates:", response.status, await response.text())
       }
     } catch (error) {
-      console.error("Error loading templates:", error)
+      console.error("[v0] Error loading templates:", error)
     }
   }
 
@@ -170,11 +187,15 @@ export default function AdminNotificationsPage() {
     try {
       const usersToNotify = sendToAll ? users.map((u) => u.id) : selectedUsers
 
-      // Use bulk notification API for better performance
+      const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
+
+      console.log("[v0] Sending notification to", usersToNotify.length, "users")
+
       const response = await fetch("/api/admin/bulk-notifications", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${sessionToken || ""}`,
         },
         body: JSON.stringify({
           userIds: usersToNotify,
@@ -187,9 +208,10 @@ export default function AdminNotificationsPage() {
       })
 
       const result = await response.json()
-      
+
       if (response.ok) {
         const successCount = result.count || 0
+        console.log("[v0] Successfully sent", successCount, "notifications")
 
         toast({
           title: "সফল",
@@ -199,10 +221,11 @@ export default function AdminNotificationsPage() {
         setFormData({ title: "", message: "", type: "info", link: "" })
         setSelectedUsers([])
         setSendToAll(false)
-        setSelectedTemplate("")
+        setSelectedTemplate("custom")
         setIsCreateDialogOpen(false)
         loadNotifications()
       } else {
+        console.error("[v0] Failed to send notifications:", result.error)
         toast({
           title: "ত্রুটি",
           description: result.error || "নোটিফিকেশন পাঠাতে সমস্যা হয়েছে",
@@ -210,7 +233,7 @@ export default function AdminNotificationsPage() {
         })
       }
     } catch (error) {
-      console.error("Error sending notifications:", error)
+      console.error("[v0] Error sending notifications:", error)
       toast({
         title: "ত্রুটি",
         description: "নোটিফিকেশন পাঠাতে সমস্যা হয়েছে",
@@ -248,7 +271,7 @@ export default function AdminNotificationsPage() {
   }
 
   const handleTemplateSelect = (templateId: string) => {
-    const template = templates.find(t => t.id === templateId)
+    const template = templates.find((t) => t.id === templateId)
     if (template) {
       setFormData({
         title: template.title,
@@ -260,9 +283,10 @@ export default function AdminNotificationsPage() {
     }
   }
 
-  const filteredUsers = users.filter((user) =>
-    user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase()),
+  const filteredUsers = users.filter(
+    (user) =>
+      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase()),
   )
 
   const filteredNotifications = notifications.filter((notification) => {
@@ -312,7 +336,7 @@ export default function AdminNotificationsPage() {
                       <SelectValue placeholder="পূর্বনির্ধারিত টেমপ্লেট নির্বাচন করুন" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">কাস্টম নোটিফিকেশন</SelectItem>
+                      <SelectItem value="custom">কাস্টম নোটিফিকেশন</SelectItem>
                       {templates.map((template) => (
                         <SelectItem key={template.id} value={template.id}>
                           {template.title}
@@ -334,7 +358,10 @@ export default function AdminNotificationsPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="type">ধরন</Label>
-                    <Select value={formData.type} onValueChange={(value: any) => setFormData({ ...formData, type: value })}>
+                    <Select
+                      value={formData.type}
+                      onValueChange={(value: any) => setFormData({ ...formData, type: value })}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="নোটিফিকেশনের ধরন নির্বাচন করুন" />
                       </SelectTrigger>
@@ -373,11 +400,7 @@ export default function AdminNotificationsPage() {
 
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
-                    <Switch
-                      id="send-to-all"
-                      checked={sendToAll}
-                      onCheckedChange={setSendToAll}
-                    />
+                    <Switch id="send-to-all" checked={sendToAll} onCheckedChange={setSendToAll} />
                     <Label htmlFor="send-to-all">সকল ইউজারের কাছে পাঠান</Label>
                   </div>
 
@@ -425,9 +448,7 @@ export default function AdminNotificationsPage() {
                         )}
                       </div>
                       {selectedUsers.length > 0 && (
-                        <p className="text-sm text-muted-foreground">
-                          {selectedUsers.length}টি ইউজার নির্বাচিত
-                        </p>
+                        <p className="text-sm text-muted-foreground">{selectedUsers.length}টি ইউজার নির্বাচিত</p>
                       )}
                     </div>
                   )}
@@ -502,18 +523,13 @@ export default function AdminNotificationsPage() {
                 <div className="space-y-3">
                   {filteredNotifications.length > 0 ? (
                     filteredNotifications.map((notification) => (
-                      <div
-                        key={notification.id}
-                        className="p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                      >
+                      <div key={notification.id} className="p-4 border rounded-lg hover:bg-muted/50 transition-colors">
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
                             <div className="flex items-center gap-2 mb-2">
                               {getTypeIcon(notification.type)}
                               <h3 className="font-semibold">{notification.title}</h3>
-                              <Badge className={getTypeBadgeColor(notification.type)}>
-                                {notification.type}
-                              </Badge>
+                              <Badge className={getTypeBadgeColor(notification.type)}>{notification.type}</Badge>
                             </div>
                             <p className="text-sm text-muted-foreground mb-2">{notification.message}</p>
                             <div className="flex items-center gap-4 text-xs text-muted-foreground">
@@ -557,9 +573,7 @@ export default function AdminNotificationsPage() {
                     <Bell className="w-6 h-6 text-blue-600 dark:text-blue-400" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-foreground mt-4">
-                  {notifications.length}
-                </div>
+                <div className="text-2xl font-bold text-foreground mt-4">{notifications.length}</div>
                 <div className="text-sm text-muted-foreground">মোট নোটিফিকেশন</div>
               </CardContent>
             </Card>
@@ -572,7 +586,7 @@ export default function AdminNotificationsPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-foreground mt-4">
-                  {notifications.filter(n => n.is_read).length}
+                  {notifications.filter((n) => n.is_read).length}
                 </div>
                 <div className="text-sm text-muted-foreground">পড়া হয়েছে</div>
               </CardContent>
@@ -586,7 +600,7 @@ export default function AdminNotificationsPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-foreground mt-4">
-                  {notifications.filter(n => !n.is_read).length}
+                  {notifications.filter((n) => !n.is_read).length}
                 </div>
                 <div className="text-sm text-muted-foreground">অপঠিত</div>
               </CardContent>
@@ -599,9 +613,7 @@ export default function AdminNotificationsPage() {
                     <Users className="w-6 h-6 text-purple-600 dark:text-purple-400" />
                   </div>
                 </div>
-                <div className="text-2xl font-bold text-foreground mt-4">
-                  {users.length}
-                </div>
+                <div className="text-2xl font-bold text-foreground mt-4">{users.length}</div>
                 <div className="text-sm text-muted-foreground">মোট ইউজার</div>
               </CardContent>
             </Card>

@@ -14,27 +14,27 @@
 1. **Supabase Dashboard** এ যান: https://supabase.com/dashboard
 2. **Your Project** → **Settings** → **API**
 3. **Site URL** section এ নতুন domain যোগ করুন:
-   ```
+   \`\`\`
    https://your-new-domain.com
    https://your-new-domain.netlify.app
-   ```
+   \`\`\`
 
 4. **Additional Redirect URLs** এ যোগ করুন:
-   ```
+   \`\`\`
    https://your-new-domain.com/auth/callback
    https://your-new-domain.netlify.app/auth/callback
-   ```
+   \`\`\`
 
 ### 2. Environment Variables আপডেট করুন
 
 #### Netlify এ:
 1. **Netlify Dashboard** → **Site Settings** → **Environment Variables**
 2. নতুন variables যোগ করুন:
-   ```
+   \`\`\`
    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
    SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-   ```
+   \`\`\`
 
 #### Vercel এ:
 1. **Vercel Dashboard** → **Project Settings** → **Environment Variables**
@@ -43,7 +43,7 @@
 ### 3. Code এ Dynamic Domain Support যোগ করুন
 
 #### lib/supabase/client.ts আপডেট করুন:
-```typescript
+\`\`\`typescript
 import { createBrowserClient } from "@supabase/ssr"
 
 export function createClient() {
@@ -59,12 +59,12 @@ export function createClient() {
     }
   })
 }
-```
+\`\`\`
 
 ### 4. Middleware আপডেট করুন
 
 #### middleware.ts:
-```typescript
+\`\`\`typescript
 import { createServerClient } from "@supabase/ssr"
 import { NextResponse, type NextRequest } from "next/server"
 
@@ -89,12 +89,12 @@ export async function updateSession(request: NextRequest) {
 
   // Rest of your middleware code...
 }
-```
+\`\`\`
 
 ### 5. Next.js Config আপডেট করুন
 
 #### next.config.mjs:
-```javascript
+\`\`\`javascript
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   // ... existing config
@@ -122,7 +122,7 @@ const nextConfig = {
 }
 
 export default nextConfig
-```
+\`\`\`
 
 ## 🎯 Quick Fix Steps:
 
@@ -146,14 +146,14 @@ export default nextConfig
 ## 🔍 Debugging:
 
 ### Check Browser Console:
-```javascript
+\`\`\`javascript
 // Check if Supabase is loaded
 console.log('Supabase URL:', process.env.NEXT_PUBLIC_SUPABASE_URL)
 console.log('Supabase Client:', window.supabase)
 
 // Check current domain
 console.log('Current Domain:', window.location.origin)
-```
+\`\`\`
 
 ### Check Network Tab:
 1. Open Developer Tools
@@ -175,7 +175,7 @@ console.log('Current Domain:', window.location.origin)
 If the above doesn't work, you can use a proxy:
 
 ### Create API Route: /api/supabase-proxy
-```typescript
+\`\`\`typescript
 import { createClient } from '@supabase/supabase-js'
 
 export default async function handler(req, res) {
@@ -187,6 +187,6 @@ export default async function handler(req, res) {
   // Handle authentication requests
   // This bypasses CORS issues
 }
-```
+\`\`\`
 
 This should fix your domain-specific login issues!

@@ -1,27 +1,20 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabase/server"
+import { verifyAdminAuth } from "@/lib/admin-auth-helper"
 
 // GET - Fetch all notifications history (admin only)
 export async function GET(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const authHeader = request.headers.get("Authorization")
+    const authResult = await verifyAdminAuth(authHeader)
 
-    // Get admin user from session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    if (!authResult.isValid) {
+      console.log("[v0] Unauthorized access attempt to notifications history")
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 })
-    }
+    console.log("[v0] Admin authenticated, fetching notifications history")
+    const supabase = await createClient()
 
     // Get query params
     const { searchParams } = new URL(request.url)
@@ -54,18 +47,18 @@ export async function GET(request: NextRequest) {
     }
 
     // Get statistics
-    const { data: stats } = await supabase
-      .from("notifications")
-      .select("type, is_read")
+    const { data: stats } = await supabase.from("notifications").select("type, is_read")
 
     const totalNotifications = stats?.length || 0
-    const readNotifications = stats?.filter(n => n.is_read).length || 0
+    const readNotifications = stats?.filter((n) => n.is_read).length || 0
     const unreadNotifications = totalNotifications - readNotifications
-    const typeStats = stats?.reduce((acc: any, notification: any) => {
-      acc[notification.type] = (acc[notification.type] || 0) + 1
-      return acc
-    }, {}) || {}
+    const typeStats =
+      stats?.reduce((acc: any, notification: any) => {
+        acc[notification.type] = (acc[notification.type] || 0) + 1
+        return acc
+      }, {}) || {}
 
+    console.log("[v0] Successfully fetched", notifications?.length || 0, "notifications")
     return NextResponse.json({
       notifications: notifications || [],
       statistics: {
@@ -84,25 +77,14 @@ export async function GET(request: NextRequest) {
 // DELETE - Delete notification (admin only)
 export async function DELETE(request: NextRequest) {
   try {
-    const supabase = await createClient()
+    const authHeader = request.headers.get("Authorization")
+    const authResult = await verifyAdminAuth(authHeader)
 
-    // Get admin user from session
-    const {
-      data: { user },
-      error: authError,
-    } = await supabase.auth.getUser()
-
-    if (authError || !user) {
+    if (!authResult.isValid) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    // Check if user is admin
-    const { data: profile } = await supabase.from("profiles").select("is_admin").eq("id", user.id).single()
-
-    if (!profile?.is_admin) {
-      return NextResponse.json({ error: "Forbidden - Admin access required" }, { status: 403 })
-    }
-
+    const supabase = await createClient()
     const { searchParams } = new URL(request.url)
     const notificationId = searchParams.get("id")
 
@@ -110,10 +92,7 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: "Notification ID required" }, { status: 400 })
     }
 
-    const { error } = await supabase
-      .from("notifications")
-      .delete()
-      .eq("id", notificationId)
+    const { error } = await supabase.from("notifications").delete().eq("id", notificationId)
 
     if (error) {
       console.error("[v0] Delete notification error:", error)

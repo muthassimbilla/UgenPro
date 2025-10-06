@@ -5,14 +5,14 @@
 ### Method 1: GitHub/GitLab Integration (Recommended)
 
 1. **Repository তৈরি করুন:**
-   ```bash
+   \`\`\`bash
    git init
    git add .
    git commit -m "Initial commit"
    git branch -M main
    git remote add origin https://github.com/yourusername/your-repo-name.git
    git push -u origin main
-   ```
+   \`\`\`
 
 2. **Netlify এ Connect করুন:**
    - [netlify.com](https://netlify.com) এ যান
@@ -28,9 +28,9 @@
 ### Method 2: Manual Deploy
 
 1. **Build করুন:**
-   ```bash
+   \`\`\`bash
    npm run build
-   ```
+   \`\`\`
 
 2. **Netlify এ Upload:**
    - [netlify.com](https://netlify.com) এ যান
@@ -40,30 +40,30 @@
 ### Method 3: Netlify CLI
 
 1. **CLI Install করুন:**
-   ```bash
+   \`\`\`bash
    npm install -g netlify-cli
-   ```
+   \`\`\`
 
 2. **Login করুন:**
-   ```bash
+   \`\`\`bash
    netlify login
-   ```
+   \`\`\`
 
 3. **Deploy করুন:**
-   ```bash
+   \`\`\`bash
    npm run build
    netlify deploy --prod --dir=.next
-   ```
+   \`\`\`
 
 ## 🔧 Environment Variables
 
 Netlify dashboard এ যান এবং Environment Variables যোগ করুন:
 
-```
+\`\`\`
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
+\`\`\`
 
 ## 📁 Important Files
 
