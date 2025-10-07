@@ -127,7 +127,8 @@ export class AuthService {
 
       const supabase = createClient()
 
-      const ipPromise = this.getUserCurrentIP().catch(() => "unknown")
+      const currentIP = await this.getUserCurrentIP().catch(() => "unknown")
+      console.log("[v0] Current IP detected:", currentIP)
 
       // Sign in with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
@@ -144,13 +145,11 @@ export class AuthService {
         throw new Error("No user data returned from login")
       }
 
-      const [profileResponse, currentIP] = await Promise.all([
-        supabase.from("profiles").select("*").eq("id", data.user.id).single(),
-        ipPromise,
-      ])
-
-      const profile = profileResponse.data
-      const profileError = profileResponse.error
+      const { data: profile, error: profileError } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .single()
 
       if (profileError) {
         console.error("[v0] Profile fetch error:", profileError)
@@ -184,7 +183,7 @@ export class AuthService {
       const sessionToken = uuidv4() + "-" + Date.now().toString(36)
       const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
 
-      const sessionPromise = supabase.from("user_sessions").insert({
+      const { error: sessionError } = await supabase.from("user_sessions").insert({
         user_id: data.user.id,
         session_token: sessionToken,
         expires_at: expiresAt.toISOString(),
@@ -193,23 +192,40 @@ export class AuthService {
         is_active: true,
       })
 
-      if (currentIP && currentIP !== "unknown") {
-        console.log("[v0] Tracking IP address:", currentIP)
-        fetch("/api/user/track-ip", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            user_id: data.user.id,
-            ip_address: currentIP,
-          }),
-        }).catch((error) => {
-          console.warn("[v0] IP tracking failed:", error)
-        })
+      if (sessionError) {
+        console.error("[v0] Session creation error:", sessionError)
+      } else {
+        console.log("[v0] Session created successfully")
       }
 
-      await sessionPromise
+      if (currentIP && currentIP !== "unknown") {
+        console.log("[v0] Tracking IP address:", currentIP)
+        try {
+          const trackResponse = await fetch("/api/user/track-ip", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              user_id: data.user.id,
+              ip_address: currentIP,
+            }),
+          })
+
+          if (!trackResponse.ok) {
+            console.error("[v0] IP tracking failed with status:", trackResponse.status)
+            const errorData = await trackResponse.json().catch(() => ({}))
+            console.error("[v0] IP tracking error details:", errorData)
+          } else {
+            const result = await trackResponse.json()
+            console.log("[v0] IP tracking successful:", result)
+          }
+        } catch (error) {
+          console.error("[v0] IP tracking request failed:", error)
+        }
+      } else {
+        console.warn("[v0] No valid IP address to track")
+      }
 
       const user: User = {
         id: data.user.id,
@@ -295,9 +311,7 @@ export class AuthService {
       const supabase = createClient()
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
-      const redirectUrl = isLocalhost
-        ? "http://localhost:3000/auth/callback"
-        : "https://ugenpro.site/auth/callback"
+      const redirectUrl = isLocalhost ? "http://localhost:3000/auth/callback" : "https://ugenpro.site/auth/callback"
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
