@@ -30,9 +30,6 @@ import {
   Smartphone,
   RefreshCw,
   User,
-  BarChart3,
-  Database,
-  Wifi,
 } from "lucide-react"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Switch } from "@/components/ui/switch"
@@ -72,26 +69,11 @@ export default function UserManagementPage() {
     return () => clearInterval(interval)
   }, [autoRefresh])
 
-  const loadUsers = async (forceRefresh = false) => {
+  const loadUsers = async () => {
     try {
-      if (forceRefresh) {
-        console.log("🔄 Force refreshing users...")
-        setIsLoading(true)
-      }
-
       const userData = await AdminUserService.getAllUsers()
       setUsers(userData)
       setLastUpdated(new Date())
-
-      if (forceRefresh) {
-        console.log("✅ Users refreshed successfully:", userData.length, "users loaded")
-        // Log device counts for debugging
-        userData.forEach((user) => {
-          console.log(
-            `👤 ${user.full_name}: ${user.device_count} devices, ${user.active_sessions || 0} active sessions`,
-          )
-        })
-      }
     } catch (error) {
       console.error("Error loading users:", error)
     } finally {
@@ -270,17 +252,15 @@ export default function UserManagementPage() {
     setDebugLoading(true)
     try {
       console.log("🔍 Debug: Checking device data...")
-      const response = await fetch("/api/debug/device-data")
+      const response = await fetch('/api/debug/device-data')
       const data = await response.json()
-
+      
       if (response.ok) {
         setDebugInfo(data)
         console.log("✅ Debug info:", data)
       } else {
         console.error("❌ Debug failed:", data)
-        alert(
-          `Debug failed: ${data.error}\n\nDetails: ${data.details || "No details available"}\n\nRecommendations:\n${data.recommendations?.join("\n• ") || "No recommendations"}`,
-        )
+        alert(`Debug failed: ${data.error}\n\nDetails: ${data.details || 'No details available'}\n\nRecommendations:\n${data.recommendations?.join('\n• ') || 'No recommendations'}`)
       }
     } catch (error) {
       console.error("❌ Debug error:", error)
@@ -294,9 +274,9 @@ export default function UserManagementPage() {
     setDebugLoading(true)
     try {
       console.log("🔍 Debug: Checking environment variables...")
-      const response = await fetch("/api/debug/env-check")
+      const response = await fetch('/api/debug/env-check')
       const data = await response.json()
-
+      
       if (response.ok) {
         setDebugInfo(data)
         console.log("✅ Environment check:", data)
@@ -307,104 +287,6 @@ export default function UserManagementPage() {
     } catch (error) {
       console.error("❌ Environment check error:", error)
       alert(`Environment check error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
-  const handleInsertSampleData = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("🔧 Debug: Inserting sample data...")
-      const response = await fetch("/api/debug/insert-sample-data", {
-        method: "POST",
-      })
-      const data = await response.json()
-
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Sample data inserted:", data)
-        alert(
-          `Sample data inserted successfully!\n\nInserted ${data.inserted_records} records\nUnique IPs: ${data.verification.unique_ips}\n\nNow try the 'Debug Devices' button again.`,
-        )
-      } else {
-        console.error("❌ Sample data insertion failed:", data)
-        alert(
-          `Sample data insertion failed: ${data.error}\n\nDetails: ${data.details || "No details available"}\n\nRecommendations:\n${data.recommendations?.join("\n• ") || "No recommendations"}\n\nTry the 'Manual Guide' button for alternative methods.`,
-        )
-      }
-    } catch (error) {
-      console.error("❌ Sample data insertion error:", error)
-      alert(`Sample data insertion error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
-  const handleManualGuide = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("📋 Debug: Getting manual data insertion guide...")
-      const response = await fetch("/api/debug/manual-data-guide")
-      const data = await response.json()
-
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Manual guide generated:", data)
-      } else {
-        console.error("❌ Manual guide generation failed:", data)
-        alert(`Manual guide generation failed: ${data.error}`)
-      }
-    } catch (error) {
-      console.error("❌ Manual guide error:", error)
-      alert(`Manual guide error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
-  const handleDeviceCountAnalysis = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("🔍 Debug: Analyzing device count...")
-      const response = await fetch("/api/debug/device-count-analysis")
-      const data = await response.json()
-
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Device count analysis completed:", data)
-      } else {
-        console.error("❌ Device count analysis error:", data)
-        alert(`Device count analysis error: ${data.error}`)
-      }
-    } catch (error) {
-      console.error("❌ Device count analysis error:", error)
-      alert(`Device count analysis error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
-  const handleDirectDBCheck = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("🔍 Debug: Direct database check...")
-      const response = await fetch("/api/debug/direct-db-check")
-      const data = await response.json()
-
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Direct database check completed:", data)
-
-        // Force reload users after direct check
-        await loadUsers(true)
-      } else {
-        console.error("❌ Direct database check error:", data)
-        alert(`Direct database check error: ${data.error}`)
-      }
-    } catch (error) {
-      console.error("❌ Direct database check error:", error)
-      alert(`Direct database check error: ${error}`)
     } finally {
       setDebugLoading(false)
     }
@@ -490,14 +372,9 @@ export default function UserManagementPage() {
                 Auto Refresh
               </label>
             </div>
-            <Button
-              onClick={() => loadUsers(true)}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
+            <Button onClick={loadUsers} variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
               <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              Force Refresh
+              Refresh
             </Button>
             <Button variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
               <Download className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
@@ -516,62 +393,6 @@ export default function UserManagementPage() {
                 <Shield className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               )}
               Check Env
-            </Button>
-            <Button
-              onClick={handleInsertSampleData}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Insert Sample Data
-            </Button>
-            <Button
-              onClick={handleManualGuide}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <User className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Manual Guide
-            </Button>
-            <Button
-              onClick={handleDeviceCountAnalysis}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <BarChart3 className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Analyze Devices
-            </Button>
-            <Button
-              onClick={handleDirectDBCheck}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <Database className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Direct DB Check
             </Button>
             <Button
               onClick={handleDebugDeviceData}
@@ -612,7 +433,7 @@ export default function UserManagementPage() {
               Close
             </Button>
           </div>
-
+          
           <div className="space-y-4">
             {/* Environment Variables */}
             {debugInfo.environment_variables && (
@@ -622,16 +443,18 @@ export default function UserManagementPage() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
                     {Object.entries(debugInfo.environment_variables).map(([key, value]) => (
                       <div key={key} className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${value ? "bg-green-500" : "bg-red-500"}`}></span>
+                        <span className={`w-2 h-2 rounded-full ${value ? 'bg-green-500' : 'bg-red-500'}`}></span>
                         <span className="font-mono text-xs">{key}:</span>
-                        <span className={value ? "text-green-600" : "text-red-600"}>{value ? "Set" : "Missing"}</span>
+                        <span className={value ? 'text-green-600' : 'text-red-600'}>
+                          {value ? 'Set' : 'Missing'}
+                        </span>
                       </div>
                     ))}
                   </div>
                   {debugInfo.missing_variables && debugInfo.missing_variables.length > 0 && (
                     <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">
                       <p className="text-sm text-red-600 dark:text-red-400">
-                        Missing: {debugInfo.missing_variables.join(", ")}
+                        Missing: {debugInfo.missing_variables.join(', ')}
                       </p>
                     </div>
                   )}
@@ -645,16 +468,14 @@ export default function UserManagementPage() {
                 <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Database Table Structure:</h4>
                 <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
                   <p className="text-sm">
-                    <span
-                      className={`font-medium ${debugInfo.table_structure.has_required_columns ? "text-green-600" : "text-red-600"}`}
-                    >
-                      {debugInfo.table_structure.has_required_columns ? "✅" : "❌"} Required columns:
+                    <span className={`font-medium ${debugInfo.table_structure.has_required_columns ? 'text-green-600' : 'text-red-600'}`}>
+                      {debugInfo.table_structure.has_required_columns ? '✅' : '❌'} Required columns: 
                     </span>
-                    {debugInfo.table_structure.has_required_columns ? "Present" : "Missing"}
+                    {debugInfo.table_structure.has_required_columns ? 'Present' : 'Missing'}
                   </p>
                   {debugInfo.table_structure.columns && (
                     <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      Columns: {debugInfo.table_structure.columns.map((col: any) => col.name).join(", ")}
+                      Columns: {debugInfo.table_structure.columns.map((col: any) => col.name).join(', ')}
                     </p>
                   )}
                 </div>
@@ -696,7 +517,7 @@ export default function UserManagementPage() {
                       <p className="text-xs text-gray-600 dark:text-gray-400">Sample IP records:</p>
                       {debugInfo.ip_history.sample.slice(0, 3).map((ip: any, index: number) => (
                         <p key={index} className="text-xs text-gray-600 dark:text-gray-400 ml-2">
-                          • {ip.ip_address} - {ip.city || "Unknown"}, {ip.country || "Unknown"}
+                          • {ip.ip_address} - {ip.city || 'Unknown'}, {ip.country || 'Unknown'}
                         </p>
                       ))}
                     </div>
@@ -714,12 +535,10 @@ export default function UserManagementPage() {
                     <span className="font-medium text-blue-600">👤 User:</span> {debugInfo.device_count_test.user_name}
                   </p>
                   <p className="text-sm">
-                    <span className="font-medium text-blue-600">📱 Device Count:</span>{" "}
-                    {debugInfo.device_count_test.unique_ips} unique devices
+                    <span className="font-medium text-blue-600">📱 Device Count:</span> {debugInfo.device_count_test.unique_ips} unique devices
                   </p>
                   <p className="text-sm">
-                    <span className="font-medium text-blue-600">📊 Total Records:</span>{" "}
-                    {debugInfo.device_count_test.total_records}
+                    <span className="font-medium text-blue-600">📊 Total Records:</span> {debugInfo.device_count_test.total_records}
                   </p>
                 </div>
               </div>
@@ -735,219 +554,6 @@ export default function UserManagementPage() {
                       • {rec}
                     </p>
                   ))}
-                </div>
-              </div>
-            )}
-
-            {/* Manual Data Insertion Guide */}
-            {debugInfo.steps && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">
-                  📋 Manual Data Insertion Guide:
-                </h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg space-y-4">
-                  {debugInfo.steps.map((step: any, index: number) => (
-                    <div key={index} className="border-l-4 border-blue-500 pl-4">
-                      <h5 className="font-medium text-blue-600 mb-2">
-                        Step {step.step}: {step.title}
-                      </h5>
-                      <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">{step.description}</p>
-                      {step.sql_script && (
-                        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs font-mono">
-                          <p className="text-blue-600">SQL Script: {step.sql_script}</p>
-                        </div>
-                      )}
-                      {step.instructions && (
-                        <ul className="text-xs text-gray-600 dark:text-gray-400 list-disc list-inside">
-                          {step.instructions.map((instruction: string, i: number) => (
-                            <li key={i}>{instruction}</li>
-                          ))}
-                        </ul>
-                      )}
-                      {step.sql_commands && (
-                        <div className="bg-gray-100 dark:bg-gray-800 p-2 rounded text-xs font-mono">
-                          {step.sql_commands.map((cmd: string, i: number) => (
-                            <div key={i} className="mb-1">
-                              <code className="text-green-600">{cmd}</code>
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Sample Data Insertion Results */}
-            {debugInfo.inserted_records && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">📊 Sample Data Insertion:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium text-green-600">✅ Inserted Records:</span>{" "}
-                    {debugInfo.inserted_records}
-                  </p>
-                  {debugInfo.verification && (
-                    <div className="mt-2">
-                      <p className="text-sm">
-                        <span className="font-medium text-blue-600">👤 User ID:</span> {debugInfo.verification.user_id}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium text-blue-600">📱 Unique Devices:</span>{" "}
-                        {debugInfo.verification.unique_ips}
-                      </p>
-                      <p className="text-sm">
-                        <span className="font-medium text-blue-600">📊 Total Records:</span>{" "}
-                        {debugInfo.verification.total_records}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Direct Database Check */}
-            {debugInfo.summary && debugInfo.user_device_counts && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">🔍 Direct Database Check:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-blue-600">📊 Total IP Records:</span>{" "}
-                      {debugInfo.summary.total_ip_records}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">👥 Total Users:</span>{" "}
-                      {debugInfo.summary.total_profiles}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">📱 Users with Devices:</span>{" "}
-                      {debugInfo.summary.users_with_devices}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">🎯 Total Devices:</span>{" "}
-                      {debugInfo.summary.total_devices}
-                    </div>
-                  </div>
-
-                  {debugInfo.summary.sample_ip_addresses && debugInfo.summary.sample_ip_addresses.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="font-medium text-blue-600 mb-2">🌐 Sample IP Addresses:</h5>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        {debugInfo.summary.sample_ip_addresses.join(", ")}
-                      </div>
-                    </div>
-                  )}
-
-                  <div className="mt-3">
-                    <h5 className="font-medium text-blue-600 mb-2">👤 User Device Counts:</h5>
-                    <div className="space-y-2">
-                      {debugInfo.user_device_counts.map((user: any, index: number) => (
-                        <div key={index} className="text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">{user.full_name || user.email}</span>
-                            <span
-                              className={`px-2 py-1 rounded text-xs ${user.device_count > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                            >
-                              {user.device_count} devices
-                            </span>
-                          </div>
-                          {user.device_count > 0 && (
-                            <div className="mt-1 text-gray-600 dark:text-gray-400">
-                              IPs: {user.ip_addresses.join(", ")} ({user.total_records} records)
-                            </div>
-                          )}
-                          {user.error && <div className="mt-1 text-red-600 dark:text-red-400">Error: {user.error}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {debugInfo.recommendations && debugInfo.recommendations.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="font-medium text-green-600 mb-2">💡 Recommendations:</h5>
-                      {debugInfo.recommendations.map((rec: string, index: number) => (
-                        <div key={index} className="text-sm text-green-600 dark:text-green-400">
-                          • {rec}
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Device Count Analysis */}
-            {debugInfo.summary && debugInfo.user_analysis && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">🔍 Device Count Analysis:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg space-y-3">
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div>
-                      <span className="font-medium text-blue-600">📊 Total IP Records:</span>{" "}
-                      {debugInfo.summary.total_ip_records}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">🌐 Unique IPs:</span>{" "}
-                      {debugInfo.summary.unique_ip_addresses}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">👥 Total Users:</span> {debugInfo.summary.total_users}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">📱 Users with Devices:</span>{" "}
-                      {debugInfo.summary.users_with_devices}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">❌ Users with 0 Devices:</span>{" "}
-                      {debugInfo.summary.users_with_zero_devices}
-                    </div>
-                    <div>
-                      <span className="font-medium text-blue-600">🎯 Total Expected Devices:</span>{" "}
-                      {debugInfo.summary.total_expected_devices}
-                    </div>
-                  </div>
-
-                  {debugInfo.user_analysis && debugInfo.user_analysis.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="font-medium text-blue-600 mb-2">👤 User Analysis:</h5>
-                      <div className="space-y-2">
-                        {debugInfo.user_analysis.map((user: any, index: number) => (
-                          <div key={index} className="text-xs bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                            <div className="flex justify-between items-center">
-                              <span className="font-medium">{user.full_name || user.email}</span>
-                              <span
-                                className={`px-2 py-1 rounded text-xs ${user.device_count > 0 ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"}`}
-                              >
-                                {user.device_count} devices
-                              </span>
-                            </div>
-                            {user.device_count > 0 && (
-                              <div className="mt-1 text-gray-600 dark:text-gray-400">
-                                IPs: {user.unique_ips.join(", ")}
-                              </div>
-                            )}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {debugInfo.issues && debugInfo.issues.length > 0 && (
-                    <div className="mt-3">
-                      <h5 className="font-medium text-red-600 mb-2">⚠️ Issues Found:</h5>
-                      {debugInfo.issues.map((issue: any, index: number) => (
-                        <div
-                          key={index}
-                          className="text-sm text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 p-2 rounded"
-                        >
-                          <strong>{issue.type}:</strong> {issue.message}
-                          {issue.users && <div className="mt-1 text-xs">Users: {issue.users.join(", ")}</div>}
-                        </div>
-                      ))}
-                    </div>
-                  )}
                 </div>
               </div>
             )}
@@ -1112,9 +718,7 @@ export default function UserManagementPage() {
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <CheckCircle className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
                     <HydrationSafe fallback={<span className="truncate">Approved: Loading...</span>}>
-                      <span className="truncate">
-                        Approved: {new Date(user.approved_at).toLocaleDateString("en-US")}
-                      </span>
+                      <span className="truncate">Approved: {new Date(user.approved_at).toLocaleDateString("en-US")}</span>
                     </HydrationSafe>
                   </div>
                 )}
@@ -1138,15 +742,6 @@ export default function UserManagementPage() {
                   <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
                   <span className="truncate">Devices: {user.device_count || 0}</span>
                 </div>
-                {/* CHANGE> Adding active sessions display */}
-                {user.active_sessions !== undefined && user.active_sessions > 0 && (
-                  <div className="flex items-center gap-2 text-xs lg:text-sm text-green-600 dark:text-green-400">
-                    <Wifi className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
-                    <span className="truncate">
-                      {user.active_sessions} Active Session{user.active_sessions > 1 ? "s" : ""}
-                    </span>
-                  </div>
-                )}
                 {user.last_login && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
@@ -1467,18 +1062,6 @@ export default function UserManagementPage() {
                         {selectedUser.device_count || 0} Unique IPs
                       </Badge>
                     </div>
-                    {/* CHANGE> Adding active sessions display in user details */}
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Active Sessions</span>
-                      <Badge
-                        variant={
-                          selectedUser.active_sessions && selectedUser.active_sessions > 0 ? "default" : "secondary"
-                        }
-                        className="text-sm"
-                      >
-                        {selectedUser.active_sessions || 0} Active
-                      </Badge>
-                    </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Approval Status</span>
                       <Badge variant={selectedUser.is_approved ? "default" : "secondary"} className="text-sm">
@@ -1494,7 +1077,7 @@ export default function UserManagementPage() {
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Last Login</span>
                       <span className="text-sm text-foreground">
-                        {selectedUser.last_login
+                        {selectedUser.last_login 
                           ? new Date(selectedUser.last_login).toLocaleDateString("en-US", {
                               year: "numeric",
                               month: "short",
@@ -1502,7 +1085,8 @@ export default function UserManagementPage() {
                               hour: "2-digit",
                               minute: "2-digit",
                             })
-                          : "Never"}
+                          : "Never"
+                        }
                       </span>
                     </div>
                   </div>
@@ -1523,10 +1107,7 @@ export default function UserManagementPage() {
                       <Smartphone className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
                       <div className="text-sm text-blue-700 dark:text-blue-300">
                         <p className="font-medium mb-1">Device Information:</p>
-                        <p>
-                          Each unique IP address is counted as a separate device. This helps track user activity across
-                          different networks and locations.
-                        </p>
+                        <p>Each unique IP address is counted as a separate device. This helps track user activity across different networks and locations.</p>
                       </div>
                     </div>
                   </div>
@@ -1610,8 +1191,7 @@ export default function UserManagementPage() {
               Device & IP Information
             </DialogTitle>
             <DialogDescription>
-              View all devices and IP addresses used by {selectedUser?.full_name}. Each unique IP address represents a
-              different device or network location.
+              View all devices and IP addresses used by {selectedUser?.full_name}. Each unique IP address represents a different device or network location.
             </DialogDescription>
           </DialogHeader>
 
@@ -1714,9 +1294,7 @@ export default function UserManagementPage() {
             <div className="text-center py-8">
               <Smartphone className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
               <p className="text-muted-foreground">No device information found for this user</p>
-              <p className="text-sm text-muted-foreground mt-2">
-                Device information will appear here once the user logs in from different IP addresses.
-              </p>
+              <p className="text-sm text-muted-foreground mt-2">Device information will appear here once the user logs in from different IP addresses.</p>
             </div>
           )}
         </DialogContent>

@@ -17,7 +17,6 @@ export interface AdminUser {
   device_count?: number
   user_agent?: string
   last_login?: string
-  active_sessions?: number
 }
 
 export class AdminUserService {
@@ -53,7 +52,6 @@ export class AdminUserService {
           let uniqueIPCount = 0
           let userAgent = "Unknown"
           let lastLogin = null
-          let activeSessions = 0
           const userEmail = profile.email || "No email"
           const telegramUsername = profile.telegram_username
 
@@ -63,26 +61,13 @@ export class AdminUserService {
               .select("ip_address, is_current")
               .eq("user_id", profile.id)
 
-            if (ipError) {
-              console.error(`[v0] Error fetching IP history for user ${profile.id}:`, ipError)
-              uniqueIPCount = 0
-            } else if (ipHistory && ipHistory.length > 0) {
+            if (!ipError && ipHistory && ipHistory.length > 0) {
               // Create a Set to get unique IP addresses
               const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
               uniqueIPCount = uniqueIPs.size
-              console.log(
-                `[v0] User ${profile.full_name} (${profile.id}) has ${uniqueIPCount} unique IPs (devices):`,
-                Array.from(uniqueIPs),
-              )
-              console.log(`[v0] Total IP records for user: ${ipHistory.length}`)
-
-              const currentIPs = ipHistory.filter((ip) => ip.is_current)
-              activeSessions = currentIPs.length
-              console.log(`[v0] User ${profile.full_name} has ${activeSessions} active sessions`)
+              console.log(`[v0] User ${profile.full_name} has ${uniqueIPCount} unique IPs (devices)`)
             } else {
-              console.log(`[v0] User ${profile.full_name} (${profile.id}) has no IP history records`)
-              uniqueIPCount = 0
-              activeSessions = 0
+              console.log(`[v0] User ${profile.full_name} has no IP history or error:`, ipError)
             }
 
             // Get latest user agent and last login from active sessions
@@ -121,7 +106,6 @@ export class AdminUserService {
             device_count: uniqueIPCount, // This will now correctly show the number of unique IPs
             user_agent: userAgent,
             last_login: lastLogin,
-            active_sessions: activeSessions,
           }
         }),
       )
@@ -132,6 +116,15 @@ export class AdminUserService {
       console.error("[v0] Error getting users:", error)
       throw error
     }
+  }
+
+  private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
+    if (!user.is_approved) return "pending"
+    if (user.account_status === "suspended") return "suspended"
+    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
+    if (!user.is_active) return "inactive"
+    if (user.account_status === "active") return "active"
+    return "inactive"
   }
 
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
@@ -605,14 +598,5 @@ export class AdminUserService {
       console.error("[v0] Security update failed:", error)
       throw error
     }
-  }
-
-  private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
-    if (!user.is_approved) return "pending"
-    if (user.account_status === "suspended") return "suspended"
-    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
-    if (!user.is_active) return "inactive"
-    if (user.account_status === "active") return "active"
-    return "inactive"
   }
 }
