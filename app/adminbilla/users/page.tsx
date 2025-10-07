@@ -79,7 +79,15 @@ export default function UserManagementPage() {
         setIsLoading(true)
       }
 
+      console.log("[v0] Starting to load users...")
+      console.log("[v0] Environment check:", {
+        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
+        hasSupabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+      })
+
       const userData = await AdminUserService.getAllUsers()
+
+      console.log("[v0] Users loaded successfully:", userData.length)
       setUsers(userData)
       setLastUpdated(new Date())
 
@@ -92,8 +100,14 @@ export default function UserManagementPage() {
           )
         })
       }
-    } catch (error) {
-      console.error("Error loading users:", error)
+    } catch (error: any) {
+      console.error("[v0] Error loading users:", error)
+      console.error("[v0] Error details:", {
+        message: error.message,
+        stack: error.stack,
+        name: error.name,
+      })
+      alert(`Failed to load users: ${error.message}. Check console for details.`)
     } finally {
       setIsLoading(false)
     }
