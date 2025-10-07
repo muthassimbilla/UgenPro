@@ -1,4 +1,4 @@
-import { createBrowserClient } from "@supabase/ssr"
+import { createBrowserClient, createClient } from "@supabase/ssr"
 
 export interface AdminUser {
   id: string
@@ -24,7 +24,7 @@ export class AdminUserService {
   static async getAllUsers(): Promise<AdminUser[]> {
     try {
       console.log("[v0] getAllUsers called")
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
@@ -66,7 +66,6 @@ export class AdminUserService {
               console.error(`[v0] Error fetching IP history for user ${profile.id}:`, ipError)
               uniqueIPCount = 0
             } else if (ipHistory && ipHistory.length > 0) {
-              // Create a Set to get unique IP addresses
               const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
               uniqueIPCount = uniqueIPs.size
 
@@ -84,7 +83,6 @@ export class AdminUserService {
               activeSessions = 0
             }
 
-            // Get latest user agent and last login from active sessions
             const { data: latestSession } = await supabase
               .from("user_sessions")
               .select("user_agent, last_accessed, created_at")
@@ -135,7 +133,7 @@ export class AdminUserService {
 
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -170,7 +168,7 @@ export class AdminUserService {
 
   static async rejectUser(userId: string, adminUserId?: string): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -202,7 +200,7 @@ export class AdminUserService {
 
   static async getPendingUsers(): Promise<AdminUser[]> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -244,7 +242,7 @@ export class AdminUserService {
   static async updateUser(userId: string, userData: Partial<AdminUser>): Promise<AdminUser> {
     console.log("[v0] Updating user:", userId, userData)
 
-    const supabase = this.getSupabaseClient()
+    const supabase = this.getSupabaseServiceClient()
 
     if (!supabase) {
       throw new Error("Supabase integration required")
@@ -255,7 +253,7 @@ export class AdminUserService {
         .from("profiles")
         .update({
           full_name: userData.full_name,
-          email: userData.email, // Update email in profiles table
+          email: userData.email,
           is_active: userData.is_active,
           updated_at: new Date().toISOString(),
         })
@@ -291,7 +289,7 @@ export class AdminUserService {
 
   static async updateUserExpiration(userId: string, expirationDate: string | null): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -319,7 +317,7 @@ export class AdminUserService {
 
   static async updateUserStatus(userId: string, status: "active" | "suspended"): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -349,7 +347,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Starting delete operation for user:", userId)
 
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -368,7 +366,6 @@ export class AdminUserService {
 
       console.log("[v0] User found before delete:", existingUser)
 
-      // First delete related sessions
       const { error: sessionError } = await supabase.from("user_sessions").delete().eq("user_id", userId)
 
       if (sessionError) {
@@ -400,7 +397,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
 
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -456,7 +453,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Creating new user:", userData)
 
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -478,11 +475,10 @@ export class AdminUserService {
         throw new Error(`Failed to create auth user: ${authError?.message}`)
       }
 
-      // Update the auto-created profile with additional data
       const { data, error } = await supabase
         .from("profiles")
         .update({
-          email: userData.email, // Ensure email is stored in profile
+          email: userData.email,
           is_active: userData.is_active ?? true,
           is_approved: userData.is_approved ?? true,
           account_status: userData.account_status ?? "active",
@@ -521,6 +517,23 @@ export class AdminUserService {
     }
   }
 
+  private static getSupabaseServiceClient() {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+
+    if (!supabaseUrl || !supabaseServiceKey) {
+      console.error("[v0] Missing Supabase credentials")
+      return null
+    }
+
+    return createClient(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+      },
+    })
+  }
+
   private static getSupabaseClient() {
     if (typeof window === "undefined") return null
 
@@ -545,7 +558,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
 
-      const supabase = this.getSupabaseClient()
+      const supabase = this.getSupabaseServiceClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
