@@ -23,137 +23,49 @@ export interface AdminUser {
 export class AdminUserService {
   static async getAllUsers(): Promise<AdminUser[]> {
     try {
-      console.log("[v0] getAllUsers called")
+      console.log("[v0] getAllUsers called - using API route")
 
-      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-      const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-      console.log("[v0] Environment variables check:", {
-        hasUrl: !!supabaseUrl,
-        hasServiceKey: !!supabaseServiceKey,
-        urlValue: supabaseUrl ? `${supabaseUrl.substring(0, 20)}...` : "MISSING",
-        serviceKeyValue: supabaseServiceKey ? "SET (hidden)" : "MISSING",
+      const response = await fetch("/api/admin/users", {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
       })
 
-      const supabase = this.getSupabaseServiceClient()
-
-      if (!supabase) {
-        const errorMsg =
-          "Supabase integration required. Please add Supabase integration and SUPABASE_SERVICE_ROLE_KEY environment variable from project settings."
-        console.error("[v0]", errorMsg)
-        throw new Error(errorMsg)
+      if (!response.ok) {
+        const errorData = await response.json()
+        console.error("[v0] API error:", errorData)
+        throw new Error(errorData.error || "Failed to load users")
       }
 
-      console.log("[v0] Supabase client created successfully")
-      console.log("[v0] Fetching profiles from database...")
+      const { users } = await response.json()
+      console.log("[v0] Users loaded from API:", users.length)
 
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-
-      if (error) {
-        console.error("[v0] Supabase error:", error)
-        console.error("[v0] Error details:", {
-          message: error.message,
-          code: error.code,
-          details: error.details,
-          hint: error.hint,
-        })
-        throw new Error(`Failed to load user data: ${error.message}`)
-      }
-
-      console.log("[v0] Profiles fetched:", profiles?.length || 0)
-
-      if (!profiles || profiles.length === 0) {
-        console.log("[v0] No profiles found in database")
-        console.log("[v0] This could mean:")
-        console.log("  1. No users have signed up yet")
-        console.log("  2. The profiles table is empty")
-        console.log("  3. RLS policies are blocking access (but service role should bypass this)")
-        return []
-      }
-
-      console.log("[v0] Processing user data with device counts...")
-
-      const usersWithDeviceCount = await Promise.all(
-        profiles.map(async (profile) => {
-          let uniqueIPCount = 0
-          let userAgent = "Unknown"
-          let lastLogin = null
-          let activeSessions = 0
-          const userEmail = profile.email || "No email"
-          const telegramUsername = profile.telegram_username
-
-          try {
-            const { data: ipHistory, error: ipError } = await supabase
-              .from("user_ip_history")
-              .select("ip_address, is_current, city, country, updated_at")
-              .eq("user_id", profile.id)
-
-            if (ipError) {
-              console.error(`[v0] Error fetching IP history for user ${profile.id}:`, ipError)
-              uniqueIPCount = 0
-            } else if (ipHistory && ipHistory.length > 0) {
-              const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
-              uniqueIPCount = uniqueIPs.size
-
-              const currentIPs = ipHistory.filter((ip) => ip.is_current === true)
-              activeSessions = currentIPs.length
-
-              console.log(
-                `[v0] User ${profile.full_name} (${profile.id}):`,
-                `${uniqueIPCount} unique IPs,`,
-                `${activeSessions} active sessions`,
-              )
-            } else {
-              console.log(`[v0] User ${profile.full_name} (${profile.id}) has no IP history records`)
-              uniqueIPCount = 0
-              activeSessions = 0
-            }
-
-            const { data: latestSession } = await supabase
-              .from("user_sessions")
-              .select("user_agent, last_accessed, created_at")
-              .eq("user_id", profile.id)
-              .eq("is_active", true)
-              .gt("expires_at", new Date().toISOString())
-              .order("last_accessed", { ascending: false })
-              .limit(1)
-              .single()
-
-            if (latestSession) {
-              userAgent = latestSession.user_agent || "Unknown"
-              lastLogin = latestSession.last_accessed || latestSession.created_at
-            }
-          } catch (error) {
-            console.error("[v0] Error getting additional data for user:", profile.id, error)
-          }
-
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            email: userEmail,
-            telegram_username: telegramUsername,
-            is_active: profile.is_active ?? true,
-            is_approved: profile.is_approved ?? false,
-            approved_at: profile.approved_at,
-            approved_by: profile.approved_by,
-            account_status: profile.account_status || "active",
-            expiration_date: profile.expiration_date,
-            current_status: this.calculateCurrentStatus(profile),
-            created_at: profile.created_at,
-            updated_at: profile.updated_at || profile.created_at,
-            device_count: uniqueIPCount,
-            user_agent: userAgent,
-            last_login: lastLogin,
-            active_sessions: activeSessions,
-          }
+      // Map API response to AdminUser format
+      return users.map((user: any) => ({
+        id: user.user_id,
+        full_name: user.full_name,
+        email: user.email,
+        telegram_username: user.telegram_username,
+        is_active: user.account_status === "active",
+        is_approved: user.approval_status === "approved",
+        approved_at: user.approved_at,
+        approved_by: user.approved_by,
+        account_status: user.account_status,
+        expiration_date: user.subscription_expires_at,
+        current_status: this.calculateCurrentStatus({
+          is_approved: user.approval_status === "approved",
+          account_status: user.account_status,
+          expiration_date: user.subscription_expires_at,
+          is_active: user.account_status === "active",
         }),
-      )
-
-      console.log("[v0] Returning users:", usersWithDeviceCount.length)
-      return usersWithDeviceCount
+        created_at: user.created_at,
+        updated_at: user.updated_at,
+        device_count: user.device_count,
+        user_agent: "Unknown",
+        last_login: user.last_login,
+        active_sessions: user.active_sessions,
+      }))
     } catch (error: any) {
       console.error("[v0] Error getting users:", error)
       throw error
@@ -250,6 +162,7 @@ export class AdminUserService {
         id: profile.id,
         full_name: profile.full_name,
         email: profile.email || "No email",
+        telegram_username: profile.telegram_username,
         is_active: profile.is_active ?? true,
         is_approved: profile.is_approved ?? false,
         approved_at: profile.approved_at,

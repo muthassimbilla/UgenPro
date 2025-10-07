@@ -80,10 +80,6 @@ export default function UserManagementPage() {
       }
 
       console.log("[v0] Starting to load users...")
-      console.log("[v0] Environment check:", {
-        hasSupabaseUrl: !!process.env.NEXT_PUBLIC_SUPABASE_URL,
-        hasSupabaseAnonKey: !!process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-      })
 
       const userData = await AdminUserService.getAllUsers()
 
@@ -102,11 +98,6 @@ export default function UserManagementPage() {
       }
     } catch (error: any) {
       console.error("[v0] Error loading users:", error)
-      console.error("[v0] Error details:", {
-        message: error.message,
-        stack: error.stack,
-        name: error.name,
-      })
       alert(`Failed to load users: ${error.message}. Check console for details.`)
     } finally {
       setIsLoading(false)
@@ -603,7 +594,7 @@ export default function UserManagementPage() {
             </Button>
             <Button
               onClick={handleCreateUser}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-xs lg:text-sm"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
             >
               <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               New User
