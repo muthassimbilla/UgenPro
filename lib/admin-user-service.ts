@@ -41,7 +41,6 @@ export class AdminUserService {
       }
 
       console.log("[v0] Profiles fetched:", profiles?.length || 0)
-      console.log("[v0] Profile data sample:", profiles?.[0]) // Debug log to see what data we're getting
 
       if (!profiles || profiles.length === 0) {
         console.log("[v0] No profiles found in database")
@@ -60,7 +59,7 @@ export class AdminUserService {
           try {
             const { data: ipHistory, error: ipError } = await supabase
               .from("user_ip_history")
-              .select("ip_address, is_current")
+              .select("ip_address, is_current, city, country, updated_at")
               .eq("user_id", profile.id)
 
             if (ipError) {
@@ -70,15 +69,15 @@ export class AdminUserService {
               // Create a Set to get unique IP addresses
               const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
               uniqueIPCount = uniqueIPs.size
-              console.log(
-                `[v0] User ${profile.full_name} (${profile.id}) has ${uniqueIPCount} unique IPs (devices):`,
-                Array.from(uniqueIPs),
-              )
-              console.log(`[v0] Total IP records for user: ${ipHistory.length}`)
 
-              const currentIPs = ipHistory.filter((ip) => ip.is_current)
+              const currentIPs = ipHistory.filter((ip) => ip.is_current === true)
               activeSessions = currentIPs.length
-              console.log(`[v0] User ${profile.full_name} has ${activeSessions} active sessions`)
+
+              console.log(
+                `[v0] User ${profile.full_name} (${profile.id}):`,
+                `${uniqueIPCount} unique IPs,`,
+                `${activeSessions} active sessions`,
+              )
             } else {
               console.log(`[v0] User ${profile.full_name} (${profile.id}) has no IP history records`)
               uniqueIPCount = 0
@@ -118,7 +117,7 @@ export class AdminUserService {
             current_status: this.calculateCurrentStatus(profile),
             created_at: profile.created_at,
             updated_at: profile.updated_at || profile.created_at,
-            device_count: uniqueIPCount, // This will now correctly show the number of unique IPs
+            device_count: uniqueIPCount,
             user_agent: userAgent,
             last_login: lastLogin,
             active_sessions: activeSessions,
