@@ -1,0 +1,69 @@
+{
+  "name": "UGen Pro - Advanced Generator Tools Platform",
+  "short_name": "UGen Pro",
+  "description": "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2B7FFF",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en",
+  "categories": ["productivity", "utilities", "developer"],
+  "icons": [
+    {
+      "src": "/ugenpro-logo.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/favicon-16x16.ico",
+      "sizes": "16x16",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/favicon-32x32.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/ugenpro-social-sharing.jpg",
+      "sizes": "1200x630",
+      "type": "image/jpeg",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "User Agent Generator",
+      "short_name": "UA Generator",
+      "description": "Generate user agent strings",
+      "url": "/tool/user-agent-generator",
+      "icons": [
+        {
+          "src": "/ugenpro-logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    },
+    {
+      "name": "Address Generator",
+      "short_name": "Address Gen",
+      "description": "Generate random addresses",
+      "url": "/tool/address-generator",
+      "icons": [
+        {
+          "src": "/ugenpro-logo.svg",
+          "sizes": "any",
+          "type": "image/svg+xml"
+        }
+      ]
+    }
+  ],
+  "related_applications": [],
+  "prefer_related_applications": false
+}
