@@ -296,8 +296,8 @@ export class AuthService {
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
       const redirectUrl = isLocalhost
-        ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/reset-password"
-        : "https://ugenpro.site/reset-password"
+        ? "http://localhost:3000/auth/callback"
+        : "https://ugenpro.site/auth/callback"
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,

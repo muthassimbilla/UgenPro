@@ -3,7 +3,7 @@ import { type NextRequest, NextResponse } from "next/server"
 
 export async function POST(request: NextRequest) {
   try {
-    const { user_id, ip_address } = await request.json()
+    const { user_id, ip_address, country, city, isp } = await request.json()
 
     if (!user_id || !ip_address) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 })
@@ -24,7 +24,11 @@ export async function POST(request: NextRequest) {
       const { error: insertError } = await supabase.from("user_ip_history").insert({
         user_id,
         ip_address,
+        country: country || null,
+        city: city || null,
+        isp: isp || null,
         is_current: true,
+        updated_at: new Date().toISOString(),
       })
 
       if (insertError) {
@@ -32,9 +36,25 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: "Failed to track IP" }, { status: 500 })
       }
 
-      console.log("[v0] IP tracked successfully:", ip_address)
+      console.log("[v0] IP tracked successfully:", ip_address, "Location:", city, country)
     } else {
-      console.log("[v0] IP already exists for user:", ip_address)
+      // Update existing IP record with new location info if available
+      const { error: updateError } = await supabase
+        .from("user_ip_history")
+        .update({
+          country: country || null,
+          city: city || null,
+          isp: isp || null,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("user_id", user_id)
+        .eq("ip_address", ip_address)
+
+      if (updateError) {
+        console.error("[v0] Error updating IP history:", updateError)
+      } else {
+        console.log("[v0] IP location updated:", ip_address, "Location:", city, country)
+      }
     }
 
     return NextResponse.json({ success: true })

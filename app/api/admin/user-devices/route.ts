@@ -49,7 +49,6 @@ export async function GET(request: NextRequest) {
       .from("user_ip_history")
       .select("*")
       .eq("user_id", userId)
-      .eq("is_current", true)
       .order("created_at", { ascending: false })
 
     if (ipError) {
@@ -65,9 +64,14 @@ export async function GET(request: NextRequest) {
         const ipAddress = ipRecord.ip_address
         
         if (!deviceMap.has(ipAddress)) {
+          // Create a more descriptive device name
+          const location = ipRecord.city && ipRecord.country 
+            ? `${ipRecord.city}, ${ipRecord.country}` 
+            : ipRecord.country || "Unknown Location"
+          
           deviceMap.set(ipAddress, {
             device_fingerprint: `ip-${ipAddress}`,
-            device_name: `Device from ${ipAddress}`,
+            device_name: `Device from ${location}`,
             browser_info: "Unknown Browser",
             os_info: "Unknown OS",
             screen_resolution: "Unknown",
@@ -90,24 +94,44 @@ export async function GET(request: NextRequest) {
               isp: ipRecord.isp || "Unknown",
               first_seen: ipRecord.created_at,
               last_seen: ipRecord.updated_at || ipRecord.created_at,
-              is_current: true
+              is_current: ipRecord.is_current || false
             }],
-            active_sessions: 1
+            active_sessions: ipRecord.is_current ? 1 : 0
           })
         } else {
           const device = deviceMap.get(ipAddress)
           device.total_logins += 1
-          device.active_sessions += 1
           
           // Update last_seen to the most recent IP record
           if (new Date(ipRecord.updated_at || ipRecord.created_at) > new Date(device.last_seen)) {
             device.last_seen = ipRecord.updated_at || ipRecord.created_at
           }
+          
+          // Update active sessions count
+          if (ipRecord.is_current) {
+            device.active_sessions = 1
+          }
+          
+          // Add to IP history if not already present
+          const existingIP = device.ip_history.find(ip => ip.ip_address === ipAddress)
+          if (!existingIP) {
+            device.ip_history.push({
+              ip_address: ipAddress,
+              country: ipRecord.country || "Unknown",
+              city: ipRecord.city || "Unknown",
+              isp: ipRecord.isp || "Unknown",
+              first_seen: ipRecord.created_at,
+              last_seen: ipRecord.updated_at || ipRecord.created_at,
+              is_current: ipRecord.is_current || false
+            })
+          }
         }
       })
 
-      // Convert map to array
-      processedDevices = Array.from(deviceMap.values())
+      // Convert map to array and sort by last_seen
+      processedDevices = Array.from(deviceMap.values()).sort((a, b) => 
+        new Date(b.last_seen).getTime() - new Date(a.last_seen).getTime()
+      )
       console.log("Created devices from IP history:", processedDevices.length)
     } else {
       // If no IP history, return empty array
