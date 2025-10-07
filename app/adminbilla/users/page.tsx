@@ -28,11 +28,13 @@ import {
   CheckCircle,
   XCircle,
   Smartphone,
+  Monitor,
   RefreshCw,
   User,
 } from "lucide-react"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Switch } from "@/components/ui/switch"
+import UserSessionsModal from "@/components/admin/user-sessions-modal"
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -50,6 +52,8 @@ export default function UserManagementPage() {
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+  const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false)
+  const [selectedUserForSessions, setSelectedUserForSessions] = useState<AdminUser | null>(null)
 
   useEffect(() => {
     loadUsers()
@@ -171,6 +175,11 @@ export default function UserManagementPage() {
   const handleSecuritySettings = (user: AdminUser) => {
     setSelectedUser(user)
     setIsSecurityDialogOpen(true)
+  }
+
+  const handleViewSessions = (user: AdminUser) => {
+    setSelectedUserForSessions(user)
+    setIsSessionsModalOpen(true)
   }
 
   const handleSaveUser = async (updatedUser: AdminUser) => {
@@ -498,8 +507,8 @@ export default function UserManagementPage() {
                   <span className="truncate">Updated: {new Date(user.updated_at).toLocaleDateString("en-US")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                  <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Active Sessions: {user.device_count || 0}</span>
+                  <Monitor className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
+                  <span className="truncate">Active Sessions: {user.active_sessions_count || 0}</span>
                 </div>
                 {user.last_login && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
@@ -579,6 +588,16 @@ export default function UserManagementPage() {
                   >
                     <Eye className="h-3 w-3 mr-1.5" />
                     View
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleViewSessions(user)}
+                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 flex-1 text-xs font-medium"
+                    disabled={!user.active_sessions_count || user.active_sessions_count === 0}
+                  >
+                    <Monitor className="h-3 w-3 mr-1.5" />
+                    Sessions ({user.active_sessions_count || 0})
                   </Button>
                   <Button
                     variant="outline"
@@ -669,7 +688,7 @@ export default function UserManagementPage() {
                       {getStatusInfo(selectedUser.current_status).text}
                     </Badge>
                     <Badge variant="outline" className="text-sm">
-                      {selectedUser.device_count || 0} Active Sessions
+                      {selectedUser.active_sessions_count || 0} Active Sessions
                     </Badge>
                   </div>
                 </div>
@@ -814,7 +833,7 @@ export default function UserManagementPage() {
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Active Sessions</span>
                       <Badge variant="outline" className="text-sm">
-                        {selectedUser.device_count || 0} Devices
+                        {selectedUser.active_sessions_count || 0} Active Sessions
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
@@ -1022,6 +1041,19 @@ export default function UserManagementPage() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* User Sessions Modal */}
+      {selectedUserForSessions && (
+        <UserSessionsModal
+          userId={selectedUserForSessions.id}
+          userName={selectedUserForSessions.full_name}
+          isOpen={isSessionsModalOpen}
+          onClose={() => {
+            setIsSessionsModalOpen(false)
+            setSelectedUserForSessions(null)
+          }}
+        />
+      )}
     </div>
   )
 }

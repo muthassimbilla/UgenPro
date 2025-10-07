@@ -99,7 +99,7 @@ export default function PremiumToolsPage() {
       textColor: "text-green-700 dark:text-green-300",
       badgeVariant: "default" as const,
       title: "Subscription Active",
-      message: "আপনার subscription সক্রিয় আছে।",
+      message: "Your subscription is active.",
     }
   }
 
@@ -107,7 +107,7 @@ export default function PremiumToolsPage() {
   const StatusIcon = statusConfig.icon
 
   const handleContactAdmin = () => {
-    window.location.href = "mailto:admin@example.com?subject=Premium Tools Access&body=আমি Premium Tools এক্সেস করতে চাই।"
+    window.location.href = "mailto:admin@example.com?subject=Premium Tools Access&body=I want to access Premium Tools."
   }
 
   return (
@@ -163,9 +163,9 @@ export default function PremiumToolsPage() {
                       className="bg-white/20 hover:bg-white/30 text-white border-white/30 hover:border-white/50 transition-all duration-300 shadow-lg hover:shadow-xl"
                     >
                       <Crown className="w-4 h-4 mr-2" />
-                      Subscription কিনুন
+                      Buy Subscription
                     </Button>
-                    <div className="text-white/70 text-xs">💎 Premium Tools এক্সেস করুন</div>
+                    <div className="text-white/70 text-xs">💎 Access Premium Tools</div>
                   </div>
                 )}
               </div>
@@ -188,7 +188,7 @@ export default function PremiumToolsPage() {
                 Choose Your Plan
               </h2>
               <p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                আপনার প্রয়োজন অনুযায়ী একটি প্ল্যান বেছে নিন এবং সকল Premium Tools এক্সেস করুন
+                Choose a plan according to your needs and access all Premium Tools
               </p>
             </div>
 

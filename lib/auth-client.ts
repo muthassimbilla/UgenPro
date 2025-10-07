@@ -38,6 +38,67 @@ export interface SignupData {
   password: string
 }
 
+// Email utilities
+export class EmailUtils {
+  static validateEmail(email: string): { isValid: boolean; errors: string[] } {
+    const errors: string[] = []
+
+    if (email.length === 0) {
+      errors.push("Email is required")
+      return { isValid: false, errors }
+    }
+
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      errors.push("Please enter a valid email address")
+      return { isValid: false, errors }
+    }
+
+    // Check for suspicious patterns
+    const suspiciousPatterns = [
+      // Multiple consecutive dots
+      /\.{2,}/,
+      // Numbers in username part (like pat.ho.rporo.sh5.5)
+      /^[^@]*\d+[^@]*@/,
+      // Too many dots in username part
+      /^[^@]*\.[^@]*\.[^@]*\.[^@]*\.[^@]*@/,
+      // Random character patterns
+      /^[^@]*[a-z]\.[a-z]\.[a-z]+\.[a-z]+\.[a-z]+\.[a-z]+@/,
+      // Suspicious combinations
+      /^[^@]*\.(ho|hi|he|ha)\.[^@]*@/,
+    ]
+
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(email.toLowerCase())) {
+        errors.push("This email format is not allowed. Please use a valid email address.")
+        break
+      }
+    }
+
+    // Check for common disposable email domains
+    const disposableDomains = [
+      '10minutemail.com',
+      'tempmail.org',
+      'guerrillamail.com',
+      'mailinator.com',
+      'yopmail.com',
+      'temp-mail.org',
+      'throwaway.email'
+    ]
+
+    const domain = email.split('@')[1]?.toLowerCase()
+    if (domain && disposableDomains.includes(domain)) {
+      errors.push("Disposable email addresses are not allowed")
+    }
+
+    return {
+      isValid: errors.length === 0,
+      errors,
+    }
+  }
+}
+
 // Password utilities
 export class PasswordUtils {
   static validatePassword(password: string): { isValid: boolean; errors: string[] } {
@@ -62,7 +123,18 @@ export class AuthService {
     try {
       console.log("[v0] Starting signup process with email:", signupData.email)
 
+      // Validate email format and suspicious patterns
+      const emailValidation = EmailUtils.validateEmail(signupData.email)
+      if (!emailValidation.isValid) {
+        console.log("[v0] Email validation failed:", emailValidation.errors)
+        throw new Error(emailValidation.errors[0])
+      }
+
       const supabase = createClient()
+
+      // Get user's current IP address for tracking
+      const currentIP = await this.getUserCurrentIP().catch(() => "unknown")
+      console.log("[v0] User signup IP address:", currentIP)
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
       const redirectUrl =
@@ -110,6 +182,27 @@ export class AuthService {
         // Don't fail signup if profile check fails - the trigger should handle it
       } else {
         console.log("[v0] Profile created successfully:", profile.id)
+        
+        // Store IP address in user_ip_history for signup tracking
+        if (currentIP && currentIP !== "unknown") {
+          console.log("[v0] Storing signup IP address:", currentIP)
+          await supabase
+            .from("user_ip_history")
+            .insert({
+              user_id: data.user.id,
+              ip_address: currentIP,
+              is_current: true,
+              first_seen: new Date().toISOString(),
+              last_seen: new Date().toISOString(),
+            })
+            .then(({ error: ipError }) => {
+              if (ipError) {
+                console.warn("[v0] IP history tracking failed during signup:", ipError)
+              } else {
+                console.log("[v0] IP address stored successfully during signup")
+              }
+            })
+        }
       }
 
       console.log("[v0] Signup successful, email verification sent")

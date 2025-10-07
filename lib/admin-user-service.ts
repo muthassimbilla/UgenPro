@@ -17,6 +17,7 @@ export interface AdminUser {
   device_count?: number
   user_agent?: string
   last_login?: string
+  active_sessions_count: number
 }
 
 export class AdminUserService {
@@ -53,6 +54,7 @@ export class AdminUserService {
           let uniqueIPCount = 0
           let userAgent = "Unknown"
           let lastLogin = null
+          let activeSessionsCount = 0
           const userEmail = profile.email || "No email"
           const telegramUsername = profile.telegram_username
 
@@ -69,20 +71,24 @@ export class AdminUserService {
               uniqueIPCount = uniqueIPs.size
             }
 
-            // Get latest user agent and last login from active sessions
-            const { data: latestSession } = await supabase
-              .from("user_sessions")
-              .select("user_agent, last_accessed, created_at")
-              .eq("user_id", profile.id)
-              .eq("is_active", true)
-              .gt("expires_at", new Date().toISOString())
-              .order("last_accessed", { ascending: false })
-              .limit(1)
-              .single()
-
-            if (latestSession) {
-              userAgent = latestSession.user_agent || "Unknown"
-              lastLogin = latestSession.last_accessed || latestSession.created_at
+            // Get active sessions count and latest session info using API
+            try {
+              const response = await fetch(`/api/admin/user-sessions?userId=${profile.id}`)
+              if (response.ok) {
+                const data = await response.json()
+                if (data.success && data.sessions) {
+                  activeSessionsCount = data.sessions.length
+                  if (data.sessions.length > 0) {
+                    const latestSession = data.sessions[0]
+                    userAgent = latestSession.user_agent || "Unknown"
+                    lastLogin = latestSession.last_accessed || latestSession.created_at
+                  }
+                }
+              } else {
+                console.warn("[v0] Failed to fetch sessions for user:", profile.id, response.status)
+              }
+            } catch (apiError) {
+              console.warn("[v0] API error fetching sessions for user:", profile.id, apiError)
             }
           } catch (error) {
             console.error("[v0] Error getting additional data for user:", profile.id, error)
@@ -105,6 +111,7 @@ export class AdminUserService {
             device_count: uniqueIPCount,
             user_agent: userAgent,
             last_login: lastLogin,
+            active_sessions_count: activeSessionsCount,
           }
         }),
       )
@@ -515,6 +522,8 @@ export class AdminUserService {
   }
 
   private static getSupabaseClient() {
+    // Use regular client for admin operations
+    // The RLS policies should allow admin access
     if (typeof window === "undefined") return null
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL

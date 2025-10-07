@@ -3,7 +3,7 @@
 import type React from "react"
 import { useState, useCallback, memo, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { AuthService, ValidationUtils, PasswordUtils } from "@/lib/auth-client"
+import { AuthService, ValidationUtils, PasswordUtils, EmailUtils } from "@/lib/auth-client"
 import { setClientFlashMessage } from "@/lib/flash-messages"
 import { useNetwork } from "@/contexts/network-context"
 import AuthLayout from "@/components/auth/auth-layout"
@@ -57,8 +57,8 @@ const SignupPage = memo(function SignupPage() {
       newErrors.push(...nameValidation.errors)
     }
 
-    // Validate email
-    const emailValidation = ValidationUtils.validateEmail(formData.email)
+    // Validate email format and suspicious patterns
+    const emailValidation = EmailUtils.validateEmail(formData.email)
     if (!emailValidation.isValid) {
       newErrors.push(...emailValidation.errors)
     }
