@@ -47,7 +47,6 @@ export class AdminUserService {
         return []
       }
 
-      // Get unique IP counts and user agent data
       const usersWithDeviceCount = await Promise.all(
         profiles.map(async (profile) => {
           let uniqueIPCount = 0
@@ -57,16 +56,20 @@ export class AdminUserService {
           const telegramUsername = profile.telegram_username
 
           try {
-            // Count unique IP addresses for this user
+            // Count unique IP addresses for this user (each unique IP = 1 device)
             const { data: ipHistory, error: ipError } = await supabase
               .from("user_ip_history")
               .select("ip_address")
               .eq("user_id", profile.id)
               .eq("is_current", true)
 
-            if (!ipError && ipHistory) {
+            if (!ipError && ipHistory && ipHistory.length > 0) {
+              // Create a Set to get unique IP addresses
               const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
               uniqueIPCount = uniqueIPs.size
+              console.log(`[v0] User ${profile.full_name} has ${uniqueIPCount} unique IPs (devices)`)
+            } else {
+              console.log(`[v0] User ${profile.full_name} has no IP history or error:`, ipError)
             }
 
             // Get latest user agent and last login from active sessions
@@ -102,7 +105,7 @@ export class AdminUserService {
             current_status: this.calculateCurrentStatus(profile),
             created_at: profile.created_at,
             updated_at: profile.updated_at || profile.created_at,
-            device_count: uniqueIPCount,
+            device_count: uniqueIPCount, // This will now correctly show the number of unique IPs
             user_agent: userAgent,
             last_login: lastLogin,
           }
