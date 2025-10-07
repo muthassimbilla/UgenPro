@@ -79,11 +79,7 @@ export default function UserManagementPage() {
         setIsLoading(true)
       }
 
-      console.log("[v0] Starting to load users...")
-
       const userData = await AdminUserService.getAllUsers()
-
-      console.log("[v0] Users loaded successfully:", userData.length)
       setUsers(userData)
       setLastUpdated(new Date())
 
@@ -96,9 +92,8 @@ export default function UserManagementPage() {
           )
         })
       }
-    } catch (error: any) {
-      console.error("[v0] Error loading users:", error)
-      alert(`Failed to load users: ${error.message}. Check console for details.`)
+    } catch (error) {
+      console.error("Error loading users:", error)
     } finally {
       setIsLoading(false)
     }
@@ -594,7 +589,7 @@ export default function UserManagementPage() {
             </Button>
             <Button
               onClick={handleCreateUser}
-              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700"
+              className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-xs lg:text-sm"
             >
               <Plus className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               New User

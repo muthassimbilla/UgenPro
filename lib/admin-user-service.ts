@@ -1,4 +1,4 @@
-import { createBrowserClient, createClient } from "@supabase/ssr"
+import { createBrowserClient } from "@supabase/ssr"
 
 export interface AdminUser {
   id: string
@@ -23,49 +23,111 @@ export interface AdminUser {
 export class AdminUserService {
   static async getAllUsers(): Promise<AdminUser[]> {
     try {
-      console.log("[v0] getAllUsers called - using API route")
+      console.log("[v0] getAllUsers called")
+      const supabase = this.getSupabaseClient()
 
-      const response = await fetch("/api/admin/users", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        console.error("[v0] API error:", errorData)
-        throw new Error(errorData.error || "Failed to load users")
+      if (!supabase) {
+        throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
       }
 
-      const { users } = await response.json()
-      console.log("[v0] Users loaded from API:", users.length)
+      const { data: profiles, error } = await supabase
+        .from("profiles")
+        .select("*")
+        .order("created_at", { ascending: false })
 
-      // Map API response to AdminUser format
-      return users.map((user: any) => ({
-        id: user.user_id,
-        full_name: user.full_name,
-        email: user.email,
-        telegram_username: user.telegram_username,
-        is_active: user.account_status === "active",
-        is_approved: user.approval_status === "approved",
-        approved_at: user.approved_at,
-        approved_by: user.approved_by,
-        account_status: user.account_status,
-        expiration_date: user.subscription_expires_at,
-        current_status: this.calculateCurrentStatus({
-          is_approved: user.approval_status === "approved",
-          account_status: user.account_status,
-          expiration_date: user.subscription_expires_at,
-          is_active: user.account_status === "active",
+      if (error) {
+        console.error("[v0] Supabase error:", error)
+        throw new Error(`Failed to load user data: ${error.message}`)
+      }
+
+      console.log("[v0] Profiles fetched:", profiles?.length || 0)
+      console.log("[v0] Profile data sample:", profiles?.[0]) // Debug log to see what data we're getting
+
+      if (!profiles || profiles.length === 0) {
+        console.log("[v0] No profiles found in database")
+        return []
+      }
+
+      const usersWithDeviceCount = await Promise.all(
+        profiles.map(async (profile) => {
+          let uniqueIPCount = 0
+          let userAgent = "Unknown"
+          let lastLogin = null
+          let activeSessions = 0
+          const userEmail = profile.email || "No email"
+          const telegramUsername = profile.telegram_username
+
+          try {
+            const { data: ipHistory, error: ipError } = await supabase
+              .from("user_ip_history")
+              .select("ip_address, is_current")
+              .eq("user_id", profile.id)
+
+            if (ipError) {
+              console.error(`[v0] Error fetching IP history for user ${profile.id}:`, ipError)
+              uniqueIPCount = 0
+            } else if (ipHistory && ipHistory.length > 0) {
+              // Create a Set to get unique IP addresses
+              const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
+              uniqueIPCount = uniqueIPs.size
+              console.log(
+                `[v0] User ${profile.full_name} (${profile.id}) has ${uniqueIPCount} unique IPs (devices):`,
+                Array.from(uniqueIPs),
+              )
+              console.log(`[v0] Total IP records for user: ${ipHistory.length}`)
+
+              const currentIPs = ipHistory.filter((ip) => ip.is_current)
+              activeSessions = currentIPs.length
+              console.log(`[v0] User ${profile.full_name} has ${activeSessions} active sessions`)
+            } else {
+              console.log(`[v0] User ${profile.full_name} (${profile.id}) has no IP history records`)
+              uniqueIPCount = 0
+              activeSessions = 0
+            }
+
+            // Get latest user agent and last login from active sessions
+            const { data: latestSession } = await supabase
+              .from("user_sessions")
+              .select("user_agent, last_accessed, created_at")
+              .eq("user_id", profile.id)
+              .eq("is_active", true)
+              .gt("expires_at", new Date().toISOString())
+              .order("last_accessed", { ascending: false })
+              .limit(1)
+              .single()
+
+            if (latestSession) {
+              userAgent = latestSession.user_agent || "Unknown"
+              lastLogin = latestSession.last_accessed || latestSession.created_at
+            }
+          } catch (error) {
+            console.error("[v0] Error getting additional data for user:", profile.id, error)
+          }
+
+          return {
+            id: profile.id,
+            full_name: profile.full_name,
+            email: userEmail,
+            telegram_username: telegramUsername,
+            is_active: profile.is_active ?? true,
+            is_approved: profile.is_approved ?? false,
+            approved_at: profile.approved_at,
+            approved_by: profile.approved_by,
+            account_status: profile.account_status || "active",
+            expiration_date: profile.expiration_date,
+            current_status: this.calculateCurrentStatus(profile),
+            created_at: profile.created_at,
+            updated_at: profile.updated_at || profile.created_at,
+            device_count: uniqueIPCount, // This will now correctly show the number of unique IPs
+            user_agent: userAgent,
+            last_login: lastLogin,
+            active_sessions: activeSessions,
+          }
         }),
-        created_at: user.created_at,
-        updated_at: user.updated_at,
-        device_count: user.device_count,
-        user_agent: "Unknown",
-        last_login: user.last_login,
-        active_sessions: user.active_sessions,
-      }))
+      )
+
+      console.log("[v0] Returning users:", usersWithDeviceCount.length)
+      return usersWithDeviceCount
     } catch (error: any) {
       console.error("[v0] Error getting users:", error)
       throw error
@@ -74,7 +136,7 @@ export class AdminUserService {
 
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
     try {
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -109,7 +171,7 @@ export class AdminUserService {
 
   static async rejectUser(userId: string, adminUserId?: string): Promise<void> {
     try {
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -141,7 +203,7 @@ export class AdminUserService {
 
   static async getPendingUsers(): Promise<AdminUser[]> {
     try {
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -162,7 +224,6 @@ export class AdminUserService {
         id: profile.id,
         full_name: profile.full_name,
         email: profile.email || "No email",
-        telegram_username: profile.telegram_username,
         is_active: profile.is_active ?? true,
         is_approved: profile.is_approved ?? false,
         approved_at: profile.approved_at,
@@ -184,7 +245,7 @@ export class AdminUserService {
   static async updateUser(userId: string, userData: Partial<AdminUser>): Promise<AdminUser> {
     console.log("[v0] Updating user:", userId, userData)
 
-    const supabase = this.getSupabaseServiceClient()
+    const supabase = this.getSupabaseClient()
 
     if (!supabase) {
       throw new Error("Supabase integration required")
@@ -195,7 +256,7 @@ export class AdminUserService {
         .from("profiles")
         .update({
           full_name: userData.full_name,
-          email: userData.email,
+          email: userData.email, // Update email in profiles table
           is_active: userData.is_active,
           updated_at: new Date().toISOString(),
         })
@@ -231,7 +292,7 @@ export class AdminUserService {
 
   static async updateUserExpiration(userId: string, expirationDate: string | null): Promise<void> {
     try {
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -259,7 +320,7 @@ export class AdminUserService {
 
   static async updateUserStatus(userId: string, status: "active" | "suspended"): Promise<void> {
     try {
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -289,7 +350,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Starting delete operation for user:", userId)
 
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -308,6 +369,7 @@ export class AdminUserService {
 
       console.log("[v0] User found before delete:", existingUser)
 
+      // First delete related sessions
       const { error: sessionError } = await supabase.from("user_sessions").delete().eq("user_id", userId)
 
       if (sessionError) {
@@ -339,7 +401,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
 
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -395,7 +457,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Creating new user:", userData)
 
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -417,10 +479,11 @@ export class AdminUserService {
         throw new Error(`Failed to create auth user: ${authError?.message}`)
       }
 
+      // Update the auto-created profile with additional data
       const { data, error } = await supabase
         .from("profiles")
         .update({
-          email: userData.email,
+          email: userData.email, // Ensure email is stored in profile
           is_active: userData.is_active ?? true,
           is_approved: userData.is_approved ?? true,
           account_status: userData.account_status ?? "active",
@@ -459,6 +522,19 @@ export class AdminUserService {
     }
   }
 
+  private static getSupabaseClient() {
+    if (typeof window === "undefined") return null
+
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
+    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+
+    if (supabaseUrl && supabaseAnonKey) {
+      return createBrowserClient(supabaseUrl, supabaseAnonKey)
+    }
+
+    return null
+  }
+
   static async handleSecurityUpdate(
     userId: string,
     data: {
@@ -470,7 +546,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
 
-      const supabase = this.getSupabaseServiceClient()
+      const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -529,40 +605,6 @@ export class AdminUserService {
       console.error("[v0] Security update failed:", error)
       throw error
     }
-  }
-
-  private static getSupabaseServiceClient() {
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
-
-    if (!supabaseUrl || !supabaseServiceKey) {
-      console.error("[v0] Missing Supabase credentials:", {
-        hasUrl: !!supabaseUrl,
-        hasServiceKey: !!supabaseServiceKey,
-      })
-      return null
-    }
-
-    console.log("[v0] Creating Supabase service client...")
-    return createClient(supabaseUrl, supabaseServiceKey, {
-      auth: {
-        autoRefreshToken: false,
-        persistSession: false,
-      },
-    })
-  }
-
-  private static getSupabaseClient() {
-    if (typeof window === "undefined") return null
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (supabaseUrl && supabaseAnonKey) {
-      return createBrowserClient(supabaseUrl, supabaseAnonKey)
-    }
-
-    return null
   }
 
   private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
