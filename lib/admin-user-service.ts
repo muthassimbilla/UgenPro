@@ -56,12 +56,10 @@ export class AdminUserService {
           const telegramUsername = profile.telegram_username
 
           try {
-            // Count unique IP addresses for this user (each unique IP = 1 device)
             const { data: ipHistory, error: ipError } = await supabase
               .from("user_ip_history")
               .select("ip_address")
               .eq("user_id", profile.id)
-              .eq("is_current", true)
 
             if (!ipError && ipHistory && ipHistory.length > 0) {
               // Create a Set to get unique IP addresses

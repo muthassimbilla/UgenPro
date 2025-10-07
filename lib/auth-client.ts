@@ -194,18 +194,19 @@ export class AuthService {
       })
 
       if (currentIP && currentIP !== "unknown") {
-        supabase
-          .from("user_ip_history")
-          .insert({
+        console.log("[v0] Tracking IP address:", currentIP)
+        fetch("/api/user/track-ip", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             user_id: data.user.id,
             ip_address: currentIP,
-            is_current: true,
-          })
-          .then(({ error: ipError }) => {
-            if (ipError) {
-              console.warn("[v0] IP history tracking failed:", ipError)
-            }
-          })
+          }),
+        }).catch((error) => {
+          console.warn("[v0] IP tracking failed:", error)
+        })
       }
 
       await sessionPromise

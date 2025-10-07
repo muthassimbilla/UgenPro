@@ -18,7 +18,6 @@ export async function GET(request: NextRequest) {
       .from("user_ip_history")
       .select("ip_address")
       .eq("user_id", user.id)
-      .eq("is_current", true)
 
     if (ipError) {
       console.error("[v0] Error fetching IP history:", ipError)
