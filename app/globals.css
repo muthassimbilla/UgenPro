@@ -62,13 +62,13 @@
   
   /* Optimize glass effects */
   .glass {
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
   }
   
   .glass-strong {
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
   }
   
   /* Optimize gradients */
@@ -383,13 +383,13 @@
 
   /* Glass morphism effect */
   .glass {
-    backdrop-filter: blur(16px) saturate(180%);
+    backdrop-filter: blur(2px) saturate(180%);
     background: hsl(var(--card) / 0.8);
     border: 1px solid hsl(var(--border) / 0.3);
   }
 
   .glass-strong {
-    backdrop-filter: blur(20px) saturate(200%);
+    backdrop-filter: blur(4px) saturate(200%);
     background: hsl(var(--card) / 0.9);
     border: 1px solid hsl(var(--border) / 0.5);
   }

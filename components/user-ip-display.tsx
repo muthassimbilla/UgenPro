@@ -205,12 +205,18 @@ export const UserIPDisplay = memo(function UserIPDisplay() {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => {
-                    navigator.clipboard.writeText(currentIP)
-                    toast({
-                      title: "Copied",
-                      description: "IP address copied to clipboard",
-                    })
+                  onClick={async () => {
+                    try {
+                      await navigator.clipboard.writeText(currentIP)
+                      // Remove toast notification - just show tick mark
+                    } catch (err) {
+                      // Only show error toast for actual failures
+                      toast({
+                        title: "Error",
+                        description: "Failed to copy IP address",
+                        variant: "destructive"
+                      })
+                    }
                   }}
                   className="h-8 px-3 rounded-lg border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
                 >

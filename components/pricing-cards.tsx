@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
 import { pricingPlans } from "@/lib/pricing-data"
-import { memo } from "react"
+import { memo, useState } from "react"
+import PurchaseModal from "@/components/purchase-modal"
 
 interface PricingCardsProps {
   onSelectPlan?: (planId: string) => void
@@ -24,10 +25,10 @@ const PricingCard = memo(
     return (
       <div className="group h-full">
         <Card
-          className={`h-full hover-lift border-2 rounded-3xl bg-card/50 backdrop-blur-xl transition-all duration-500 overflow-hidden flex flex-col relative ${
+          className={`h-full hover-lift border-2 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl transition-all duration-500 overflow-hidden flex flex-col relative ${
             plan.is_popular
               ? "ring-2 ring-primary shadow-2xl shadow-primary/30 border-primary/50 scale-105"
-              : "border-border/50 hover:border-primary/30 hover:shadow-xl hover:shadow-primary/10"
+              : "border-[#2B7FFF]/40 dark:border-[#2B7FFF]/50 hover:border-[#2B7FFF]/60 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3"
           }`}
         >
           <div
@@ -112,6 +113,7 @@ const PricingCard = memo(
                     })
                   }
                   console.log(`Buy Now clicked for plan: ${plan.id}`)
+                  onButtonClick(plan.id)
                 }}
                 className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 text-white shadow-lg hover:shadow-2xl hover:scale-105 cursor-pointer border-2 relative overflow-hidden group/btn ${
                   plan.is_popular
@@ -119,7 +121,7 @@ const PricingCard = memo(
                     : "bg-[#2B7FFF] border-[#2B7FFF]/50"
                 }`}
               >
-                <span className="relative z-10">Buy Now</span>
+                <span className="relative z-10">{buttonText}</span>
                 <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover/btn:translate-x-[100%] transition-transform duration-700" />
               </button>
             </div>
@@ -137,6 +139,13 @@ export function PricingCards({
   buttonText = "Get Started",
   showContactAdmin = false,
 }: PricingCardsProps) {
+  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedPlan, setSelectedPlan] = useState<{
+    name: string
+    price: string
+    duration: string
+  } | null>(null)
+
   const handleContactAdmin = () => {
     if (typeof window !== "undefined" && (window as any).gtag) {
       ;(window as any).gtag("event", "contact_admin", {
@@ -148,18 +157,50 @@ export function PricingCards({
   }
 
   const handleButtonClick = (planId: string) => {
+    console.log("Button clicked:", planId, "showContactAdmin:", showContactAdmin)
     if (showContactAdmin) {
-      handleContactAdmin()
+      // Find the selected plan
+      const plan = pricingPlans.find(p => p.id === planId)
+      console.log("Found plan:", plan)
+      if (plan) {
+        setSelectedPlan({
+          name: plan.name,
+          price: plan.price,
+          duration: plan.duration
+        })
+        setIsModalOpen(true)
+        console.log("Modal should open now")
+      }
     } else if (onSelectPlan) {
       onSelectPlan(planId)
     }
   }
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false)
+    setSelectedPlan(null)
+  }
+
+  console.log("Rendering PricingCards - isModalOpen:", isModalOpen, "selectedPlan:", selectedPlan)
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
-      {pricingPlans.map((plan) => (
-        <PricingCard key={plan.id} plan={plan} onButtonClick={handleButtonClick} buttonText={buttonText} />
-      ))}
-    </div>
+    <>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto px-4 sm:px-0">
+        {pricingPlans.map((plan) => (
+          <PricingCard key={plan.id} plan={plan} onButtonClick={handleButtonClick} buttonText={buttonText} />
+        ))}
+      </div>
+
+      {/* Purchase Modal */}
+      {selectedPlan && (
+        <PurchaseModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          planName={selectedPlan.name}
+          planPrice={selectedPlan.price}
+          planDuration={selectedPlan.duration}
+        />
+      )}
+    </>
   )
 }

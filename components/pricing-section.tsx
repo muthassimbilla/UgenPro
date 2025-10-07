@@ -21,21 +21,21 @@ export function PricingSection() {
   }
 
   return (
-    <section id="pricing" ref={sectionRef} className="relative py-16 md:py-20 overflow-hidden">
+    <section id="pricing" ref={sectionRef} className="relative py-6 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-blue-50/30 via-blue-50/20 to-background dark:via-blue-950/10 dark:via-blue-950/10" />
         <div className="absolute top-1/3 right-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10 rounded-full blur-3xl" />
         <div className="absolute bottom-1/3 left-1/4 w-96 h-96 bg-gradient-to-r from-[#4a9fff]/8 via-[#2B7FFF]/8 to-[#4a9fff]/8 rounded-full blur-3xl" />
       </div>
 
-      <div className="container relative z-10 mx-auto px-4">
+      <div className="container relative z-10 mx-auto px-4 sm:px-6">
         <motion.div
-          className="max-w-4xl mx-auto text-center mb-12"
+          className="max-w-4xl mx-auto text-center mb-4 px-4 sm:px-0"
           initial={{ opacity: 0, y: 20 }}
           animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] text-sm font-bold mb-6 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30">
+          <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] text-xs sm:text-sm font-bold mb-2 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30">
             <DollarSign className="h-4 w-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
             <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
               Pricing Plans
@@ -58,7 +58,7 @@ export function PricingSection() {
           animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6, delay: 0.2 }}
         >
-          <PricingCards onSelectPlan={handleSelectPlan} buttonText="Get Started" />
+          <PricingCards onSelectPlan={handleSelectPlan} buttonText="Get Started" showContactAdmin={true} />
         </motion.div>
       </div>
     </section>

@@ -12,8 +12,6 @@ interface NavigationProps {
 
 export function Navigation({ activeSection = "hero" }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-
   const navItems = [
     { id: "hero", label: "Home", href: "#hero" },
     { id: "tools", label: "Tools", href: "#tools" },
@@ -21,41 +19,18 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
     { id: "contact", label: "Contact", href: "#contact" },
   ]
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout
-
-    const handleScroll = () => {
-      clearTimeout(timeoutId)
-      timeoutId = setTimeout(() => {
-        setScrolled(window.scrollY > 20)
-      }, 10)
-    }
-
-    window.addEventListener("scroll", handleScroll, { passive: true })
-    return () => {
-      clearTimeout(timeoutId)
-      window.removeEventListener("scroll", handleScroll)
-    }
-  }, [])
-
   return (
-    <nav
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled
-          ? "glass-strong border-b border-border/50 shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
-          : "glass backdrop-blur-md"
-      }`}
-    >
-      <div className="container mx-auto flex h-16 items-center justify-between px-4">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-white/95 dark:bg-gray-900/95 border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg shadow-black/10 dark:shadow-black/20 transition-all duration-300">
+      <div className="container mx-auto flex h-16 items-center justify-between px-4 sm:px-6">
         <Link href="/" className="flex items-center gap-2 group">
           <div className="w-8 h-8 rounded-xl transition-transform group-hover:scale-110 shadow-glow">
             <img src="/ugenpro-logo.svg" alt="UGen Pro Logo" className="w-full h-full rounded-xl" />
           </div>
-          <span className="font-bold text-xl gradient-text">UGen Pro</span>
+          <span className="font-bold text-lg sm:text-xl gradient-text">UGen Pro</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <div className="hidden md:flex items-center gap-2">
+        <div className="hidden lg:flex items-center gap-2">
           {navItems.map((item) => (
             <a
               key={item.id}
@@ -75,10 +50,10 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
         </div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
 
-          <Link href="/login" className="hidden sm:block">
+          <Link href="/login" className="hidden md:block">
             <Button
               variant="outline"
               size="sm"
@@ -98,7 +73,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
           <Button
             variant="ghost"
             size="icon"
-            className="md:hidden hover:bg-card/50 rounded-xl"
+            className="lg:hidden hover:bg-card/50 rounded-xl"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
             {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
@@ -108,7 +83,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
 
       {/* Enhanced Mobile Menu */}
       {mobileMenuOpen && (
-        <div className="md:hidden border-t border-border/30 glass-strong">
+        <div className="lg:hidden border-t border-gray-200/30 dark:border-gray-700/30 bg-white/95 dark:bg-gray-900/95 shadow-lg">
           <div className="container mx-auto px-4 py-6 space-y-2">
             {navItems.map((item) => (
               <a

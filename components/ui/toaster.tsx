@@ -23,51 +23,22 @@ export function Toaster() {
 
   return (
     <ToastProvider>
-      {/* Enhanced Viewport with liquid glass backdrop */}
-      <div className="fixed inset-0 pointer-events-none z-[99]">
-        {/* Animated background blur when toasts are active */}
-        {toasts.length > 0 && (
-          <div className="absolute inset-0 bg-black/5 dark:bg-black/20 backdrop-blur-[0.5px] animate-in fade-in-0 duration-300" />
-        )}
-
-        {/* Floating orbs background effect */}
-        {toasts.length > 0 && (
-          <>
-            <div className="absolute top-20 right-20 w-32 h-32 bg-gradient-to-r from-blue-400/10 to-purple-400/10 rounded-full blur-3xl animate-pulse" />
-            <div className="absolute bottom-40 right-32 w-48 h-48 bg-gradient-to-r from-emerald-400/8 to-cyan-400/8 rounded-full blur-3xl animate-pulse delay-1000" />
-          </>
-        )}
-      </div>
+      {/* Removed background blur effects for unnoticeable toasts */}
 
       {toasts.map(({ id, title, description, action, variant = "default", ...props }, index) => (
-        <Toast key={id} variant={variant} {...props}>
+        <Toast key={id} variant={variant} duration={3000} {...props}>
           {/* Toast content wrapper with enhanced layout */}
           <div className="flex items-start space-x-3 w-full">
-            {/* Icon with liquid glass effect */}
+            {/* Simple icon without effects */}
             <div className="flex-shrink-0 mt-0.5">
-              <div className="relative">
-                {/* Icon glow effect */}
-                <div className="absolute inset-0 rounded-full bg-current/20 blur-md animate-pulse" />
-                <div className="relative z-10">{getToastIcon(variant)}</div>
-              </div>
+              {getToastIcon(variant)}
             </div>
 
             {/* Content area */}
             <div className="flex-1 grid gap-1 min-w-0">
               {title && (
-                <ToastTitle className="flex items-center gap-2">
+                <ToastTitle>
                   {title}
-                  {/* Progress indicator for toast timing */}
-                  <div className="ml-auto flex-shrink-0">
-                    <div className="w-8 h-1 bg-white/20 dark:bg-slate-700/40 rounded-full overflow-hidden">
-                      <div
-                        className="h-full bg-current/60 rounded-full animate-progress"
-                        style={{
-                          animation: `progress-shrink ${props.duration || 5000}ms linear forwards`,
-                        }}
-                      />
-                    </div>
-                  </div>
                 </ToastTitle>
               )}
               {description && <ToastDescription className="pr-2">{description}</ToastDescription>}

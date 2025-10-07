@@ -26,55 +26,42 @@ ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 const toastVariants = cva(
   [
-    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden p-6 pr-8 transition-all duration-500",
-    "backdrop-blur-xl bg-white/10 dark:bg-slate-900/20 border border-white/20 dark:border-slate-700/30",
-    "shadow-2xl shadow-black/10 dark:shadow-black/30",
-    "rounded-2xl",
+    "group pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden p-4 pr-6 transition-all duration-300",
+    "backdrop-blur-sm border rounded-lg",
+    "shadow-sm",
     // Swipe animations
     "data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none",
-    // State animations with liquid effects
+    // State animations
     "data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out",
-    "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=closed]:scale-95",
-    "data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full data-[state=open]:scale-100",
-    // Glass shine effect
-    "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-br before:from-white/20 before:via-transparent before:to-transparent before:opacity-60",
-    // Liquid border animation
-    "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-r after:from-transparent after:via-white/10 after:to-transparent",
-    "after:translate-x-[-100%] after:group-hover:translate-x-[100%] after:transition-transform after:duration-1000",
+    "data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full",
+    "data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full",
   ],
   {
     variants: {
       variant: {
         default: [
-          "bg-gradient-to-br from-white/80 via-slate-50/60 to-white/40",
-          "dark:from-slate-800/80 dark:via-slate-900/60 dark:to-slate-800/40",
+          "bg-white/90 dark:bg-slate-800/90",
           "text-slate-800 dark:text-slate-100",
-          "border-slate-200/40 dark:border-slate-600/40",
-          "shadow-slate-500/20 dark:shadow-black/40"
+          "border-slate-200/50 dark:border-slate-600/50",
+          "shadow-sm"
         ],
         destructive: [
-          "bg-gradient-to-br from-red-500/20 via-red-600/10 to-red-500/20",
-          "dark:from-red-900/40 dark:via-red-800/20 dark:to-red-900/40",
-          "border-red-500/30 dark:border-red-400/30",
-          "text-red-900 dark:text-red-100",
-          "shadow-red-500/30 dark:shadow-red-900/50",
-          "before:from-red-200/30 before:via-transparent before:to-transparent"
+          "bg-red-50/90 dark:bg-red-900/90",
+          "border-red-200/50 dark:border-red-700/50",
+          "text-red-800 dark:text-red-100",
+          "shadow-sm"
         ],
         success: [
-          "bg-gradient-to-br from-emerald-500/20 via-green-600/10 to-emerald-500/20",
-          "dark:from-emerald-900/40 dark:via-green-800/20 dark:to-emerald-900/40",
-          "border-emerald-500/30 dark:border-emerald-400/30",
-          "text-emerald-900 dark:text-emerald-100",
-          "shadow-emerald-500/30 dark:shadow-emerald-900/50",
-          "before:from-emerald-200/30 before:via-transparent before:to-transparent"
+          "bg-green-50/90 dark:bg-green-900/90",
+          "border-green-200/50 dark:border-green-700/50",
+          "text-green-800 dark:text-green-100",
+          "shadow-sm"
         ],
         warning: [
-          "bg-gradient-to-br from-amber-500/20 via-yellow-600/10 to-amber-500/20",
-          "dark:from-amber-900/40 dark:via-yellow-800/20 dark:to-amber-900/40",
-          "border-amber-500/30 dark:border-amber-400/30",
-          "text-amber-900 dark:text-amber-100",
-          "shadow-amber-500/30 dark:shadow-amber-900/50",
-          "before:from-amber-200/30 before:via-transparent before:to-transparent"
+          "bg-yellow-50/90 dark:bg-yellow-900/90",
+          "border-yellow-200/50 dark:border-yellow-700/50",
+          "text-yellow-800 dark:text-yellow-100",
+          "shadow-sm"
         ]
       },
     },
@@ -90,23 +77,10 @@ const Toast = React.forwardRef<
 >(({ className, variant, children, ...props }, ref) => {
   return (
     <ToastPrimitives.Root ref={ref} className={cn(toastVariants({ variant }), className)} {...props}>
-      {/* Floating particles effect */}
-      <div className="absolute inset-0 overflow-hidden rounded-2xl pointer-events-none">
-        <div className="absolute top-2 left-4 w-1 h-1 bg-current opacity-20 rounded-full animate-pulse"></div>
-        <div className="absolute top-4 right-8 w-0.5 h-0.5 bg-current opacity-30 rounded-full animate-pulse delay-300"></div>
-        <div className="absolute bottom-3 left-8 w-1.5 h-1.5 bg-current opacity-15 rounded-full animate-pulse delay-700"></div>
-      </div>
-      
-      {/* Ripple effect on appear */}
-      <div className="absolute inset-0 rounded-2xl bg-gradient-radial from-white/20 to-transparent opacity-0 group-data-[state=open]:animate-ping group-data-[state=open]:opacity-100"></div>
-      
-      {/* Content */}
-      <div className="relative z-10 flex w-full items-center justify-between space-x-4">
+      {/* Simple content without visual effects */}
+      <div className="flex w-full items-center justify-between space-x-4">
         {children}
       </div>
-      
-      {/* Bottom highlight */}
-      <div className="absolute bottom-0 left-1/4 right-1/4 h-px bg-gradient-to-r from-transparent via-current/20 to-transparent"></div>
     </ToastPrimitives.Root>
   )
 })

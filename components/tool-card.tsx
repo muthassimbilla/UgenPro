@@ -28,8 +28,8 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
     <Card
       className={cn(
         "group relative overflow-hidden cursor-pointer transition-all duration-500",
-        "border-2 border-border/50 rounded-3xl bg-card/50 backdrop-blur-xl",
-        "hover:border-primary/50 hover:shadow-2xl hover:shadow-primary/20 hover:-translate-y-2 hover:scale-[1.02]",
+        "border-2 border-[#2B7FFF]/40 dark:border-[#2B7FFF]/50 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl",
+        "hover:border-[#2B7FFF]/60 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3 hover:scale-[1.02]",
         featured ? "md:row-span-1" : "",
         "h-full",
       )}
@@ -95,7 +95,7 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
 
         <div className="flex items-center justify-center pt-4">
           <div className="px-6 py-2.5 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 border-2 border-[#2B7FFF]/30 rounded-xl text-sm font-bold text-[#2B7FFF] dark:text-[#2B7FFF] hover:text-[#4a9fff] dark:hover:text-[#4a9fff] hover:border-[#2B7FFF]/50 hover:scale-105 transition-all duration-300 cursor-pointer shadow-lg hover:shadow-xl group-hover:shadow-[#2B7FFF]/30">
-            Try Demo
+            Demo
           </div>
         </div>
       </div>

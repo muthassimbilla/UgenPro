@@ -146,9 +146,10 @@ export default function AddressGeneratorPage() {
     try {
       await navigator.clipboard.writeText(address)
       setCopiedIndex(index)
-      toast.success("Address copied to clipboard")
+      // Remove toast notification - just show tick mark
       setTimeout(() => setCopiedIndex(null), 2000)
     } catch (err) {
+      // Only show error toast for actual failures
       toast.error("Failed to copy")
     }
   }
@@ -158,9 +159,10 @@ export default function AddressGeneratorPage() {
     try {
       await navigator.clipboard.writeText(part)
       setCopiedField(partName)
-      toast.success(`${partName} copied to clipboard`)
+      // Remove toast notification - just show tick mark
       setTimeout(() => setCopiedField(null), 2000)
     } catch (err) {
+      // Only show error toast for actual failures
       toast.error("Failed to copy")
     }
   }

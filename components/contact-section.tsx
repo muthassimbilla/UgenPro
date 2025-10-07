@@ -22,7 +22,7 @@ export function ContactSection() {
       description: "Direct contact with our admin team",
       color: "from-purple-500 to-purple-600",
       actionText: "Contact Admin",
-      actionLink: "https://t.me/UGenPro_bot",
+      actionLink: "https://t.me/ugenpro_admin",
       actionIcon: ExternalLink,
     },
   ]
@@ -50,7 +50,7 @@ export function ContactSection() {
   }
 
   return (
-    <section id="contact" className="relative py-16 md:py-20 overflow-hidden">
+    <section id="contact" className="relative py-6 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-[#2B7FFF]/5 via-[#4a9fff]/3 to-background dark:via-[#2B7FFF]/10 dark:via-[#4a9fff]/8" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 rounded-full blur-3xl animate-pulse opacity-70" />
@@ -63,9 +63,9 @@ export function ContactSection() {
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          className="text-center mb-16"
+          className="text-center mb-6"
         >
-          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF]/80 text-sm font-bold mb-6 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#2B7FFF]/10 to-[#4a9fff]/10 dark:from-[#2B7FFF]/20 dark:to-[#4a9fff]/20">
+          <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF]/80 text-sm font-bold mb-3 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#2B7FFF]/10 to-[#4a9fff]/10 dark:from-[#2B7FFF]/20 dark:to-[#4a9fff]/20">
             <MessageCircle className="w-4 h-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
             <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
               Contact Us
@@ -88,27 +88,27 @@ export function ContactSection() {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="flex flex-col sm:flex-row items-center justify-center gap-8 max-w-5xl mx-auto"
+          className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8 max-w-5xl mx-auto px-4 sm:px-0"
         >
           {contactInfo.map((contact, index) => {
             const IconComponent = contact.icon
             const isChannel = index === 0
             return (
-              <motion.div key={index} variants={itemVariants} className="group relative w-full sm:w-96 lg:w-[28rem]">
-                <div className="group relative overflow-hidden cursor-pointer transition-all duration-500 rounded-3xl glass hover:glass-strong border-2 border-purple-200/50 hover:border-purple-400/70 dark:border-purple-700/30 dark:hover:border-purple-500/50 hover:shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-2 h-full">
+              <motion.div key={index} variants={itemVariants} className="group relative w-full sm:w-80 lg:w-96 xl:w-[28rem]">
+                <div className="group relative overflow-hidden cursor-pointer transition-all duration-500 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl border-2 border-[#2B7FFF]/40 hover:border-[#2B7FFF]/60 dark:border-[#2B7FFF]/50 dark:hover:border-[#2B7FFF]/70 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3 h-full">
                   {/* Gradient overlay */}
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${isChannel ? "from-[#4a9fff]/10 via-[#2B7FFF]/10 to-[#4a9fff]/10" : "from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10"} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
                   />
 
-                  <div className="p-8 space-y-6 h-full flex flex-col relative z-10">
+                  <div className="p-6 sm:p-8 space-y-4 sm:space-y-6 h-full flex flex-col relative z-10">
                     {/* Icon with gradient background */}
                     <div className="flex items-center justify-between">
                       <div
-                        className={`p-4 rounded-2xl bg-gradient-to-br ${isChannel ? "from-[#4a9fff]/20 via-[#2B7FFF]/20 to-[#4a9fff]/20" : "from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20"} border-2 ${isChannel ? "border-[#4a9fff]/30" : "border-[#2B7FFF]/30"} group-hover:scale-110 transition-all duration-300 shadow-lg`}
+                        className="p-4 rounded-2xl bg-gradient-to-br from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 border-2 border-[#2B7FFF]/30 group-hover:scale-110 transition-all duration-300 shadow-lg"
                       >
                         <IconComponent
-                          className={`h-7 w-7 ${isChannel ? "text-[#4a9fff] dark:text-[#4a9fff]" : "text-[#2B7FFF] dark:text-[#2B7FFF]"}`}
+                          className="h-7 w-7 text-[#2B7FFF] dark:text-[#2B7FFF]"
                         />
                       </div>
                     </div>
@@ -117,7 +117,7 @@ export function ContactSection() {
                     <div className="space-y-4 flex-1">
                       {/* Title with gradient */}
                       <h3
-                        className={`text-2xl font-bold bg-gradient-to-r ${isChannel ? "from-[#4a9fff] via-[#2B7FFF] to-[#4a9fff]" : "from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF]"} bg-clip-text text-transparent`}
+                        className="text-2xl font-bold bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent"
                       >
                         {contact.title}
                       </h3>
@@ -130,7 +130,7 @@ export function ContactSection() {
                       {/* Contact info badge */}
                       <div className="space-y-2">
                         <span
-                          className={`inline-block font-semibold text-sm px-4 py-2 rounded-xl glass border-2 ${isChannel ? "border-cyan-400/40 text-cyan-700 dark:text-cyan-300" : "border-purple-400/40 text-purple-700 dark:text-purple-300"}`}
+                          className="inline-block font-semibold text-sm px-4 py-2 rounded-xl glass border-2 border-[#2B7FFF]/40 text-[#2B7FFF] dark:text-[#2B7FFF]"
                         >
                           {contact.value}
                         </span>
@@ -142,7 +142,7 @@ export function ContactSection() {
                       href={contact.actionLink}
                       target={contact.actionLink.startsWith("http") ? "_blank" : "_self"}
                       rel={contact.actionLink.startsWith("http") ? "noopener noreferrer" : undefined}
-                      className={`group/btn relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r ${isChannel ? "from-[#4a9fff] via-[#2B7FFF] to-[#4a9fff] hover:from-[#3a8fef] hover:via-[#1a6bff] hover:to-[#3a8fef]" : "from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] hover:from-[#1a6bff] hover:via-[#3a8fef] hover:to-[#1a6bff]"} text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105`}
+                      className="group/btn relative w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] hover:from-[#1a6bff] hover:via-[#3a8fef] hover:to-[#1a6bff] text-white font-bold shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-105"
                     >
                       <div className="flex items-center justify-center gap-3">
                         <contact.actionIcon className="w-5 h-5" />

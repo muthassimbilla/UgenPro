@@ -59,8 +59,8 @@ export class EmailUtils {
     const suspiciousPatterns = [
       // Multiple consecutive dots
       /\.{2,}/,
-      // Numbers in username part (like pat.ho.rporo.sh5.5)
-      /^[^@]*\d+[^@]*@/,
+      // Suspicious number patterns (like pat.ho.rporo.sh5.5 with multiple dots and numbers)
+      /^[^@]*\.[^@]*\.[^@]*\d+[^@]*\.[^@]*@/,
       // Too many dots in username part
       /^[^@]*\.[^@]*\.[^@]*\.[^@]*\.[^@]*@/,
       // Random character patterns

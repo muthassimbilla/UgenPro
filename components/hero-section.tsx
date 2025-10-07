@@ -50,7 +50,7 @@ export const HeroSection = memo(function HeroSection() {
   }), [])
 
   return (
-    <section id="hero" className="relative min-h-[80vh] flex items-center justify-center overflow-hidden pt-16">
+    <section id="hero" className="relative min-h-[90vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden pt-16 pb-6">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-50 via-blue-50 to-blue-50 dark:from-blue-950/20 dark:via-blue-950/20 dark:to-blue-950/20 -z-10" />
       <div className="absolute inset-0 bg-gradient-to-tr from-blue-100/50 via-blue-100/30 to-blue-100/50 dark:from-blue-900/10 dark:via-blue-900/10 dark:to-blue-900/10 -z-10" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_30%,rgba(43,127,255,0.15),transparent_40%)] -z-10" />
@@ -76,20 +76,20 @@ export const HeroSection = memo(function HeroSection() {
 
       <div className="absolute inset-0 -z-10 bg-gradient-to-t from-background/20 via-transparent to-background/10" />
 
-      <div className="container mx-auto px-4 py-12">
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
         <div className="max-w-4xl mx-auto text-center">
           <PerformanceOptimizer>
             <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: prefersReducedMotion ? 0.1 : 0.8 }}
-              className="space-y-8"
+              className="space-y-6 sm:space-y-8"
             >
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow text-sm font-semibold hover-lift border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] transition-all duration-300 bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30"
+                className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full glass shadow-glow text-xs sm:text-sm font-semibold hover-lift border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] transition-all duration-300 bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30"
               >
                 <Sparkles className="h-4 w-4 text-[#2B7FFF] dark:text-[#2B7FFF] animate-pulse" />
                 <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
@@ -109,7 +109,7 @@ export const HeroSection = memo(function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.5 }}
-                className="text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium"
+                className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium px-4 sm:px-0"
               >
                 Unlock the power of AI-driven development. Generate code, content, and designs in seconds with our
                 <span className="text-[#2B7FFF] dark:text-[#2B7FFF] font-semibold"> professional toolkit</span>.
@@ -119,12 +119,12 @@ export const HeroSection = memo(function HeroSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.6 }}
-                className="flex flex-col sm:flex-row gap-3 justify-center"
+                className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center px-4 sm:px-0"
               >
                 <Button
                   size="lg"
                   onClick={handleGetStarted}
-                  className="text-base px-8 py-6 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all group interactive-scale"
+                  className="text-sm sm:text-base px-6 sm:px-8 py-4 sm:py-6 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all group interactive-scale w-full sm:w-auto"
                 >
                   Get Started
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -180,12 +180,9 @@ export const HeroSection = memo(function HeroSection() {
           transition={{ duration: 0.8, delay: 0.9 }}
           className="mt-16 text-center"
         >
-          <TextGenerateEffect
-            words="Join thousands of developers building the future with AI-powered tools"
-            className="text-lg md:text-xl text-muted-foreground"
-            duration={0.8}
-            repeatInterval={0}
-          />
+          <p className="text-lg md:text-xl text-muted-foreground">
+            Join thousands of developers building the future with AI-powered tools
+          </p>
         </motion.div>
       </div>
     </section>

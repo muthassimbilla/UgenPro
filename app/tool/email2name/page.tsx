@@ -76,9 +76,10 @@ export default function Email2NamePage() {
     try {
       await navigator.clipboard.writeText(value)
       setCopiedField(fieldName)
-      toast.success(`${fieldName} copied`)
+      // Remove toast notification - just show tick mark
       setTimeout(() => setCopiedField(null), 2000)
     } catch (err) {
+      // Only show error toast for actual failures
       toast.error("Failed to copy")
     }
   }

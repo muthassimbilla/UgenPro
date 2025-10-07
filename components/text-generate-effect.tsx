@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 export const TextGenerateEffect = ({
   words,
   className,
-  filter = true,
+  filter = false,
   duration = 0.5,
   repeatInterval = 0, // Default to 0 to disable repetition
 }: {
