@@ -33,7 +33,6 @@ import {
 } from "lucide-react"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Switch } from "@/components/ui/switch"
-import HydrationSafe from "@/components/hydration-safe"
 
 export default function UserManagementPage() {
   const [users, setUsers] = useState<AdminUser[]>([])
@@ -51,8 +50,6 @@ export default function UserManagementPage() {
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
   const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
-  const [debugInfo, setDebugInfo] = useState<any>(null)
-  const [debugLoading, setDebugLoading] = useState(false)
 
   useEffect(() => {
     loadUsers()
@@ -248,50 +245,6 @@ export default function UserManagementPage() {
     setIsCreateDialogOpen(true)
   }
 
-  const handleDebugDeviceData = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("🔍 Debug: Checking device data...")
-      const response = await fetch('/api/debug/device-data')
-      const data = await response.json()
-      
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Debug info:", data)
-      } else {
-        console.error("❌ Debug failed:", data)
-        alert(`Debug failed: ${data.error}\n\nDetails: ${data.details || 'No details available'}\n\nRecommendations:\n${data.recommendations?.join('\n• ') || 'No recommendations'}`)
-      }
-    } catch (error) {
-      console.error("❌ Debug error:", error)
-      alert(`Debug error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
-  const handleEnvCheck = async () => {
-    setDebugLoading(true)
-    try {
-      console.log("🔍 Debug: Checking environment variables...")
-      const response = await fetch('/api/debug/env-check')
-      const data = await response.json()
-      
-      if (response.ok) {
-        setDebugInfo(data)
-        console.log("✅ Environment check:", data)
-      } else {
-        console.error("❌ Environment check failed:", data)
-        alert(`Environment check failed: ${data.error}`)
-      }
-    } catch (error) {
-      console.error("❌ Environment check error:", error)
-      alert(`Environment check error: ${error}`)
-    } finally {
-      setDebugLoading(false)
-    }
-  }
-
   const handleSaveNewUser = async (userData: {
     full_name: string
     email: string
@@ -354,9 +307,7 @@ export default function UserManagementPage() {
             </p>
             <div className="flex items-center gap-2 mt-1">
               <Clock className="w-3 h-3 text-muted-foreground" />
-              <HydrationSafe fallback={<span className="text-xs text-muted-foreground">Last updated: Loading...</span>}>
-                <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
-              </HydrationSafe>
+              <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
               {autoRefresh && (
                 <Badge variant="secondary" className="text-xs">
                   <Activity className="w-3 h-3 mr-1" />
@@ -381,34 +332,6 @@ export default function UserManagementPage() {
               Export
             </Button>
             <Button
-              onClick={handleEnvCheck}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <Shield className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Check Env
-            </Button>
-            <Button
-              onClick={handleDebugDeviceData}
-              disabled={debugLoading}
-              variant="outline"
-              size="sm"
-              className="text-xs lg:text-sm bg-transparent"
-            >
-              {debugLoading ? (
-                <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2 animate-spin" />
-              ) : (
-                <Activity className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
-              )}
-              Debug Devices
-            </Button>
-            <Button
               onClick={handleCreateUser}
               className="bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 text-xs lg:text-sm"
             >
@@ -418,162 +341,6 @@ export default function UserManagementPage() {
           </div>
         </div>
       </div>
-
-      {/* Debug Info */}
-      {debugInfo && (
-        <div className="glass-card p-4 lg:p-6 rounded-2xl border-2 border-orange-200/50 dark:border-orange-800/50 bg-gradient-to-br from-orange-50/50 to-yellow-50/50 dark:from-orange-900/20 dark:to-yellow-900/20">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-lg font-semibold text-orange-800 dark:text-orange-200">🔍 Device Data Debug Info</h3>
-            <Button
-              onClick={() => setDebugInfo(null)}
-              variant="outline"
-              size="sm"
-              className="text-orange-600 border-orange-300 hover:bg-orange-100"
-            >
-              Close
-            </Button>
-          </div>
-          
-          <div className="space-y-4">
-            {/* Environment Variables */}
-            {debugInfo.environment_variables && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Environment Variables:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm">
-                    {Object.entries(debugInfo.environment_variables).map(([key, value]) => (
-                      <div key={key} className="flex items-center gap-2">
-                        <span className={`w-2 h-2 rounded-full ${value ? 'bg-green-500' : 'bg-red-500'}`}></span>
-                        <span className="font-mono text-xs">{key}:</span>
-                        <span className={value ? 'text-green-600' : 'text-red-600'}>
-                          {value ? 'Set' : 'Missing'}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                  {debugInfo.missing_variables && debugInfo.missing_variables.length > 0 && (
-                    <div className="mt-2 p-2 bg-red-50 dark:bg-red-900/20 rounded">
-                      <p className="text-sm text-red-600 dark:text-red-400">
-                        Missing: {debugInfo.missing_variables.join(', ')}
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Table Structure */}
-            {debugInfo.table_structure && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Database Table Structure:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className={`font-medium ${debugInfo.table_structure.has_required_columns ? 'text-green-600' : 'text-red-600'}`}>
-                      {debugInfo.table_structure.has_required_columns ? '✅' : '❌'} Required columns: 
-                    </span>
-                    {debugInfo.table_structure.has_required_columns ? 'Present' : 'Missing'}
-                  </p>
-                  {debugInfo.table_structure.columns && (
-                    <p className="text-xs text-gray-600 dark:text-gray-400 mt-1">
-                      Columns: {debugInfo.table_structure.columns.map((col: any) => col.name).join(', ')}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Users */}
-            {debugInfo.users && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Users in Database:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium text-blue-600">👥 Total Users:</span> {debugInfo.users.count}
-                  </p>
-                  {debugInfo.users.sample && debugInfo.users.sample.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Sample users:</p>
-                      {debugInfo.users.sample.map((user: any, index: number) => (
-                        <p key={index} className="text-xs text-gray-600 dark:text-gray-400 ml-2">
-                          • {user.name} ({user.email})
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* IP History */}
-            {debugInfo.ip_history && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">IP History Data:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium text-blue-600">🌐 Total IP Records:</span> {debugInfo.ip_history.count}
-                  </p>
-                  {debugInfo.ip_history.sample && debugInfo.ip_history.sample.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-xs text-gray-600 dark:text-gray-400">Sample IP records:</p>
-                      {debugInfo.ip_history.sample.slice(0, 3).map((ip: any, index: number) => (
-                        <p key={index} className="text-xs text-gray-600 dark:text-gray-400 ml-2">
-                          • {ip.ip_address} - {ip.city || 'Unknown'}, {ip.country || 'Unknown'}
-                        </p>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            )}
-
-            {/* Device Count Test */}
-            {debugInfo.device_count_test && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">Device Count Test:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  <p className="text-sm">
-                    <span className="font-medium text-blue-600">👤 User:</span> {debugInfo.device_count_test.user_name}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium text-blue-600">📱 Device Count:</span> {debugInfo.device_count_test.unique_ips} unique devices
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium text-blue-600">📊 Total Records:</span> {debugInfo.device_count_test.total_records}
-                  </p>
-                </div>
-              </div>
-            )}
-
-            {/* Recommendations */}
-            {debugInfo.recommendations && debugInfo.recommendations.length > 0 && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">📝 Recommendations:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  {debugInfo.recommendations.map((rec: string, index: number) => (
-                    <p key={index} className="text-sm text-orange-600 dark:text-orange-400">
-                      • {rec}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Next Steps */}
-            {debugInfo.next_steps && debugInfo.next_steps.length > 0 && (
-              <div>
-                <h4 className="font-medium text-orange-700 dark:text-orange-300 mb-2">🚀 Next Steps:</h4>
-                <div className="bg-white/50 dark:bg-gray-800/50 p-3 rounded-lg">
-                  {debugInfo.next_steps.map((step: string, index: number) => (
-                    <p key={index} className="text-sm text-blue-600 dark:text-blue-400">
-                      • {step}
-                    </p>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-4">
@@ -710,44 +477,34 @@ export default function UserManagementPage() {
               <div className="space-y-1 lg:space-y-2 mb-3 lg:mb-4">
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                   <Calendar className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <HydrationSafe fallback={<span className="truncate">Joined: Loading...</span>}>
-                    <span className="truncate">Joined: {new Date(user.created_at).toLocaleDateString("en-US")}</span>
-                  </HydrationSafe>
+                  <span className="truncate">Joined: {new Date(user.created_at).toLocaleDateString("en-US")}</span>
                 </div>
                 {user.approved_at && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <CheckCircle className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <HydrationSafe fallback={<span className="truncate">Approved: Loading...</span>}>
-                      <span className="truncate">Approved: {new Date(user.approved_at).toLocaleDateString("en-US")}</span>
-                    </HydrationSafe>
+                    <span className="truncate">Approved: {new Date(user.approved_at).toLocaleDateString("en-US")}</span>
                   </div>
                 )}
                 {user.expiration_date && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <HydrationSafe fallback={<span className="truncate">Expires: Loading...</span>}>
-                      <span className="truncate">
-                        Expires: {new Date(user.expiration_date).toLocaleDateString("en-US")}
-                      </span>
-                    </HydrationSafe>
+                    <span className="truncate">
+                      Expires: {new Date(user.expiration_date).toLocaleDateString("en-US")}
+                    </span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                   <Activity className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <HydrationSafe fallback={<span className="truncate">Updated: Loading...</span>}>
-                    <span className="truncate">Updated: {new Date(user.updated_at).toLocaleDateString("en-US")}</span>
-                  </HydrationSafe>
+                  <span className="truncate">Updated: {new Date(user.updated_at).toLocaleDateString("en-US")}</span>
                 </div>
                 <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                   <Smartphone className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Devices: {user.device_count || 0}</span>
+                  <span className="truncate">Active Sessions: {user.device_count || 0}</span>
                 </div>
                 {user.last_login && (
                   <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
                     <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <HydrationSafe fallback={<span className="truncate">Last Login: Loading...</span>}>
-                      <span className="truncate">Last Login: {new Date(user.last_login).toLocaleString("en-US")}</span>
-                    </HydrationSafe>
+                    <span className="truncate">Last Login: {new Date(user.last_login).toLocaleString("en-US")}</span>
                   </div>
                 )}
                 <div className="flex items-center gap-2 text-xs lg:text-sm">
@@ -912,7 +669,7 @@ export default function UserManagementPage() {
                       {getStatusInfo(selectedUser.current_status).text}
                     </Badge>
                     <Badge variant="outline" className="text-sm">
-                      {selectedUser.device_count || 0} Devices
+                      {selectedUser.device_count || 0} Active Sessions
                     </Badge>
                   </div>
                 </div>
@@ -978,17 +735,15 @@ export default function UserManagementPage() {
                   <CardContent className="space-y-3">
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Join Date</span>
-                      <HydrationSafe fallback={<span className="text-sm text-foreground">Loading...</span>}>
-                        <span className="text-sm text-foreground">
-                          {new Date(selectedUser.created_at).toLocaleDateString("en-US", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </HydrationSafe>
+                      <span className="text-sm text-foreground">
+                        {new Date(selectedUser.created_at).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "long",
+                          day: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
                       <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
@@ -1057,9 +812,9 @@ export default function UserManagementPage() {
                 <CardContent className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Total Devices</span>
+                      <span className="text-sm font-medium text-muted-foreground">Active Sessions</span>
                       <Badge variant="outline" className="text-sm">
-                        {selectedUser.device_count || 0} Unique IPs
+                        {selectedUser.device_count || 0} Devices
                       </Badge>
                     </div>
                     <div className="flex justify-between items-center py-2 border-b border-border">
@@ -1068,32 +823,11 @@ export default function UserManagementPage() {
                         {selectedUser.is_approved ? "Approved" : "Pending"}
                       </Badge>
                     </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Account Status</span>
-                      <Badge variant={getStatusInfo(selectedUser.current_status).variant} className="text-sm">
-                        {getStatusInfo(selectedUser.current_status).text}
-                      </Badge>
-                    </div>
-                    <div className="flex justify-between items-center py-2 border-b border-border">
-                      <span className="text-sm font-medium text-muted-foreground">Last Login</span>
-                      <span className="text-sm text-foreground">
-                        {selectedUser.last_login 
-                          ? new Date(selectedUser.last_login).toLocaleDateString("en-US", {
-                              year: "numeric",
-                              month: "short",
-                              day: "numeric",
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })
-                          : "Never"
-                        }
-                      </span>
-                    </div>
                   </div>
 
                   {selectedUser.user_agent && selectedUser.user_agent !== "Unknown" && (
                     <div className="space-y-2">
-                      <span className="text-sm font-medium text-muted-foreground">Latest User Agent</span>
+                      <span className="text-sm font-medium text-muted-foreground">User Agent</span>
                       <div className="bg-muted p-3 rounded-lg">
                         <code className="text-xs text-foreground break-all leading-relaxed block">
                           {selectedUser.user_agent}
@@ -1101,16 +835,6 @@ export default function UserManagementPage() {
                       </div>
                     </div>
                   )}
-
-                  <div className="p-3 rounded-lg bg-blue-50 border border-blue-200 dark:bg-blue-900/20 dark:border-blue-800">
-                    <div className="flex items-start gap-2">
-                      <Smartphone className="h-4 w-4 text-blue-500 mt-0.5 flex-shrink-0" />
-                      <div className="text-sm text-blue-700 dark:text-blue-300">
-                        <p className="font-medium mb-1">Device Information:</p>
-                        <p>Each unique IP address is counted as a separate device. This helps track user activity across different networks and locations.</p>
-                      </div>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
 
@@ -1188,10 +912,10 @@ export default function UserManagementPage() {
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <Smartphone className="h-5 w-5" />
-              Device & IP Information
+              User Sessions & IP Addresses
             </DialogTitle>
             <DialogDescription>
-              View all devices and IP addresses used by {selectedUser?.full_name}. Each unique IP address represents a different device or network location.
+              View all active sessions and IP addresses used by {selectedUser?.full_name}
             </DialogDescription>
           </DialogHeader>
 
@@ -1214,15 +938,15 @@ export default function UserManagementPage() {
                       <div>
                         <h3 className="font-semibold">{device.device_name || "Unknown Device"}</h3>
                         <p className="text-sm text-muted-foreground">
-                          IP: {device.ip_address} • {device.country}, {device.city}
+                          {device.browser_info} • {device.os_info}
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {device.active_sessions > 0 ? (
-                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Active</span>
+                      {device.is_blocked ? (
+                        <span className="px-2 py-1 text-xs bg-red-100 text-red-800 rounded-full">Blocked</span>
                       ) : (
-                        <span className="px-2 py-1 text-xs bg-gray-100 text-gray-800 rounded-full">Inactive</span>
+                        <span className="px-2 py-1 text-xs bg-green-100 text-green-800 rounded-full">Active</span>
                       )}
                     </div>
                   </div>
@@ -1241,8 +965,8 @@ export default function UserManagementPage() {
                       <p>{device.total_logins} times</p>
                     </div>
                     <div>
-                      <p className="font-medium text-muted-foreground">ISP</p>
-                      <p>{device.isp || "Unknown"}</p>
+                      <p className="font-medium text-muted-foreground">Screen Resolution</p>
+                      <p>{device.screen_resolution || "Unknown"}</p>
                     </div>
                   </div>
 
@@ -1293,8 +1017,7 @@ export default function UserManagementPage() {
           ) : (
             <div className="text-center py-8">
               <Smartphone className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <p className="text-muted-foreground">No device information found for this user</p>
-              <p className="text-sm text-muted-foreground mt-2">Device information will appear here once the user logs in from different IP addresses.</p>
+              <p className="text-muted-foreground">No active sessions found for this user</p>
             </div>
           )}
         </DialogContent>

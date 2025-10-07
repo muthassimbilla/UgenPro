@@ -14,21 +14,21 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized access" }, { status: 401 })
     }
 
+    // Get unique IP count for this user (device count)
     const { data: ipHistory, error: ipError } = await supabase
       .from("user_ip_history")
       .select("ip_address")
       .eq("user_id", user.id)
+      .eq("is_current", true)
 
     if (ipError) {
-      console.error("[v0] Error fetching IP history:", ipError)
+      console.error("Error fetching IP history:", ipError)
       return NextResponse.json({ error: "Failed to fetch device count" }, { status: 500 })
     }
 
-    // Count unique IP addresses - each unique IP represents a different device
+    // Count unique IP addresses
     const uniqueIPs = new Set(ipHistory?.map((ip) => ip.ip_address) || [])
     const deviceCount = uniqueIPs.size
-
-    console.log(`[v0] User ${user.id} has ${deviceCount} devices (unique IPs):`, Array.from(uniqueIPs))
 
     return NextResponse.json({
       success: true,
@@ -38,7 +38,7 @@ export async function GET(request: NextRequest) {
       },
     })
   } catch (error) {
-    console.error("[v0] Error in device-count API:", error)
+    console.error("Error in device-count API:", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })
   }
 }

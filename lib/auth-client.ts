@@ -194,19 +194,18 @@ export class AuthService {
       })
 
       if (currentIP && currentIP !== "unknown") {
-        console.log("[v0] Tracking IP address:", currentIP)
-        fetch("/api/user/track-ip", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
+        supabase
+          .from("user_ip_history")
+          .insert({
             user_id: data.user.id,
             ip_address: currentIP,
-          }),
-        }).catch((error) => {
-          console.warn("[v0] IP tracking failed:", error)
-        })
+            is_current: true,
+          })
+          .then(({ error: ipError }) => {
+            if (ipError) {
+              console.warn("[v0] IP history tracking failed:", ipError)
+            }
+          })
       }
 
       await sessionPromise
@@ -296,8 +295,8 @@ export class AuthService {
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
       const redirectUrl = isLocalhost
-        ? "http://localhost:3000/auth/callback"
-        : "https://ugenpro.site/auth/callback"
+        ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/reset-password"
+        : "https://ugenpro.site/reset-password"
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,

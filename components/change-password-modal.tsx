@@ -200,7 +200,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md relative z-10">
         {/* Change Password Modal */}
-        <div className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/95 dark:bg-gray-900/10 border border-gray-200/50 dark:border-gray-700/30">
+        <div className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
           {/* Header */}
           <div className="text-center space-y-2 pb-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -209,7 +209,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
             <h2 className="text-2xl font-bold bg-gradient-to-r from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] bg-clip-text text-transparent">
               Change Password
             </h2>
-            <p className="text-gray-600 dark:text-muted-foreground text-sm">Update your account password for better security</p>
+            <p className="text-muted-foreground text-sm">Update your account password for better security</p>
           </div>
 
           <div className="space-y-4">
@@ -256,7 +256,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                     placeholder="Enter your current password"
                     value={formData.currentPassword}
                     onChange={handleInputChange}
-                    className="h-12 pl-12 pr-12 rounded-xl border-gray-300/50 dark:border-border/50 bg-white/90 dark:bg-background/50 backdrop-blur-sm focus:bg-white dark:focus:bg-background/80 transition-all duration-200 group-hover:border-blue-300/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
+                    className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-blue-300/50 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20"
                     required
                     autoComplete="current-password"
                   />
@@ -285,7 +285,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                     placeholder="Enter your new password"
                     value={formData.newPassword}
                     onChange={handleInputChange}
-                    className="h-12 pl-12 pr-12 rounded-xl border-gray-300/50 dark:border-border/50 bg-white/90 dark:bg-background/50 backdrop-blur-sm focus:bg-white dark:focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
+                    className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
                     required
                     autoComplete="new-password"
                   />
@@ -298,7 +298,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                     {showNewPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-muted-foreground ml-1">Password must be at least 6 characters long</p>
+                <p className="text-xs text-muted-foreground ml-1">Password must be at least 6 characters long</p>
               </div>
 
               {/* Confirm Password Field */}
@@ -318,7 +318,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                     placeholder="Re-enter your new password"
                     value={formData.confirmPassword}
                     onChange={handleInputChange}
-                    className="h-12 pl-12 pr-12 rounded-xl border-gray-300/50 dark:border-border/50 bg-white/90 dark:bg-background/50 backdrop-blur-sm focus:bg-white dark:focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20 placeholder:text-gray-500 dark:placeholder:text-muted-foreground"
+                    className="h-12 pl-12 pr-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm focus:bg-background/80 transition-all duration-200 group-hover:border-green-300/50 focus:border-green-500/50 focus:ring-2 focus:ring-green-500/20"
                     required
                     autoComplete="new-password"
                   />
@@ -356,7 +356,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
                   type="button"
                   variant="outline"
                   onClick={handleClose}
-                  className="flex-1 h-12 rounded-xl border-gray-300/50 dark:border-border/50 bg-white/90 dark:bg-background/50 backdrop-blur-sm hover:bg-gray-50 dark:hover:bg-background/80 transition-all duration-200 text-gray-700 dark:text-foreground"
+                  className="flex-1 h-12 rounded-xl border-border/50 bg-background/50 backdrop-blur-sm hover:bg-background/80 transition-all duration-200"
                   disabled={loading || isSubmitting}
                 >
                   Cancel
