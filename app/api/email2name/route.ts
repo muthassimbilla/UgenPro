@@ -120,9 +120,11 @@ export async function POST(request: NextRequest) {
         const value = parts[1].trim()
 
         if (key.includes("full name")) {
-          result.fullName = value
+          // Remove any trailing punctuation (e.g., commas) from the full name
+          const cleanedFullName = value.replace(/[\s,.;:]+$/g, "").trim()
+          result.fullName = cleanedFullName
           // Split full name into first and last name
-          const nameParts = value.trim().split(" ")
+          const nameParts = cleanedFullName.split(" ")
           if (nameParts.length >= 2) {
             result.firstName = nameParts[0]
             result.lastName = nameParts.slice(1).join(" ")

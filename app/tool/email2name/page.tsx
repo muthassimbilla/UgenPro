@@ -15,7 +15,6 @@ interface NameData {
   lastName: string
   gender: string
   country: string
-  type: string
 }
 
 export default function Email2NamePage() {
@@ -275,43 +274,7 @@ export default function Email2NamePage() {
                       </div>
                     </div>
 
-                    {/* Type */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label className="text-xs font-medium text-muted-foreground">Type</Label>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => copyToClipboard(nameData.type, "Type")}
-                          className={`h-6 w-6 p-0 transition-all ${
-                            copiedField === "Type" ? "bg-green-100 dark:bg-green-800/30" : ""
-                          }`}
-                        >
-                          {copiedField === "Type" ? (
-                            <CheckCircle className="h-3 w-3 text-green-600" />
-                          ) : (
-                            <Copy className="h-3 w-3" />
-                          )}
-                        </Button>
-                      </div>
-                      <div
-                        className={`p-3 rounded-lg border ${
-                          nameData.type.toLowerCase() === "business"
-                            ? "bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800"
-                            : "bg-slate-50 dark:bg-slate-900/20 border-slate-200 dark:border-slate-800"
-                        }`}
-                      >
-                        <p
-                          className={`font-medium text-center ${
-                            nameData.type.toLowerCase() === "business"
-                              ? "text-red-700 dark:text-red-400"
-                              : "text-slate-700 dark:text-slate-300"
-                          }`}
-                        >
-                          {nameData.type}
-                        </p>
-                      </div>
-                    </div>
+                    
                   </div>
                 </div>
               ) : (

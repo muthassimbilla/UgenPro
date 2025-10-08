@@ -106,9 +106,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     showNotification(status)
 
+    // Do not auto-logout for expired accounts; allow navigation to premium tools
     if (
       status.status === "suspended" ||
-      status.status === "expired" ||
       status.status === "inactive" ||
       status.status === "deactivated"
     ) {

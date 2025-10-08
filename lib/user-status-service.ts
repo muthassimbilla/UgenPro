@@ -170,7 +170,7 @@ export class UserStatusService {
 
         if (
           !status.is_valid &&
-          (status.status === "suspended" || status.status === "expired" || status.status === "deactivated") &&
+          (status.status === "suspended" || status.status === "deactivated") &&
           !status.message.includes("network") &&
           !status.message.includes("active")
         ) {

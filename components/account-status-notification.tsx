@@ -16,8 +16,8 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    // If status is invalid, auto logout after 5 seconds
-    if (!status.is_valid) {
+    // If status is invalid, auto logout after 5 seconds, except for expired accounts
+    if (!status.is_valid && status.status !== "expired") {
       const timer = setTimeout(() => {
         if (onLogout) {
           onLogout()
@@ -26,7 +26,7 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
 
       return () => clearTimeout(timer)
     }
-  }, [status.is_valid, onLogout])
+  }, [status.is_valid, status.status, onLogout])
 
   if (!isVisible) return null
 
@@ -112,7 +112,7 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
 
           <p className={`text-sm ${config.textColor} mb-3`}>{status.message}</p>
 
-          {!status.is_valid && (
+          {!status.is_valid && status.status !== "expired" && (
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-1">
                 <div className="text-xs text-gray-600 mb-1">Auto logout in 5 seconds...</div>
@@ -130,7 +130,7 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
           )}
 
           <div className="flex items-center gap-2">
-            {!status.is_valid && onLogout && (
+            {!status.is_valid && status.status !== "expired" && onLogout && (
               <Button size="sm" variant="outline" onClick={onLogout} className="text-xs bg-transparent">
                 Logout Now
               </Button>

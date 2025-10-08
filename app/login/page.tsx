@@ -111,8 +111,11 @@ const LoginPage = memo(function LoginPage() {
       const loginResult = await login(formData.email.trim(), formData.password)
 
       startTransition(() => {
-        // The context user might not be updated yet
-        const redirectTo = searchParams.get("redirect") || "/tool"
+        // If account is expired, redirect directly to premium tools page
+        const redirectTo =
+          loginResult?.userStatus === "expired"
+            ? "/premium-tools"
+            : searchParams.get("redirect") || "/tool"
         console.log("[v0] Login successful, redirecting to:", redirectTo)
         router.push(redirectTo)
       })
