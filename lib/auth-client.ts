@@ -55,25 +55,16 @@ export class EmailUtils {
       return { isValid: false, errors }
     }
 
-    // Check for suspicious patterns
-    const suspiciousPatterns = [
-      // Multiple consecutive dots
-      /\.{2,}/,
-      // Suspicious number patterns (like pat.ho.rporo.sh5.5 with multiple dots and numbers)
-      /^[^@]*\.[^@]*\.[^@]*\d+[^@]*\.[^@]*@/,
-      // Too many dots in username part
-      /^[^@]*\.[^@]*\.[^@]*\.[^@]*\.[^@]*@/,
-      // Random character patterns
-      /^[^@]*[a-z]\.[a-z]\.[a-z]+\.[a-z]+\.[a-z]+\.[a-z]+@/,
-      // Suspicious combinations
-      /^[^@]*\.(ho|hi|he|ha)\.[^@]*@/,
-    ]
+    // Check if email is Gmail only
+    const emailLower = email.trim().toLowerCase()
+    if (!emailLower.endsWith("@gmail.com")) {
+      errors.push("Only Gmail addresses are supported. Please use a @gmail.com email address.")
+      return { isValid: false, errors }
+    }
 
-    for (const pattern of suspiciousPatterns) {
-      if (pattern.test(email.toLowerCase())) {
-        errors.push("This email format is not allowed. Please use a valid email address.")
-        break
-      }
+    // Check for multiple consecutive dots
+    if (/\.{2,}/.test(email)) {
+      errors.push("Email cannot contain multiple consecutive dots")
     }
 
     // Check for common disposable email domains

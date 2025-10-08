@@ -15,16 +15,19 @@ export default function TestEmailValidationPage() {
   const [result, setResult] = useState<{ isValid: boolean; errors: string[] } | null>(null)
 
   const testEmails = [
-    "pat.ho.rporo.sh5.5@gmail.com",
-    "test.user123@gmail.com",
-    "john.doe@gmail.com",
-    "user.name.last@gmail.com",
-    "normal.email@gmail.com",
     "test..double.dot@gmail.com",
     "user@tempmail.org",
     "valid.email@gmail.com",
-    "suspicious.pattern@gmail.com",
-    "random.letters.here@gmail.com"
+    "john.doe@gmail.com",
+    "user@yopmail.com",
+    "test.user@gmail.com",
+    "normal.email@gmail.com",
+    "user@10minutemail.com",
+    "simple.test@gmail.com",
+    "user@mailinator.com",
+    "user@yahoo.com",
+    "user@outlook.com",
+    "test@hotmail.com"
   ]
 
   const handleTest = () => {
@@ -157,10 +160,6 @@ export default function TestEmailValidationPage() {
                 <h4 className="font-semibold text-red-600">Blocked Patterns:</h4>
                 <ul className="text-sm space-y-1 text-slate-600 dark:text-slate-400">
                   <li>• Multiple consecutive dots (..)</li>
-                  <li>• Numbers in username part</li>
-                  <li>• Too many dots in username</li>
-                  <li>• Random character patterns</li>
-                  <li>• Suspicious combinations (ho, hi, he, ha)</li>
                 </ul>
               </div>
               <div className="space-y-2">
@@ -175,6 +174,15 @@ export default function TestEmailValidationPage() {
                   <li>• throwaway.email</li>
                 </ul>
               </div>
+            </div>
+            <div className="mt-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+              <h4 className="font-semibold text-blue-600 mb-2">Requirements:</h4>
+              <ul className="text-sm space-y-1 text-slate-600 dark:text-slate-400">
+                <li>• Must be a valid Gmail address (@gmail.com only)</li>
+                <li>• Must follow standard email format</li>
+                <li>• Cannot contain multiple consecutive dots (..)</li>
+                <li>• Cannot be a disposable email address</li>
+              </ul>
             </div>
           </CardContent>
         </Card>
