@@ -62,11 +62,12 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               Sign In
             </Button>
           </Link>
-          <Link href="/signup">
-          <Button
-            size="sm"
-            className="bg-[#2B7FFF] hover:bg-[#1a6bff] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10"
-          >
+          {/* Hide Get Started on mobile; show on md+ with current brand color (non-gradient) */}
+          <Link href="/signup" className="hidden md:block">
+            <Button
+              size="sm"
+              className="bg-[#2B7FFF] hover:bg-[#1a6bff] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10"
+            >
               Get Started
             </Button>
           </Link>
@@ -81,38 +82,48 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
         </div>
       </div>
 
-      {/* Enhanced Mobile Menu */}
+      {/* Mobile Drawer Menu (slides in from right) */}
       {mobileMenuOpen && (
-        <div className="lg:hidden border-t border-gray-200/30 dark:border-gray-700/30 bg-white/95 dark:bg-gray-900/95 shadow-lg">
-          <div className="container mx-auto px-4 py-6 space-y-2">
-            {navItems.map((item) => (
-              <a
-                key={item.id}
-                href={item.href}
-                className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
-                  activeSection === item.id
-                    ? "bg-gradient-to-r from-primary/20 to-accent/10 text-primary border border-primary/30 shadow-glow"
-                    : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
-                }`}
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {item.label}
-              </a>
-            ))}
-            <div className="pt-4 flex flex-col gap-3">
-              <Link href="/login" className="block">
-                <Button
-                  variant="outline"
-                  className="w-full rounded-xl border-2 border-border/50 hover:border-primary/50 font-semibold bg-transparent"
+        <div className="lg:hidden">
+          {/* Overlay */}
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-40"
+            onClick={() => setMobileMenuOpen(false)}
+          />
+          {/* Drawer Panel */}
+          <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] z-50 bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200/50 dark:border-gray-800/50 transform transition-transform duration-300 ease-out translate-x-0">
+            <div className="px-4 py-4 border-b border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between">
+              <span className="font-bold">Menu</span>
+              {/* Theme toggle inside drawer */}
+              <ThemeToggle />
+            </div>
+            <div className="px-4 py-4 space-y-2">
+              {navItems.map((item) => (
+                <a
+                  key={item.id}
+                  href={item.href}
+                  className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
+                    activeSection === item.id
+                      ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
+                      : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
+                  }`}
+                  onClick={() => setMobileMenuOpen(false)}
                 >
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/signup" className="block">
-                <Button className="w-full bg-gradient-to-r from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] hover:from-[#7a1fd4] hover:via-[#3a8fef] hover:to-[#ef3b7a] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10">
-                  Get Started
-                </Button>
-              </Link>
+                  {item.label}
+                </a>
+              ))}
+              <div className="pt-4 flex flex-col gap-3">
+                <Link href="/login" className="block">
+                  <Button
+                    variant="outline"
+                    className="w-full rounded-xl border-2 border-border/50 hover:border-primary/50 font-semibold bg-transparent"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign In
+                  </Button>
+                </Link>
+                {/* Removed Get Started button from mobile drawer as requested */}
+              </div>
             </div>
           </div>
         </div>

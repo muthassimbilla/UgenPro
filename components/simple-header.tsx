@@ -58,7 +58,7 @@ export default function SimpleHeader() {
               className="flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-red-50 to-orange-50 dark:from-red-950/30 dark:to-orange-950/30 border border-red-200/50 dark:border-red-800/50 hover:from-red-100 hover:to-orange-100 dark:hover:from-red-900/40 dark:hover:to-orange-900/40 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 transition-all duration-300 shadow-lg hover:shadow-xl"
             >
               <LogOut className="w-4 h-4" />
-              <span className="font-semibold">লগ আউট</span>
+              <span className="font-semibold">Log out</span>
             </Button>
           )}
         </div>

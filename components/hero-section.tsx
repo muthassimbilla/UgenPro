@@ -111,8 +111,8 @@ export const HeroSection = memo(function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium px-4 sm:px-0"
               >
-                Unlock the power of AI-driven development. Generate code, content, and designs in seconds with our
-                <span className="text-[#2B7FFF] dark:text-[#2B7FFF] font-semibold"> professional toolkit</span>.
+                Supercharge your CPA marketing with AI-powered tools. Leads, content, and automation in seconds	—with our
+                <span className="text-[#2B7FFF] dark:text-[#2B7FFF] font-semibold"> premium toolkit</span>.
               </motion.p>
 
               <motion.div
