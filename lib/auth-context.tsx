@@ -145,7 +145,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user && !loading) {
       const statusChecker = StatusChecker.getInstance()
-      statusChecker.startChecking(60000)
+      // Increase interval to 5 minutes to reduce API calls
+      statusChecker.startChecking(300000)
 
       return () => {
         statusChecker.stopChecking()

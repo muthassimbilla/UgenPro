@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
     if (authError || !user) {
       return NextResponse.json(
         {
-          error: "Unauthorized",
+          is_valid: false,
           status: "inactive",
           message: "User not authenticated",
         },

@@ -12,7 +12,25 @@ interface AuthLayoutProps {
 
 export default function AuthLayout({ children, variant = "login" }: AuthLayoutProps) {
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      {/* Background Effects */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-100/30 to-pink-100/50 dark:hidden" />
+        <div className="hidden dark:block absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-pink-900/25" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-rose-900/10" />
+        </div>
+        <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-400/40 dark:bg-blue-500/20 rounded-full animate-pulse" />
+        <div
+          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-purple-400/40 dark:bg-purple-500/20 rounded-full animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/3 w-80 h-80 bg-pink-400/30 dark:bg-pink-500/15 rounded-full animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
+      </div>
+
       {/* Enhanced top navigation */}
       <div className="absolute top-3 sm:top-4 left-3 sm:left-4 right-3 sm:right-4 flex items-center justify-between z-20">
         <Link

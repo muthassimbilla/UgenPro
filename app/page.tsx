@@ -13,14 +13,14 @@ const LoadingSkeleton = ({ height = "h-96" }: { height?: string }) => (
 
 // Lazy load heavy components with optimized loading states
 const ToolsSection = dynamic(() => import("@/components/tools-section").then(mod => ({ default: mod.ToolsSection })), {
-  loading: () => <LoadingSkeleton height="h-[600px]" />,
+  loading: () => <LoadingSkeleton height="h-[400px] sm:h-[600px]" />,
   ssr: false,
 })
 
 const PricingSection = dynamic(
   () => import("@/components/pricing-section").then((mod) => ({ default: mod.PricingSection })),
   {
-    loading: () => <LoadingSkeleton height="h-[500px]" />,
+    loading: () => <LoadingSkeleton height="h-[300px] sm:h-[500px]" />,
     ssr: false,
   },
 )
@@ -28,13 +28,13 @@ const PricingSection = dynamic(
 const ContactSection = dynamic(
   () => import("@/components/contact-section").then((mod) => ({ default: mod.ContactSection })),
   {
-    loading: () => <LoadingSkeleton height="h-[400px]" />,
+    loading: () => <LoadingSkeleton height="h-[250px] sm:h-[400px]" />,
     ssr: false,
   },
 )
 
 const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ default: mod.Footer })), {
-  loading: () => <LoadingSkeleton height="h-64" />,
+  loading: () => <LoadingSkeleton height="h-32 sm:h-64" />,
   ssr: false,
 })
 
@@ -46,11 +46,12 @@ export default function HomePage() {
   //   enableLogging: process.env.NODE_ENV === 'development' 
   // })
 
-  // Optimized smooth scroll behavior
+  // Optimized smooth scroll behavior - disable on mobile for better performance
   useEffect(() => {
-    // Set smooth scrolling only if user prefers it
+    const isMobile = window.innerWidth < 768
     const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    if (!prefersReducedMotion) {
+    
+    if (!prefersReducedMotion && !isMobile) {
       document.documentElement.style.scrollBehavior = "smooth"
     }
     
@@ -124,9 +125,28 @@ export default function HomePage() {
   }, [sections, handleSmoothScroll])
 
   return (
-    <div className="min-h-screen marble-bg">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
       <Navigation activeSection={activeSection} />
-      <main className="relative">
+      
+      {/* Background Effects */}
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-100/30 to-pink-100/50 dark:hidden" />
+        <div className="hidden dark:block absolute inset-0">
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-pink-900/25" />
+          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-rose-900/10" />
+        </div>
+        <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-400/40 dark:bg-blue-500/20 rounded-full animate-pulse" />
+        <div
+          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-purple-400/40 dark:bg-purple-500/20 rounded-full animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="absolute top-1/2 left-1/3 w-80 h-80 bg-pink-400/30 dark:bg-pink-500/15 rounded-full animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
+      </div>
+
+      <main className="relative z-10">
         <HeroSection />
         <div>
           <ToolsSection />

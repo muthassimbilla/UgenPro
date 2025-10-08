@@ -56,7 +56,13 @@ export class StatusChecker {
         headers: {
           "Content-Type": "application/json",
         },
+        // Add timeout to prevent hanging requests
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
 
       const status: UserStatus = await response.json()
 
@@ -77,7 +83,7 @@ export class StatusChecker {
       console.error("[v0] Status check failed:", error)
       
       // Only dispatch error event for non-network errors
-      if (!error.message?.includes("fetch") && !error.message?.includes("network")) {
+      if (error instanceof Error && !error.message?.includes("fetch") && !error.message?.includes("network") && !error.message?.includes("timeout")) {
         window.dispatchEvent(
           new CustomEvent("user-status-invalid", {
             detail: {
@@ -101,7 +107,13 @@ export class StatusChecker {
         headers: {
           "Content-Type": "application/json",
         },
+        // Add timeout to prevent hanging requests
+        signal: AbortSignal.timeout(10000), // 10 second timeout
       })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
 
       const status: UserStatus = await response.json()
       return status
