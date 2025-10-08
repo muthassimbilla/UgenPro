@@ -23,7 +23,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [userStatus, setUserStatus] = useState<UserStatus | null>(null)
   const [isLoginInProgress, setIsLoginInProgress] = useState(false)
   const [isPending, startTransition] = useTransition()
