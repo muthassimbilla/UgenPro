@@ -70,11 +70,10 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               title={tool.name}
               className="w-full h-full"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
               loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-presentation allow-forms allow-popups allow-popups-to-escape-sandbox"
               onError={() => {
                 console.log("Video failed to load, showing fallback");
                 setVideoError(true);

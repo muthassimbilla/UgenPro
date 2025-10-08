@@ -1,6 +1,5 @@
 import { createClient } from "@/lib/supabase/client"
 import { v4 as uuidv4 } from "uuid"
-import type { UserStatus } from "./user-status-service"
 
 // Types for our authentication system
 export interface User {
@@ -49,15 +48,32 @@ export class EmailUtils {
       return { isValid: false, errors }
     }
 
-    // Check for multiple consecutive dots
-    if (/\.{2,}/.test(email)) {
-      errors.push("Multiple consecutive dots are not allowed in email address")
+    // Basic email format validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+    if (!emailRegex.test(email)) {
+      errors.push("Please enter a valid email address")
+      return { isValid: false, errors }
     }
 
-    // Check if it's Gmail address
-    const emailLower = email.trim().toLowerCase()
-    if (!emailLower.endsWith("@gmail.com")) {
-      errors.push("Only Gmail addresses are supported. Please use a @gmail.com email address.")
+    // Check for suspicious patterns
+    const suspiciousPatterns = [
+      // Multiple consecutive dots
+      /\.{2,}/,
+      // Suspicious number patterns (like pat.ho.rporo.sh5.5 with multiple dots and numbers)
+      /^[^@]*\.[^@]*\.[^@]*\d+[^@]*\.[^@]*@/,
+      // Too many dots in username part
+      /^[^@]*\.[^@]*\.[^@]*\.[^@]*\.[^@]*@/,
+      // Random character patterns
+      /^[^@]*[a-z]\.[a-z]\.[a-z]+\.[a-z]+\.[a-z]+\.[a-z]+@/,
+      // Suspicious combinations
+      /^[^@]*\.(ho|hi|he|ha)\.[^@]*@/,
+    ]
+
+    for (const pattern of suspiciousPatterns) {
+      if (pattern.test(email.toLowerCase())) {
+        errors.push("This email format is not allowed. Please use a valid email address.")
+        break
+      }
     }
 
     // Check for common disposable email domains
@@ -179,7 +195,7 @@ export class AuthService {
               first_seen: new Date().toISOString(),
               last_seen: new Date().toISOString(),
             })
-              .then(({ error: ipError }: { error: any }) => {
+            .then(({ error: ipError }) => {
               if (ipError) {
                 console.warn("[v0] IP history tracking failed during signup:", ipError)
               } else {
@@ -198,7 +214,7 @@ export class AuthService {
 
   static async login(
     credentials: LoginCredentials,
-  ): Promise<{ user: User; userStatus: UserStatus }> {
+  ): Promise<{ user: User; userStatus: "approved" | "pending" | "expired" }> {
     try {
       console.log("[v0] Starting login process with email:", credentials.email)
 
@@ -234,6 +250,8 @@ export class AuthService {
         throw new Error("Failed to fetch user profile")
       }
 
+      let userStatus: "approved" | "pending" | "expired" = "approved"
+
       // This prevents login for suspended/inactive accounts
       if (profile.account_status === "suspended") {
         console.error("[v0] Account is suspended")
@@ -245,34 +263,15 @@ export class AuthService {
         throw new Error("Account is deactivated")
       }
 
-      // Create user status object
-      let userStatus: UserStatus;
-      
       // Check if account is expired
       if (profile.expiration_date && new Date(profile.expiration_date) < new Date()) {
         console.log("[v0] Account is expired")
-        userStatus = {
-          is_valid: false,
-          status: "expired",
-          message: "Your account has expired."
-        };
+        userStatus = "expired"
       }
       // Check if pending approval
       else if (!profile.is_approved) {
         console.log("[v0] Account is pending approval")
-        userStatus = {
-          is_valid: true,
-          status: "pending",
-          message: "Your account is pending approval."
-        };
-      }
-      // Account is approved and active
-      else {
-        userStatus = {
-          is_valid: true,
-          status: "active",
-          message: "Your account is active."
-        };
+        userStatus = "pending"
       }
 
       const sessionToken = uuidv4() + "-" + Date.now().toString(36)
@@ -295,7 +294,7 @@ export class AuthService {
             ip_address: currentIP,
             is_current: true,
           })
-              .then(({ error: ipError }: { error: any }) => {
+          .then(({ error: ipError }) => {
             if (ipError) {
               console.warn("[v0] IP history tracking failed:", ipError)
             }
@@ -328,15 +327,13 @@ export class AuthService {
     try {
       const supabase = createClient()
 
-      if (supabase) {
-        const { error } = await supabase.auth.signOut()
+      const { error } = await supabase.auth.signOut()
 
-        if (error) {
-          console.error("[v0] Logout error:", error)
-        }
-
-        console.log("[v0] Logout successful")
+      if (error) {
+        console.error("[v0] Logout error:", error)
       }
+
+      console.log("[v0] Logout successful")
     } catch (error) {
       console.error("[v0] Logout error:", error)
     }
@@ -345,24 +342,6 @@ export class AuthService {
   static async getCurrentUser(): Promise<User | null> {
     try {
       const supabase = createClient()
-
-      if (!supabase) {
-        console.log("[v0] Supabase client not available")
-        return null
-      }
-
-      // First check if there's a valid session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
-      
-      if (sessionError) {
-        console.error("[v0] Session error:", sessionError)
-        return null
-      }
-
-      if (!session) {
-        console.log("[v0] No active session found")
-        return null
-      }
 
       const {
         data: { user },
@@ -386,7 +365,6 @@ export class AuthService {
         return null
       }
 
-      console.log("[v0] User authenticated successfully:", user.email)
       return {
         id: user.id,
         email: user.email!,
