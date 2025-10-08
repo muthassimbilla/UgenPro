@@ -30,6 +30,41 @@ export default function ResetPasswordPage() {
     const checkRecoverySession = async () => {
       try {
         const supabase = createClient()
+        if (!supabase) {
+          setErrors(["Authentication client not initialized. Please try again."])
+          setCheckingSession(false)
+          return
+        }
+
+        // 1) Try to complete recovery/session from URL params
+        //    Supabase can send either `code` in query or tokens in hash fragment
+        try {
+          // Handle `code` param (PKCE flow)
+          const code = typeof window !== "undefined" ? new URL(window.location.href).searchParams.get("code") : null
+          if (code) {
+            await supabase.auth.exchangeCodeForSession(code)
+          } else if (typeof window !== "undefined" && window.location.hash) {
+            // Handle hash tokens: #access_token=...&refresh_token=...&type=recovery
+            const hash = window.location.hash.replace(/^#/, "")
+            const params = new URLSearchParams(hash)
+            const access_token = params.get("access_token")
+            const refresh_token = params.get("refresh_token")
+            const type = params.get("type")
+
+            if (access_token && refresh_token) {
+              await supabase.auth.setSession({ access_token, refresh_token })
+            }
+
+            // Clean up the hash from the URL to avoid re-processing on re-render
+            if (type || access_token || refresh_token) {
+              const url = new URL(window.location.href)
+              url.hash = ""
+              window.history.replaceState({}, document.title, url.toString())
+            }
+          }
+        } catch (linkError: any) {
+          console.warn("[v0] Recovery link processing warning:", linkError)
+        }
 
         // Check if we have a valid session (from email link)
         const {

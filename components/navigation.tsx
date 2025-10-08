@@ -12,6 +12,22 @@ interface NavigationProps {
 
 export function Navigation({ activeSection = "hero" }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+  
+  // Improve UX: lock body scroll when drawer is open and close on ESC
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      const originalOverflow = document.body.style.overflow
+      document.body.style.overflow = "hidden"
+      const handleKeyDown = (e: KeyboardEvent) => {
+        if (e.key === "Escape") setMobileMenuOpen(false)
+      }
+      window.addEventListener("keydown", handleKeyDown)
+      return () => {
+        document.body.style.overflow = originalOverflow
+        window.removeEventListener("keydown", handleKeyDown)
+      }
+    }
+  }, [mobileMenuOpen])
   const navItems = [
     { id: "hero", label: "Home", href: "#hero" },
     { id: "tools", label: "Tools", href: "#tools" },
@@ -94,8 +110,14 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
           <div className="fixed top-0 right-0 h-full w-80 max-w-[85vw] z-50 bg-white dark:bg-gray-900 shadow-2xl border-l border-gray-200/50 dark:border-gray-800/50 transform transition-transform duration-300 ease-out translate-x-0">
             <div className="px-4 py-4 border-b border-gray-200/50 dark:border-gray-800/50 flex items-center justify-between">
               <span className="font-bold">Menu</span>
-              {/* Theme toggle inside drawer */}
-              <ThemeToggle />
+              {/* Three-lines button inside drawer to close on click */}
+              <button
+                aria-label="Close menu"
+                className="rounded-xl p-2 hover:bg-card/60"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Menu className="h-5 w-5" />
+              </button>
             </div>
             <div className="px-4 py-4 space-y-2">
               {navItems.map((item) => (
@@ -122,7 +144,15 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
                     Sign In
                   </Button>
                 </Link>
-                {/* Removed Get Started button from mobile drawer as requested */}
+                {/* Add Get Started inside mobile drawer with current solid brand color */}
+                <Link href="/signup" className="block">
+                  <Button
+                    className="w-full bg-[#2B7FFF] hover:bg-[#1a6bff] text-white font-semibold shadow-glow hover:shadow-glow-accent transition-all interactive-scale rounded-xl px-6 border-2 border-white/10"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Get Started
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>
