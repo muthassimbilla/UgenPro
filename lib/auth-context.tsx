@@ -8,6 +8,8 @@ import { useStatusMiddleware } from "./status-middleware"
 import { useStatusNotification } from "@/components/status-notification-provider"
 import type { UserStatus } from "./user-status-service"
 import { StatusChecker } from "./status-checker"
+import { createClient } from "./supabase/client"
+import { useSessionRestoration } from "@/hooks/use-session-restoration"
 
 interface AuthContextType {
   user: User | null
@@ -30,6 +32,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [initialCheckComplete, setInitialCheckComplete] = useState(false)
 
   const { showNotification } = useStatusNotification()
+  const { session, isRestoring } = useSessionRestoration()
 
   const checkAuth = async () => {
     if (isLoginInProgress) {
@@ -41,11 +44,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       const currentUser = await AuthService.getCurrentUser()
       if (currentUser) {
+        console.log("[v0] User authenticated successfully:", currentUser.email)
         setUser(currentUser)
       } else {
+        console.log("[v0] No authenticated user found")
         setUser(null)
       }
     } catch (error) {
+      console.error("[v0] Auth check error:", error)
       setUser(null)
     } finally {
       setLoading(false)
@@ -84,14 +90,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null)
       setUserStatus(null)
 
+      // Clear all session data
       if (typeof window !== "undefined") {
+        sessionStorage.clear()
         window.location.href = "/login"
       }
     } catch (error) {
+      console.error("[v0] Logout error:", error)
       setUser(null)
       setUserStatus(null)
 
+      // Clear all session data even on error
       if (typeof window !== "undefined") {
+        sessionStorage.clear()
         window.location.href = "/login"
       }
     }
@@ -132,15 +143,63 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return status
   }
 
+  // Initialize auth when session restoration is complete
   useEffect(() => {
-    if (typeof window !== "undefined" && !initialCheckComplete) {
-      try {
-        checkAuth()
-      } catch (error) {
-        // Silent fail
+    if (!isRestoring && !initialCheckComplete) {
+      const initializeAuth = async () => {
+        try {
+          console.log("[v0] Initializing auth after session restoration...")
+          await checkAuth()
+        } catch (error) {
+          console.error("[v0] Auth initialization error:", error)
+        }
       }
+      
+      initializeAuth()
     }
-  }, [initialCheckComplete])
+  }, [isRestoring, initialCheckComplete])
+
+  // Update user when session is restored
+  useEffect(() => {
+    if (session && !user) {
+      console.log("[v0] Session restored, fetching user data...")
+      checkAuth()
+    } else if (!session && user) {
+      console.log("[v0] Session lost, clearing user data...")
+      setUser(null)
+      setUserStatus(null)
+    }
+  }, [session, user])
+
+  // Listen for auth state changes
+  useEffect(() => {
+    if (typeof window === "undefined") return
+
+    const supabase = createClient()
+    if (!supabase) return
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event: any, session: any) => {
+        console.log("[v0] Auth state changed:", event, session?.user?.email)
+        
+        if (event === 'SIGNED_IN' && session) {
+          console.log("[v0] User signed in, updating state...")
+          await checkAuth()
+        } else if (event === 'SIGNED_OUT') {
+          console.log("[v0] User signed out, clearing state...")
+          setUser(null)
+          setUserStatus(null)
+        } else if (event === 'TOKEN_REFRESHED' && session) {
+          console.log("[v0] Token refreshed, updating state...")
+          await checkAuth()
+        }
+      }
+    )
+
+    return () => {
+      subscription.unsubscribe()
+    }
+  }, [])
 
   useEffect(() => {
     if (user && !loading) {
@@ -155,7 +214,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const value: AuthContextType = {
     user,
-    loading,
+    loading: loading || isRestoring,
     login,
     logout,
     refreshUser,

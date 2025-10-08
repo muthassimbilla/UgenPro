@@ -63,12 +63,6 @@ const SignupPage = memo(function SignupPage() {
       newErrors.push(...emailValidation.errors)
     }
 
-    // Check if email is Gmail only
-    const email = formData.email.trim().toLowerCase()
-    if (emailValidation.isValid && !email.endsWith("@gmail.com")) {
-      newErrors.push("Only Gmail addresses are supported. Please use a @gmail.com email address.")
-    }
-
     // Validate password
     const passwordValidation = PasswordUtils.validatePassword(formData.password)
     if (!passwordValidation.isValid) {

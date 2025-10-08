@@ -39,7 +39,18 @@ export async function updateSession(request: NextRequest) {
           supabaseResponse = NextResponse.next({
             request,
           })
-          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options))
+          cookiesToSet.forEach(({ name, value, options }) => {
+            // Set secure cookie options for session persistence
+            const cookieOptions = {
+              ...options,
+              httpOnly: true,
+              secure: process.env.NODE_ENV === 'production',
+              sameSite: 'lax' as const,
+              maxAge: 7 * 24 * 60 * 60, // 7 days
+              path: '/'
+            }
+            supabaseResponse.cookies.set(name, value, cookieOptions)
+          })
         },
       },
     },
@@ -66,17 +77,31 @@ export async function updateSession(request: NextRequest) {
   // For protected routes, check authentication
   const {
     data: { user },
+    error: userError
   } = await supabase.auth.getUser()
 
+  // Check for session validity
+  const {
+    data: { session },
+    error: sessionError
+  } = await supabase.auth.getSession()
+
+  // If there's a session error or no valid session, clear cookies
+  if (sessionError || !session) {
+    console.log("[v0] Middleware: Invalid session, clearing cookies")
+    supabaseResponse.cookies.delete('sb-access-token')
+    supabaseResponse.cookies.delete('sb-refresh-token')
+  }
+
   // Redirect authenticated users away from auth pages
-  if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
+  if (user && session && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
     const url = request.nextUrl.clone()
     url.pathname = "/tool"
     return NextResponse.redirect(url)
   }
 
   // Redirect unauthenticated users to login for protected routes
-  if (!user && !isPublicRoute) {
+  if ((!user || !session) && !isPublicRoute) {
     const url = request.nextUrl.clone()
     url.pathname = "/login"
     return NextResponse.redirect(url)
