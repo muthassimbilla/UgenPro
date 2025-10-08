@@ -39,7 +39,7 @@ export function StatusNotificationProvider({ children }: { children: ReactNode }
   return (
     <StatusNotificationContext.Provider value={{ showNotification, hideNotification }}>
       {children}
-      {isVisible && currentStatus && (
+      {isVisible && currentStatus && currentStatus.status !== "expired" && (
         <AccountStatusNotification status={currentStatus} onClose={hideNotification} onLogout={handleLogout} />
       )}
     </StatusNotificationContext.Provider>

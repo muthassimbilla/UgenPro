@@ -107,7 +107,9 @@ export default function PremiumToolsPage() {
   const StatusIcon = statusConfig.icon
 
   const handleContactAdmin = () => {
-    window.location.href = "mailto:admin@example.com?subject=Premium Tools Access&body=I want to access Premium Tools."
+    if (typeof window !== "undefined") {
+      window.open("https://t.me/ugenpro_admin", "_blank", "noopener,noreferrer")
+    }
   }
 
   return (
@@ -213,9 +215,6 @@ export default function PremiumToolsPage() {
                   >
                     Contact Admin
                   </Button>
-                  <div className="text-sm text-slate-500 dark:text-slate-400">
-                    Email: admin@example.com | Phone: +8801700000000
-                  </div>
                 </div>
               </div>
             </Card>
