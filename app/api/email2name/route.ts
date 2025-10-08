@@ -26,45 +26,40 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     })
 
-    // Check if GOOGLE_API_KEY is available
-    const apiKey = process.env.GOOGLE_API_KEY
+    // Check if GROQ_API_KEY is available
+    const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
-      addApiRequest(false, Date.now() - startTime, "GOOGLE_API_KEY not configured", email, requestId)
+      addApiRequest(false, Date.now() - startTime, "GROQ_API_KEY not configured", email, requestId)
       return NextResponse.json(
-        { success: false, error: "GOOGLE_API_KEY not configured. Please add it to your environment variables." },
+        { success: false, error: "GROQ_API_KEY not configured. Please add it to your environment variables." },
         { status: 500 },
       )
     }
 
-    // Call Google Gemini API
+    // Call Groq Chat Completions API (OpenAI-compatible)
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: `${SYSTEM_PROMPT}\n\nEmail: ${email}`,
-                },
-              ],
-            },
+          model: "llama-3.1-8b-instant",
+          messages: [
+            { role: "system", content: SYSTEM_PROMPT },
+            { role: "user", content: `Email: ${email}` },
           ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 50,
-          },
+          temperature: 0.2,
+          max_tokens: 40,
         }),
       },
     )
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error(`[${requestId}] Gemini API error:`, {
+      console.error(`[${requestId}] Groq API error:`, {
         status: response.status,
         statusText: response.statusText,
         error: errorData,
@@ -74,12 +69,12 @@ export async function POST(request: NextRequest) {
       
       // Check for quota exceeded error
       if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
-        console.error(`[${requestId}] QUOTA EXCEEDED for email: ${email}`)
+        console.error(`[${requestId}] GROQ QUOTA EXCEEDED for email: ${email}`)
         addApiRequest(false, Date.now() - startTime, "API quota exceeded", email, requestId)
         return NextResponse.json(
           { 
             success: false, 
-            error: "API quota exceeded. Please check your Google API key limits or upgrade your plan.",
+            error: "API quota exceeded. Please check your Groq API key limits or upgrade your plan.",
             requestId: requestId,
             timestamp: new Date().toISOString()
           },
@@ -100,7 +95,7 @@ export async function POST(request: NextRequest) {
     }
 
     const data = await response.json()
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const generatedText = data.choices?.[0]?.message?.content
 
     if (!generatedText) {
       addApiRequest(false, Date.now() - startTime, "No response from AI", email, requestId)
