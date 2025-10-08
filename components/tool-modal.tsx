@@ -74,6 +74,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
               loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-presentation"
               onError={() => {
                 console.log("Video failed to load, showing fallback");
                 setVideoError(true);
