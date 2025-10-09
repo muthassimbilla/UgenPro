@@ -26,8 +26,8 @@ export default function Email2NamePage() {
   const [autoGenerate, setAutoGenerate] = useState(true)
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [isPasteEvent, setIsPasteEvent] = useState(false)
-  const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const usageCounterRef = useRef<any>(null)
+  const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null)  
+  const usageCounterRef = useRef<{ updateAfterApiCall: (result: any) => void; refreshUsage: () => void }>(null)
   const { apiCall } = useApiClient()
 
   // Auto generate when email changes and auto generate is enabled
@@ -76,7 +76,14 @@ export default function Email2NamePage() {
         
         // Update usage counter
         if (result.rate_limit && usageCounterRef.current) {
+          console.log('Email2Name: Calling updateAfterApiCall with:', result.rate_limit)
           usageCounterRef.current.updateAfterApiCall(result.rate_limit)
+          // Also refresh to ensure we have latest data
+          setTimeout(() => {
+            if (usageCounterRef.current) {
+              usageCounterRef.current.refreshUsage()
+            }
+          }, 500)
         }
       } else {
         if (result.auth_required) {
@@ -84,6 +91,7 @@ export default function Email2NamePage() {
         } else if (result.rate_limit && result.error && result.error.includes('লিমিট')) {
           toast.error(result.error)
           if (usageCounterRef.current) {
+            console.log('Email2Name: Calling updateAfterApiCall with rate limit error:', result.rate_limit)
             usageCounterRef.current.updateAfterApiCall(result.rate_limit)
           }
         } else {
@@ -136,15 +144,6 @@ export default function Email2NamePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
-          {/* API Usage Counter */}
-          <div className="lg:col-span-2">
-            <ApiUsageCounter 
-              ref={usageCounterRef}
-              apiType="email2name" 
-              className="mb-6" 
-            />
-          </div>
-          
           {/* Left Card - Input */}
           <Card className="h-[550px] flex flex-col">
             <CardHeader>
@@ -196,6 +195,16 @@ export default function Email2NamePage() {
                 {isLoading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Mail className="h-4 w-4 mr-2" />}
                 Generate Name
               </Button>
+
+              {/* API Usage Counter - Inside card at bottom */}
+              <div className="mt-4 pt-3 border-t border-gray-200">
+                <ApiUsageCounter 
+                  ref={usageCounterRef}
+                  apiType="email2name" 
+                  compact={true}
+                  showProgressBar={false}
+                />
+              </div>
             </CardContent>
           </Card>
 

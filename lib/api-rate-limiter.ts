@@ -40,11 +40,32 @@ export interface ApiUserLimit {
   created_by: string | null
 }
 
+// Global limits interface
+export interface GlobalApiLimit {
+  id: number
+  api_type: ApiType
+  daily_limit: number
+  is_unlimited: boolean
+  created_at: string
+  updated_at: string
+}
+
 export class ApiRateLimiter {
   private supabase: any
 
   constructor() {
-    this.supabase = createServerSupabaseClient()
+    try {
+      // Use service role key for admin operations to bypass RLS
+      this.supabase = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!
+      )
+      console.log('ApiRateLimiter initialized with service role')
+    } catch (error) {
+      console.error('Error initializing ApiRateLimiter:', error)
+      // Fallback to server client
+      this.supabase = createServerSupabaseClient()
+    }
   }
 
   /**
@@ -231,12 +252,12 @@ export class ApiRateLimiter {
    */
   async getAllUsageByDate(date: string = new Date().toISOString().split('T')[0]): Promise<ApiUsage[]> {
     try {
+      console.log('Getting all usage for date:', date)
+      
+      // First try without profiles join
       const { data, error } = await this.supabase
         .from('api_usage')
-        .select(`
-          *,
-          profiles:user_id(full_name, email)
-        `)
+        .select('*')
         .eq('usage_date', date)
         .order('daily_count', { ascending: false })
 
@@ -245,6 +266,7 @@ export class ApiRateLimiter {
         return []
       }
 
+      console.log('Raw usage data:', data)
       return data as ApiUsage[] || []
     } catch (error) {
       console.error('Exception fetching all usage by date:', error)
@@ -382,6 +404,112 @@ export class ApiRateLimiter {
         daily_limit: 200,
         remaining: 200
       }
+    }
+  }
+
+  /**
+   * Admin function: Get global limits for all APIs
+   */
+  async getGlobalLimits(): Promise<GlobalApiLimit[]> {
+    try {
+      const { data, error } = await this.supabase
+        .from('global_api_limits')
+        .select('*')
+        .order('api_type')
+
+      if (error) {
+        console.error('Error fetching global limits:', error)
+        return []
+      }
+
+      return data as GlobalApiLimit[] || []
+    } catch (error) {
+      console.error('Exception fetching global limits:', error)
+      return []
+    }
+  }
+
+  /**
+   * Admin function: Set global limit for an API type
+   */
+  async setGlobalLimit(apiType: ApiType, dailyLimit: number, isUnlimited: boolean = false): Promise<boolean> {
+    try {
+      const { error } = await this.supabase
+        .from('global_api_limits')
+        .upsert({
+          api_type: apiType,
+          daily_limit: dailyLimit,
+          is_unlimited: isUnlimited,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'api_type'
+        })
+
+      if (error) {
+        console.error('Error setting global limit:', error)
+        return false
+      }
+
+      return true
+    } catch (error) {
+      console.error('Exception setting global limit:', error)
+      return false
+    }
+  }
+
+  /**
+   * Get global limit for a specific API type
+   */
+  async getGlobalLimit(apiType: ApiType): Promise<GlobalApiLimit | null> {
+    try {
+      const { data, error } = await this.supabase
+        .from('global_api_limits')
+        .select('*')
+        .eq('api_type', apiType)
+        .single()
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching global limit:', error)
+        return null
+      }
+
+      return data as GlobalApiLimit | null
+    } catch (error) {
+      console.error('Exception fetching global limit:', error)
+      return null
+    }
+  }
+
+  /**
+   * Update existing usage records to use current global limits
+   */
+  async updateExistingUsageRecords(): Promise<boolean> {
+    try {
+      // Get current global limits
+      const globalLimits = await this.getGlobalLimits()
+      
+      for (const globalLimit of globalLimits) {
+        // Update existing usage records for today
+        const { error } = await this.supabase
+          .from('api_usage')
+          .update({
+            daily_limit: globalLimit.daily_limit,
+            is_unlimited: globalLimit.is_unlimited,
+            updated_at: new Date().toISOString()
+          })
+          .eq('api_type', globalLimit.api_type)
+          .eq('usage_date', new Date().toISOString().split('T')[0])
+
+        if (error) {
+          console.error(`Error updating usage records for ${globalLimit.api_type}:`, error)
+          return false
+        }
+      }
+
+      return true
+    } catch (error) {
+      console.error('Exception updating existing usage records:', error)
+      return false
     }
   }
 }

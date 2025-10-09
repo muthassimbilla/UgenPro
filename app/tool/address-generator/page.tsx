@@ -31,7 +31,7 @@ export default function AddressGeneratorPage() {
   const [activeTab, setActiveTab] = useState("ip")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
-  const usageCounterRef = useRef<any>(null)
+  const usageCounterRef = useRef<{ updateAfterApiCall: (result: any) => void; refreshUsage: () => void }>(null)
   const { apiCall } = useApiClient()
 
   // Paste from clipboard function
@@ -75,7 +75,14 @@ export default function AddressGeneratorPage() {
         
         // Update usage counter
         if (data.rate_limit && usageCounterRef.current) {
+          console.log('Calling updateAfterApiCall with:', data.rate_limit)
           usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+          // Also refresh to ensure we have latest data
+          setTimeout(() => {
+            if (usageCounterRef.current) {
+              usageCounterRef.current.refreshUsage()
+            }
+          }, 500)
         }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
@@ -85,6 +92,7 @@ export default function AddressGeneratorPage() {
         } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
           toast.error(data.error)
           if (usageCounterRef.current) {
+            console.log('Calling updateAfterApiCall with rate limit error:', data.rate_limit)
             usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           }
         } else {
@@ -130,7 +138,14 @@ export default function AddressGeneratorPage() {
         
         // Update usage counter
         if (data.rate_limit && usageCounterRef.current) {
+          console.log('Calling updateAfterApiCall with:', data.rate_limit)
           usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+          // Also refresh to ensure we have latest data
+          setTimeout(() => {
+            if (usageCounterRef.current) {
+              usageCounterRef.current.refreshUsage()
+            }
+          }, 500)
         }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
@@ -140,6 +155,7 @@ export default function AddressGeneratorPage() {
         } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
           toast.error(data.error)
           if (usageCounterRef.current) {
+            console.log('Calling updateAfterApiCall with rate limit error:', data.rate_limit)
             usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           }
         } else {
@@ -339,12 +355,6 @@ export default function AddressGeneratorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Side - Input Section */}
           <div className="space-y-6">
-            {/* API Usage Counter */}
-            <ApiUsageCounter 
-              ref={usageCounterRef}
-              apiType="address_generator" 
-              className="mb-4" 
-            />
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="ip" className="text-sm">
@@ -402,6 +412,16 @@ export default function AddressGeneratorPage() {
                         Reset
                       </Button>
                     </div>
+
+                    {/* API Usage Counter - Inside card at bottom */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <ApiUsageCounter 
+                        ref={usageCounterRef}
+                        apiType="address_generator" 
+                        compact={true}
+                        showProgressBar={false}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -453,10 +473,29 @@ export default function AddressGeneratorPage() {
                         Reset
                       </Button>
                     </div>
+
+                    {/* API Usage Counter - Inside card at bottom */}
+                    <div className="mt-4 pt-3 border-t border-gray-200">
+                      <ApiUsageCounter 
+                        ref={usageCounterRef}
+                        apiType="address_generator" 
+                        compact={true}
+                        showProgressBar={false}
+                      />
+                    </div>
                   </CardContent>
                 </Card>
               </TabsContent>
             </Tabs>
+
+            {/* API Usage Counter - Compact version at bottom */}
+            <ApiUsageCounter 
+              ref={usageCounterRef}
+              apiType="address_generator" 
+              compact={true}
+              showProgressBar={false}
+              className="mt-4 pt-3 border-t border-gray-200" 
+            />
           </div>
 
           {/* Right Side - Output Section */}

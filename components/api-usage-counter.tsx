@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
@@ -11,6 +11,13 @@ import type { ApiType, RateLimitResult } from "@/lib/api-rate-limiter"
 interface ApiUsageCounterProps {
   apiType: ApiType
   className?: string
+  showProgressBar?: boolean
+  compact?: boolean
+}
+
+interface ApiUsageCounterRef {
+  updateAfterApiCall: (result: RateLimitResult) => void
+  refreshUsage: () => void
 }
 
 interface UsageData {
@@ -21,10 +28,11 @@ interface UsageData {
   success: boolean
 }
 
-export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
-  const { user } = useAuth()
-  const [usageData, setUsageData] = useState<UsageData | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
+export const ApiUsageCounter = forwardRef<ApiUsageCounterRef, ApiUsageCounterProps>(
+  ({ apiType, className, showProgressBar = true, compact = false }, ref) => {
+    const { user } = useAuth()
+    const [usageData, setUsageData] = useState<UsageData | null>(null)
+    const [isLoading, setIsLoading] = useState(false)
 
   const fetchUsageData = async () => {
     if (!user) return
@@ -66,12 +74,9 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
     }
   }
 
-  useEffect(() => {
-    fetchUsageData()
-  }, [user, apiType])
-
   // API call করার পরে usage data update করার জন্য
   const updateAfterApiCall = (rateLimitResult: RateLimitResult) => {
+    console.log('Updating usage after API call:', rateLimitResult)
     if (rateLimitResult) {
       setUsageData({
         daily_count: rateLimitResult.daily_count,
@@ -83,10 +88,15 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
     }
   }
 
-  // Component expose করি parent component এর জন্য
-  React.useImperativeHandle(React.useRef(), () => ({
-    updateAfterApiCall
+  // Expose methods to parent component
+  useImperativeHandle(ref, () => ({
+    updateAfterApiCall,
+    refreshUsage: fetchUsageData
   }))
+
+  useEffect(() => {
+    fetchUsageData()
+  }, [user, apiType])
 
   if (!user) {
     return (
@@ -105,6 +115,14 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
   }
 
   if (isLoading) {
+    if (compact) {
+      return (
+        <div className={`text-xs text-gray-500 flex items-center gap-1 ${className}`}>
+          <Clock className="w-3 h-3" />
+          <span>Loading...</span>
+        </div>
+      )
+    }
     return (
       <Card className={`border-gray-200 ${className}`}>
         <CardContent className="p-4">
@@ -120,6 +138,17 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
   }
 
   if (!usageData) {
+    if (compact) {
+      return (
+        <div className={`text-xs text-gray-600 flex items-center gap-1 ${className}`}>
+          <CheckCircle className="w-3 h-3 text-green-500" />
+          <span>
+            {apiType === 'address_generator' ? 'Address Generator' : 'Email to Name'} - Ready
+          </span>
+          <Badge variant="secondary" className="text-xs px-1 py-0">200 daily</Badge>
+        </div>
+      )
+    }
     return (
       <Card className={`border-gray-200 ${className}`}>
         <CardContent className="p-4">
@@ -150,10 +179,10 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
   }
 
   const getStatusIcon = () => {
-    if (unlimited) return <Infinity className="w-4 h-4 text-purple-600" />
-    if (isAtLimit) return <AlertCircle className="w-4 h-4 text-red-600" />
-    if (isNearLimit) return <AlertCircle className="w-4 h-4 text-orange-600" />
-    return <CheckCircle className="w-4 h-4 text-green-600" />
+    if (unlimited) return <Infinity className="w-3 h-3 text-purple-600" />
+    if (isAtLimit) return <AlertCircle className="w-3 h-3 text-red-600" />
+    if (isNearLimit) return <AlertCircle className="w-3 h-3 text-orange-600" />
+    return <CheckCircle className="w-3 h-3 text-green-600" />
   }
 
   const getBorderColor = () => {
@@ -168,6 +197,36 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
     if (isAtLimit) return "bg-red-500"
     if (isNearLimit) return "bg-orange-500"
     return "bg-green-500"
+  }
+
+  if (compact) {
+    return (
+      <div className={`text-xs text-gray-600 flex items-center justify-between ${className}`}>
+        <div className="flex items-center gap-1">
+          {getStatusIcon()}
+          <span className="font-medium">
+            {apiType === 'address_generator' ? 'Address Generator' : 'Email to Name'}
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span>Used: {daily_count}</span>
+          <span>Limit: {daily_limit}</span>
+          {unlimited ? (
+            <Badge className="bg-purple-100 text-purple-700 text-xs px-1 py-0">
+              <Infinity className="w-2 h-2 mr-1" />
+              Unlimited
+            </Badge>
+          ) : (
+            <Badge 
+              variant={isAtLimit ? "destructive" : isNearLimit ? "secondary" : "default"}
+              className={`text-xs px-1 py-0 ${isNearLimit ? "bg-orange-100 text-orange-700" : ""}`}
+            >
+              {remaining} left
+            </Badge>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -196,7 +255,7 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
             )}
           </div>
 
-          {!unlimited && (
+          {!unlimited && showProgressBar && (
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-gray-500">
                 <span>Used: {daily_count}</span>
@@ -209,6 +268,13 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
                   '--progress-foreground': getProgressColor()
                 } as React.CSSProperties}
               />
+            </div>
+          )}
+
+          {!unlimited && !showProgressBar && (
+            <div className="flex justify-between text-xs text-gray-500">
+              <span>Used: {daily_count}</span>
+              <span>Limit: {daily_limit}</span>
             </div>
           )}
 
@@ -237,15 +303,24 @@ export function ApiUsageCounter({ apiType, className }: ApiUsageCounterProps) {
       </CardContent>
     </Card>
   )
-}
+})
+
+ApiUsageCounter.displayName = 'ApiUsageCounter'
 
 // Hook for easier usage
 export function useApiUsageCounter(apiType: ApiType) {
-  const counterRef = React.useRef<{ updateAfterApiCall: (result: RateLimitResult) => void } | null>(null)
+  const counterRef = React.useRef<ApiUsageCounterRef>(null)
 
   const updateUsage = React.useCallback((result: RateLimitResult) => {
+    console.log('Hook updating usage:', result)
     if (counterRef.current) {
       counterRef.current.updateAfterApiCall(result)
+    }
+  }, [])
+
+  const refreshUsage = React.useCallback(() => {
+    if (counterRef.current) {
+      counterRef.current.refreshUsage()
     }
   }, [])
 
@@ -253,5 +328,5 @@ export function useApiUsageCounter(apiType: ApiType) {
     <ApiUsageCounter ref={counterRef} apiType={apiType} {...props} />
   ), [apiType])
 
-  return { Counter, updateUsage }
+  return { Counter, updateUsage, refreshUsage }
 }
