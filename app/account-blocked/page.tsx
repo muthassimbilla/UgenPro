@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { Shield, Clock, AlertTriangle, Home, Mail } from "lucide-react"
+import { Shield, Clock, AlertTriangle, Home, MessageCircle } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
 export default function AccountBlockedPage() {
   const router = useRouter()
   const [statusType, setStatusType] = useState<"suspended" | "expired" | "unknown">("unknown")
-  const [message, setMessage] = useState("আপনার একাউন্টে সমস্যা রয়েছে।")
+  const [message, setMessage] = useState("Your account has a problem.")
 
   useEffect(() => {
     // Read status type from URL parameters
@@ -37,9 +37,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-red-800",
           textColor: "text-red-700",
           badgeVariant: "destructive" as const,
-          title: "একাউন্ট স্থগিত",
-          subtitle: "আপনার একাউন্ট সাময়িকভাবে নিষ্ক্রিয় করা হয়েছে",
-          actionText: "অ্যাডমিনের সাথে যোগাযোগ করুন",
+          title: "Account Suspended",
+          subtitle: "Your account has been temporarily disabled",
+          actionText: "Contact Admin",
         }
       case "expired":
         return {
@@ -51,9 +51,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-orange-800",
           textColor: "text-orange-700",
           badgeVariant: "secondary" as const,
-          title: "একাউন্টের মেয়াদ শেষ",
-          subtitle: "আপনার একাউন্টের মেয়াদ শেষ হয়ে গেছে",
-          actionText: "মেয়াদ বৃদ্ধির জন্য যোগাযোগ করুন",
+          title: "Account Expired",
+          subtitle: "Your account subscription has expired",
+          actionText: "Contact for Renewal",
         }
       default:
         return {
@@ -65,9 +65,9 @@ export default function AccountBlockedPage() {
           titleColor: "text-gray-800",
           textColor: "text-gray-700",
           badgeVariant: "outline" as const,
-          title: "একাউন্টে সমস্যা",
-          subtitle: "আপনার একাউন্টে সমস্যা রয়েছে",
-          actionText: "সহায়তার জন্য যোগাযোগ করুন",
+          title: "Account Problem",
+          subtitle: "Your account has a problem",
+          actionText: "Contact for Support",
         }
     }
   }
@@ -80,8 +80,8 @@ export default function AccountBlockedPage() {
   }
 
   const handleContactAdmin = () => {
-    // Here you can open admin contact information or email client
-    window.location.href = "mailto:admin@example.com?subject=একাউন্ট সমস্যা&body=আমার একাউন্টে সমস্যা রয়েছে। দয়া করে সাহায্য করুন।"
+    // Open admin's Telegram
+    window.open("https://t.me/your_admin_username", "_blank")
   }
 
   return (
@@ -116,7 +116,7 @@ export default function AccountBlockedPage() {
               onClick={handleContactAdmin}
               className={`w-full bg-gradient-to-r ${config.bgGradient} hover:opacity-90`}
             >
-              <Mail className="w-4 h-4 mr-2" />
+              <MessageCircle className="w-4 h-4 mr-2" />
               {config.actionText}
             </Button>
 
@@ -129,11 +129,9 @@ export default function AccountBlockedPage() {
           {/* Additional Info */}
           <div className="mt-6 pt-4 border-t border-gray-200">
             <div className="text-center">
-              <p className="text-xs text-gray-500 mb-2">সমস্যা সমাধানের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন</p>
+              <p className="text-xs text-gray-500 mb-2">Contact admin for problem resolution</p>
               <div className="flex items-center justify-center gap-4 text-xs text-gray-400">
-                <span>সহায়তা: admin@example.com</span>
-                <span>•</span>
-                <span>ফোন: +8801700000000</span>
+                <span>Support: @your_admin_username</span>
               </div>
             </div>
           </div>
@@ -141,7 +139,7 @@ export default function AccountBlockedPage() {
 
         {/* Footer */}
         <div className="text-center mt-6">
-          <p className="text-xs text-gray-500">এই বার্তাটি আপনার একাউন্টের নিরাপত্তার জন্য প্রদর্শিত হচ্ছে</p>
+          <p className="text-xs text-gray-500">This message is displayed for your account's security</p>
         </div>
       </div>
     </div>

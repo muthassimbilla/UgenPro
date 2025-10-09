@@ -105,6 +105,8 @@ const LoginPage = memo(function LoginPage() {
       const validationErrors = validateForm()
       if (validationErrors.length > 0) {
         setErrors(validationErrors)
+        setLoading(false)
+        setIsSubmitting(false)
         return
       }
 

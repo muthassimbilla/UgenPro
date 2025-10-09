@@ -143,7 +143,7 @@ export class UserStatusService {
   static async startStatusMonitoring(
     userId: string,
     onStatusChange: (status: UserStatus) => void,
-    intervalMs = 300000, // Increased to 5 minutes to reduce network load
+    intervalMs = 120000, // Check every 2 minutes for better responsiveness
   ): Promise<() => void> {
     let isActive = true
     let consecutiveFailures = 0

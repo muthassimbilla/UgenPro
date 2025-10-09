@@ -3,7 +3,7 @@ import { addApiRequest } from "../admin/api-stats/route"
 import { ApiRateLimiter } from "@/lib/api-rate-limiter"
 import { getAuthenticatedUser } from "@/lib/api-auth-helper"
 
-const SYSTEM_PROMPT = `Generate a realistic US name and gender from email. Return: Full Name: [first last], Gender: [male/female]`
+const SYSTEM_PROMPT = `Generate a realistic US first and last name and gender using ONLY the email; use email letters for initials, no middle names, short and realistic. Return: Full Name: [first last], Gender: [male/female]`
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()

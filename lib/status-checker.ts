@@ -82,17 +82,24 @@ export class StatusChecker {
     } catch (error) {
       console.error("[v0] Status check failed:", error)
       
-      // Only dispatch error event for non-network errors
-      if (error instanceof Error && !error.message?.includes("fetch") && !error.message?.includes("network") && !error.message?.includes("timeout")) {
+      // Only dispatch error event for authentication-related errors
+      // Don't auto-logout for network issues or server errors
+      if (error instanceof Error && 
+          (error.message?.includes("401") || 
+           error.message?.includes("403") || 
+           error.message?.includes("auth"))) {
         window.dispatchEvent(
           new CustomEvent("user-status-invalid", {
             detail: {
               is_valid: false,
               status: "inactive",
-              message: "Unable to verify account status.",
+              message: "Authentication error. Please login again.",
             },
           })
         )
+      } else {
+        // For network/server errors, just log but don't trigger logout
+        console.warn("[v0] Status check failed due to network/server error, not triggering logout")
       }
     } finally {
       this.isChecking = false
@@ -102,13 +109,13 @@ export class StatusChecker {
   // Manual status check
   async checkStatusNow(): Promise<UserStatus | null> {
     try {
+      console.log("[v0] Performing manual status check...")
       const response = await fetch("/api/user-status", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
         },
-        // Add timeout to prevent hanging requests
-        signal: AbortSignal.timeout(10000), // 10 second timeout
+        signal: AbortSignal.timeout(5000), // 5 second timeout for manual checks
       })
 
       if (!response.ok) {
@@ -116,10 +123,17 @@ export class StatusChecker {
       }
 
       const status: UserStatus = await response.json()
+      console.log("[v0] Manual status check result:", status)
       return status
     } catch (error) {
       console.error("[v0] Manual status check failed:", error)
       return null
     }
+  }
+
+  // Force immediate status check
+  async forceStatusCheck(): Promise<void> {
+    console.log("[v0] Force checking status...")
+    await this.checkStatus()
   }
 }

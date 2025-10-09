@@ -104,7 +104,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
         <div className="container mx-auto px-4 py-8 max-w-6xl">
           <div className="space-y-8">
             {/* Hero Section */}

@@ -106,15 +106,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     showNotification(status)
 
-    // Do not auto-logout for expired accounts; allow navigation to premium tools
+    // Only auto-logout for specific statuses that require immediate action
+    // Don't auto-logout for expired accounts; allow navigation to premium tools
     if (
       status.status === "suspended" ||
-      status.status === "inactive" ||
       status.status === "deactivated"
     ) {
       setTimeout(async () => {
         await logout()
       }, 2000)
+    }
+    
+    // For inactive status, give user more time to resolve the issue
+    if (status.status === "inactive") {
+      setTimeout(async () => {
+        await logout()
+      }, 10000) // Increased to 10 seconds
     }
   }
 
@@ -145,8 +152,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     if (user && !loading) {
       const statusChecker = StatusChecker.getInstance()
-      // Increase interval to 5 minutes to reduce API calls
-      statusChecker.startChecking(300000)
+      // Check status every 2 minutes for better responsiveness
+      statusChecker.startChecking(120000)
 
       return () => {
         statusChecker.stopChecking()

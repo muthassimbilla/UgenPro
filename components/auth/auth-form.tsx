@@ -238,13 +238,25 @@ const AuthForm = memo(function AuthForm({
         {/* Submit Button */}
         <Button
           type="submit"
-          className="w-full h-11 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white shadow-lg hover:shadow-xl transition-all"
+          className="w-full h-11 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading || isSubmitting}
         >
-          {loading ? (
+          {(loading || isSubmitting) ? (
             <div className="flex items-center gap-2">
-              <svg className="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <svg 
+                className="animate-spin h-4 w-4 text-white" 
+                xmlns="http://www.w3.org/2000/svg" 
+                fill="none" 
+                viewBox="0 0 24 24"
+              >
+                <circle 
+                  className="opacity-25" 
+                  cx="12" 
+                  cy="12" 
+                  r="10" 
+                  stroke="currentColor" 
+                  strokeWidth="4"
+                />
                 <path
                   className="opacity-75"
                   fill="currentColor"
