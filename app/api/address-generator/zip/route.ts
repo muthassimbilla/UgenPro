@@ -1,4 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server"
+import { ApiRateLimiter } from "@/lib/api-rate-limiter"
+import { getAuthenticatedUser } from "@/lib/api-auth-helper"
 
 const MAPBOX_TOKEN =
   process.env.MAPBOX_TOKEN ||
@@ -211,7 +213,42 @@ async function coordsToAddresses(lon: number, lat: number, limit = 5): Promise<s
 }
 
 export async function POST(request: NextRequest) {
+  const startTime = Date.now()
+  const requestId = Math.random().toString(36).substring(7)
+  
   try {
+    // Get authenticated user
+    const authResult = await getAuthenticatedUser(request)
+    
+    if (!authResult.isAuthenticated) {
+      return NextResponse.json({ 
+        success: false, 
+        error: "Authentication required. Please login first.",
+        auth_required: true 
+      }, { status: 401 })
+    }
+    
+    const user = authResult.user
+
+    // Check rate limit before processing
+    const rateLimiter = new ApiRateLimiter()
+    const rateLimitResult = await rateLimiter.checkAndIncrementUsage(user.id, 'address_generator')
+    
+    if (!rateLimitResult.success) {
+      return NextResponse.json({
+        success: false,
+        error: rateLimitResult.error === 'Daily limit exceeded' 
+          ? `আপনার দৈনিক লিমিট (${rateLimitResult.daily_limit}) শেষ হয়েছে। কাল আবার চেষ্টা করুন।`
+          : 'Rate limit check failed',
+        rate_limit: {
+          daily_count: rateLimitResult.daily_count,
+          daily_limit: rateLimitResult.daily_limit,
+          remaining: rateLimitResult.remaining,
+          unlimited: rateLimitResult.unlimited
+        }
+      }, { status: 429 })
+    }
+    
     const { zip } = await request.json()
 
     if (!zip || typeof zip !== "string") {
@@ -264,17 +301,49 @@ export async function POST(request: NextRequest) {
     const uniqueAddresses = [...new Set(allAddresses)]
 
     if (uniqueAddresses.length === 0) {
+      // Log failed request
+      await rateLimiter.logApiRequest(
+        user.id,
+        'address_generator',
+        { zip },
+        { error: 'No addresses found' },
+        false,
+        'কোনো এড্রেস পাওয়া যায়নি',
+        request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        request.headers.get('user-agent') || 'unknown',
+        Date.now() - startTime
+      )
+      
       return NextResponse.json({ success: false, error: "কোনো এড্রেস পাওয়া যায়নি" }, { status: 400 })
     }
+
+    // Log successful request
+    await rateLimiter.logApiRequest(
+      user.id,
+      'address_generator',
+      { zip },
+      { addresses: uniqueAddresses, boundingBox: bbox, count: uniqueAddresses.length },
+      true,
+      undefined,
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      request.headers.get('user-agent') || 'unknown',
+      Date.now() - startTime
+    )
 
     return NextResponse.json({
       success: true,
       addresses: uniqueAddresses,
       boundingBox: bbox,
       count: uniqueAddresses.length,
+      rate_limit: {
+        daily_count: rateLimitResult.daily_count,
+        daily_limit: rateLimitResult.daily_limit,
+        remaining: rateLimitResult.remaining,
+        unlimited: rateLimitResult.unlimited
+      }
     })
   } catch (error) {
-    console.error("ZIP address generator error:", error)
+    console.error(`[${requestId}] ZIP address generator error:`, error)
     return NextResponse.json({ success: false, error: "সার্ভার এরর" }, { status: 500 })
   }
 }

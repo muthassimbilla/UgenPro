@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr"
+import { apiCache } from "./api-cache"
 
 export interface AdminUser {
   id: string
@@ -22,7 +23,15 @@ export interface AdminUser {
 
 export class AdminUserService {
   static async getAllUsers(): Promise<AdminUser[]> {
+    const cacheKey = "admin:users:all"
     try {
+      // Try to get from cache first
+      const cachedData = apiCache.get<AdminUser[]>(cacheKey)
+      if (cachedData) {
+        console.log("[v0] Returning cached users data")
+        return cachedData
+      }
+
       console.log("[v0] getAllUsers called")
       const supabase = this.getSupabaseClient()
 
@@ -45,7 +54,9 @@ export class AdminUserService {
 
       if (!profiles || profiles.length === 0) {
         console.log("[v0] No profiles found in database")
-        return []
+        const emptyResult: AdminUser[] = []
+        apiCache.set(cacheKey, emptyResult)
+        return emptyResult
       }
 
       // Get unique IP counts and user agent data
@@ -117,6 +128,10 @@ export class AdminUserService {
       )
 
       console.log("[v0] Returning users:", usersWithDeviceCount.length)
+      
+      // Cache the result
+      apiCache.set(cacheKey, usersWithDeviceCount)
+      
       return usersWithDeviceCount
     } catch (error: any) {
       console.error("[v0] Error getting users:", error)
@@ -134,6 +149,7 @@ export class AdminUserService {
   }
 
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -162,6 +178,9 @@ export class AdminUserService {
       }
 
       console.log("[v0] User approved successfully:", userId, "with expiration:", expirationDate)
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Error approving user:", error)
       throw error
@@ -169,6 +188,7 @@ export class AdminUserService {
   }
 
   static async rejectUser(userId: string, adminUserId?: string): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -194,6 +214,9 @@ export class AdminUserService {
       }
 
       console.log("[v0] User approval revoked successfully:", userId)
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Error rejecting user:", error)
       throw error
@@ -242,6 +265,7 @@ export class AdminUserService {
   }
 
   static async updateUser(userId: string, userData: Partial<AdminUser>): Promise<AdminUser> {
+    const cacheKey = "admin:users:all"
     console.log("[v0] Updating user:", userId, userData)
 
     const supabase = this.getSupabaseClient()
@@ -268,7 +292,7 @@ export class AdminUserService {
         throw new Error("Failed to update user")
       }
 
-      return {
+      const updatedUser = {
         id: data.id,
         full_name: data.full_name,
         email: data.email || "No email",
@@ -283,6 +307,11 @@ export class AdminUserService {
         created_at: data.created_at,
         updated_at: data.updated_at,
       }
+
+      // Invalidate cache
+      apiCache.remove(cacheKey)
+
+      return updatedUser
     } catch (error: any) {
       console.error("[v0] Update user failed:", error)
       throw error
@@ -290,6 +319,7 @@ export class AdminUserService {
   }
 
   static async updateUserExpiration(userId: string, expirationDate: string | null): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -311,6 +341,9 @@ export class AdminUserService {
       }
 
       console.log("[v0] User expiration updated successfully:", userId, expirationDate)
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Error updating user expiration:", error)
       throw error
@@ -318,6 +351,7 @@ export class AdminUserService {
   }
 
   static async updateUserStatus(userId: string, status: "active" | "suspended"): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -339,6 +373,9 @@ export class AdminUserService {
       }
 
       console.log("[v0] User status updated successfully:", userId, status)
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Error updating user status:", error)
       throw error
@@ -346,6 +383,7 @@ export class AdminUserService {
   }
 
   static async deleteUser(userId: string): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] Starting delete operation for user:", userId)
 
@@ -390,6 +428,9 @@ export class AdminUserService {
       }
 
       console.log("[v0] User successfully deleted:", userId, "Deleted rows:", deleteData.length)
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Delete user failed:", error)
       throw error
@@ -397,6 +438,7 @@ export class AdminUserService {
   }
 
   static async toggleUserStatus(userId: string, isActive: boolean): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
 
@@ -434,6 +476,9 @@ export class AdminUserService {
         accountStatus: updatedUser.account_status,
         fullName: updatedUser.full_name,
       })
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
 
       if (updatedUser.is_active !== isActive) {
         throw new Error("Database update failed - status not changed")
@@ -453,6 +498,7 @@ export class AdminUserService {
     account_status?: "active" | "suspended"
     expiration_date?: string | null
   }): Promise<AdminUser> {
+    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] Creating new user:", userData)
 
@@ -500,7 +546,7 @@ export class AdminUserService {
 
       console.log("[v0] User created successfully:", data)
 
-      return {
+      const newUser = {
         id: data.id,
         full_name: data.full_name,
         email: userData.email,
@@ -515,6 +561,11 @@ export class AdminUserService {
         created_at: data.created_at,
         updated_at: data.updated_at,
       }
+
+      // Invalidate cache
+      apiCache.remove(cacheKey)
+
+      return newUser
     } catch (error: any) {
       console.error("[v0] Create user failed:", error)
       throw error
@@ -544,6 +595,7 @@ export class AdminUserService {
       activateAccount?: boolean
     },
   ): Promise<void> {
+    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
 
@@ -602,6 +654,9 @@ export class AdminUserService {
         newExpirationDate: updatedUser.expiration_date,
         fullName: updatedUser.full_name,
       })
+      
+      // Invalidate cache
+      apiCache.remove(cacheKey)
     } catch (error: any) {
       console.error("[v0] Security update failed:", error)
       throw error

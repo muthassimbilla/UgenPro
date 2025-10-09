@@ -18,6 +18,7 @@ export function AdminNavigation() {
     { name: "User Management", href: "/adminbilla/users", icon: Users },
     { name: "Notifications", href: "/adminbilla/notifications", icon: Bell },
     { name: "API Monitoring", href: "/adminbilla/api-monitoring", icon: Activity },
+    { name: "API Limits", href: "/adminbilla/api-limits", icon: Shield },
   ]
 
   const toggleSidebar = () => {

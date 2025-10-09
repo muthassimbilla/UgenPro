@@ -1,5 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { addApiRequest } from "../admin/api-stats/route"
+import { ApiRateLimiter } from "@/lib/api-rate-limiter"
+import { getAuthenticatedUser } from "@/lib/api-auth-helper"
 
 const SYSTEM_PROMPT = `Generate a realistic US name and gender from email. Return: Full Name: [first last], Gender: [male/female]`
 
@@ -8,10 +10,56 @@ export async function POST(request: NextRequest) {
   const requestId = Math.random().toString(36).substring(7)
   
   try {
+    // Get authenticated user
+    const authResult = await getAuthenticatedUser(request)
+    
+    if (!authResult.isAuthenticated) {
+      addApiRequest(false, Date.now() - startTime, "Authentication required", "", requestId)
+      return NextResponse.json({ 
+        success: false, 
+        error: "Authentication required. Please login first.",
+        auth_required: true 
+      }, { status: 401 })
+    }
+    
+    const user = authResult.user
+
+    // Check rate limit before processing
+    const rateLimiter = new ApiRateLimiter()
+    const rateLimitResult = await rateLimiter.checkAndIncrementUsage(user.id, 'email2name')
+    
+    if (!rateLimitResult.success) {
+      addApiRequest(false, Date.now() - startTime, "Rate limit exceeded", "", requestId)
+      return NextResponse.json({
+        success: false,
+        error: rateLimitResult.error === 'Daily limit exceeded' 
+          ? `আপনার দৈনিক লিমিট (${rateLimitResult.daily_limit}) শেষ হয়েছে। কাল আবার চেষ্টা করুন।`
+          : 'Rate limit check failed',
+        rate_limit: {
+          daily_count: rateLimitResult.daily_count,
+          daily_limit: rateLimitResult.daily_limit,
+          remaining: rateLimitResult.remaining,
+          unlimited: rateLimitResult.unlimited
+        }
+      }, { status: 429 })
+    }
+    
     const { email } = await request.json()
 
     if (!email || !email.includes("@")) {
       addApiRequest(false, Date.now() - startTime, "Invalid email address", email, requestId)
+      // Log to our new system as well
+      await rateLimiter.logApiRequest(
+        user.id,
+        'email2name',
+        { email },
+        { error: 'Invalid email address' },
+        false,
+        'Invalid email address',
+        request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+        request.headers.get('user-agent') || 'unknown',
+        Date.now() - startTime
+      )
       return NextResponse.json({ success: false, error: "Invalid email address" }, { status: 400 })
     }
 
@@ -139,7 +187,23 @@ export async function POST(request: NextRequest) {
     }
 
     const responseTime = Date.now() - startTime
+    
+    // Log to both old and new systems
     addApiRequest(true, responseTime)
+    await rateLimiter.logApiRequest(
+      user.id,
+      'email2name',
+      { email },
+      { 
+        result: result,
+        responseTime: responseTime
+      },
+      true,
+      undefined,
+      request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown',
+      request.headers.get('user-agent') || 'unknown',
+      responseTime
+    )
     
     console.log(`[${requestId}] Successfully generated name for: ${email}`, {
       result: result,
@@ -151,7 +215,13 @@ export async function POST(request: NextRequest) {
       success: true,
       data: result,
       requestId: requestId,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
+      rate_limit: {
+        daily_count: rateLimitResult.daily_count,
+        daily_limit: rateLimitResult.daily_limit,
+        remaining: rateLimitResult.remaining,
+        unlimited: rateLimitResult.unlimited
+      }
     })
   } catch (error) {
     const responseTime = Date.now() - startTime

@@ -20,6 +20,7 @@ export async function updateSession(request: NextRequest) {
     response.headers.set("Access-Control-Allow-Credentials", "true")
   }
 
+  // Skip middleware for API routes - let them handle their own authentication
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return response
   }
@@ -47,13 +48,16 @@ export async function updateSession(request: NextRequest) {
 
   const publicRoutes = [
     "/login",
-    "/signup",
+    "/signup", 
     "/forgot-password",
     "/reset-password",
     "/auth",
     "/adminbilla",
     "/contact",
     "/",
+    "/tool", // Tool pages should be accessible but API calls will handle authentication
+    "/premium-tools",
+    "/profile"
   ]
 
   const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route))

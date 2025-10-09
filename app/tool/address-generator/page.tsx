@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -10,6 +10,8 @@ import { Badge } from "@/components/ui/badge"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Loader2, MapPin, Navigation, RotateCcw, Copy, CheckCircle } from "lucide-react"
 import { toast } from "sonner"
+import { ApiUsageCounter } from "@/components/api-usage-counter"
+import { useApiClient } from "@/lib/api-client"
 
 interface AddressData {
   addresses: string[]
@@ -29,6 +31,8 @@ export default function AddressGeneratorPage() {
   const [activeTab, setActiveTab] = useState("ip")
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const usageCounterRef = useRef<any>(null)
+  const { apiCall } = useApiClient()
 
   // Paste from clipboard function
   const pasteFromClipboard = async () => {
@@ -54,10 +58,9 @@ export default function AddressGeneratorPage() {
 
     setIsLoading(true)
     try {
-      const response = await fetch("/api/address-generator/ip", {
+      const response = await apiCall("/api/address-generator/ip", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ip: ipAddress.trim() }),
+        body: { ip: ipAddress.trim() }
       })
 
       const data = await response.json()
@@ -69,9 +72,24 @@ export default function AddressGeneratorPage() {
           totalCount: data.addresses.length,
         })
         toast.success(`Found ${data.addresses.length} addresses`)
+        
+        // Update usage counter
+        if (data.rate_limit && usageCounterRef.current) {
+          usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+        }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
-        toast.error(data.error || "Could not resolve IP address")
+        
+        if (data.auth_required) {
+          toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
+        } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
+          toast.error(data.error)
+          if (usageCounterRef.current) {
+            usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+          }
+        } else {
+          toast.error(data.error || "IP ঠিকানা রেজলভ করতে পারছি না")
+        }
       }
     } catch (error) {
       toast.error("API call failed")
@@ -95,10 +113,9 @@ export default function AddressGeneratorPage() {
 
     setIsLoading(true)
     try {
-      const response = await fetch("/api/address-generator/zip", {
+      const response = await apiCall("/api/address-generator/zip", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ zip: zipCode.trim() }),
+        body: { zip: zipCode.trim() }
       })
 
       const data = await response.json()
@@ -110,9 +127,24 @@ export default function AddressGeneratorPage() {
           totalCount: data.addresses.length,
         })
         toast.success(`Found ${data.addresses.length} addresses`)
+        
+        // Update usage counter
+        if (data.rate_limit && usageCounterRef.current) {
+          usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+        }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
-        toast.error(data.error || "Could not resolve ZIP code")
+        
+        if (data.auth_required) {
+          toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
+        } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
+          toast.error(data.error)
+          if (usageCounterRef.current) {
+            usageCounterRef.current.updateAfterApiCall(data.rate_limit)
+          }
+        } else {
+          toast.error(data.error || "ZIP কোড রেজলভ করতে পারছি না")
+        }
       }
     } catch (error) {
       toast.error("API call failed")
@@ -307,6 +339,12 @@ export default function AddressGeneratorPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Side - Input Section */}
           <div className="space-y-6">
+            {/* API Usage Counter */}
+            <ApiUsageCounter 
+              ref={usageCounterRef}
+              apiType="address_generator" 
+              className="mb-4" 
+            />
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="ip" className="text-sm">

@@ -3,6 +3,18 @@
 import type React from "react"
 
 import { useState, useEffect } from "react"
+import {
+  useUsers,
+  useUpdateUser,
+  useDeleteUser,
+  useToggleUserStatus,
+  useApproveUser,
+  useRejectUser,
+  useCreateUser,
+  useUpdateUserSecurity,
+} from "@/hooks/use-users"
+import { OptimizedImage } from "@/components/optimized-image"
+import { UserCard } from "@/components/user-card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -37,7 +49,6 @@ import { Switch } from "@/components/ui/switch"
 import UserSessionsModal from "@/components/admin/user-sessions-modal"
 
 export default function UserManagementPage() {
-  const [users, setUsers] = useState<AdminUser[]>([])
   const [searchTerm, setSearchTerm] = useState("")
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null)
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
@@ -45,42 +56,34 @@ export default function UserManagementPage() {
   const [isSecurityDialogOpen, setIsSecurityDialogOpen] = useState(false)
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [isApprovalDialogOpen, setIsApprovalDialogOpen] = useState(false)
-  const [isLoading, setIsLoading] = useState(true)
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "suspended" | "expired" | "pending">("all")
   const [isDevicesDialogOpen, setIsDevicesDialogOpen] = useState(false)
   const [userDevices, setUserDevices] = useState<any[]>([])
   const [devicesLoading, setDevicesLoading] = useState(false)
   const [autoRefresh, setAutoRefresh] = useState(true)
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
   const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false)
   const [selectedUserForSessions, setSelectedUserForSessions] = useState<AdminUser | null>(null)
 
-  useEffect(() => {
-    loadUsers()
-  }, [])
+  // React Query Hooks
+  const { data: users = [], isLoading, refetch } = useUsers()
+  const updateUser = useUpdateUser()
+  const deleteUser = useDeleteUser()
+  const toggleStatus = useToggleUserStatus()
+  const approveUser = useApproveUser()
+  const rejectUser = useRejectUser()
+  const createUser = useCreateUser()
+  const updateSecurity = useUpdateUserSecurity()
 
   // Auto-refresh effect
   useEffect(() => {
     if (!autoRefresh) return
 
     const interval = setInterval(() => {
-      loadUsers()
+      refetch()
     }, 20000) // Refresh every 20 seconds
 
     return () => clearInterval(interval)
-  }, [autoRefresh])
-
-  const loadUsers = async () => {
-    try {
-      const userData = await AdminUserService.getAllUsers()
-      setUsers(userData)
-      setLastUpdated(new Date())
-    } catch (error) {
-      console.error("Error loading users:", error)
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  }, [autoRefresh, refetch])
 
   const filteredUsers = users.filter((user) => {
     const matchesSearch =
@@ -106,8 +109,7 @@ export default function UserManagementPage() {
 
   const handleApprovalWithExpiry = async (userId: string, expirationDate: string) => {
     try {
-      await AdminUserService.approveUser(userId, undefined, expirationDate)
-      await loadUsers()
+      await approveUser.mutateAsync({ userId, expirationDate })
       setIsApprovalDialogOpen(false)
       setSelectedUser(null)
     } catch (error: any) {
@@ -119,8 +121,7 @@ export default function UserManagementPage() {
   const handleRejectUser = async (userId: string) => {
     if (confirm("Are you sure you want to reject this user's approval?")) {
       try {
-        await AdminUserService.rejectUser(userId)
-        await loadUsers()
+        await rejectUser.mutateAsync(userId)
       } catch (error: any) {
         console.error("Error rejecting user:", error)
         alert(`Failed to reject user approval: ${error.message}`)
@@ -184,8 +185,7 @@ export default function UserManagementPage() {
 
   const handleSaveUser = async (updatedUser: AdminUser) => {
     try {
-      await AdminUserService.updateUser(updatedUser.id, updatedUser)
-      await loadUsers()
+      await updateUser.mutateAsync({ id: updatedUser.id, userData: updatedUser })
       setIsEditDialogOpen(false)
       setSelectedUser(null)
     } catch (error) {
@@ -203,12 +203,14 @@ export default function UserManagementPage() {
     try {
       console.log("[v0] handleSecurityUpdate called with:", { userId, data })
 
-      await AdminUserService.handleSecurityUpdate(userId, {
-        ...data,
-        activateAccount: data.status === "active",
+      await updateSecurity.mutateAsync({
+        userId,
+        securityData: {
+          ...data,
+          activateAccount: data.status === "active",
+        },
       })
 
-      await loadUsers()
       setIsSecurityDialogOpen(false)
       setSelectedUser(null)
 
@@ -222,23 +224,19 @@ export default function UserManagementPage() {
   const handleDeleteUser = async (userId: string) => {
     if (confirm("Are you sure you want to delete this user?")) {
       try {
-        await AdminUserService.deleteUser(userId)
-        await loadUsers()
+        await deleteUser.mutateAsync(userId)
       } catch (error) {
         console.error("Error deleting user:", error)
       }
     }
   }
 
-  const toggleUserStatus = async (userId: string, currentStatus: boolean) => {
+  const handleToggleUserStatus = async (userId: string, currentStatus: boolean) => {
     try {
       console.log("[v0] Toggling user status:", userId, "from", currentStatus, "to", !currentStatus)
 
       const newStatus = !currentStatus
-      await AdminUserService.toggleUserStatus(userId, newStatus)
-
-      // Reload users to get fresh data
-      await loadUsers()
+      await toggleStatus.mutateAsync({ userId, isActive: newStatus })
 
       // Show success message
       const statusText = newStatus ? "activated" : "deactivated"
@@ -263,8 +261,7 @@ export default function UserManagementPage() {
   }) => {
     try {
       console.log("[v0] Saving new user:", userData)
-      await AdminUserService.createUser(userData)
-      await loadUsers()
+      await createUser.mutateAsync(userData)
       setIsCreateDialogOpen(false)
     } catch (error: any) {
       console.error("[v0] Error creating user:", error)
@@ -292,6 +289,7 @@ export default function UserManagementPage() {
     }
   }
 
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -316,7 +314,7 @@ export default function UserManagementPage() {
             </p>
             <div className="flex items-center gap-2 mt-1">
               <Clock className="w-3 h-3 text-muted-foreground" />
-              <span className="text-xs text-muted-foreground">Last updated: {lastUpdated.toLocaleTimeString()}</span>
+              <span className="text-xs text-muted-foreground">Last updated: {new Date().toLocaleTimeString()}</span>
               {autoRefresh && (
                 <Badge variant="secondary" className="text-xs">
                   <Activity className="w-3 h-3 mr-1" />
@@ -332,7 +330,7 @@ export default function UserManagementPage() {
                 Auto Refresh
               </label>
             </div>
-            <Button onClick={loadUsers} variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
+            <Button onClick={() => refetch()} variant="outline" size="sm" className="text-xs lg:text-sm bg-transparent">
               <RefreshCw className="h-3 w-3 lg:h-4 lg:w-4 mr-2" />
               Refresh
             </Button>
@@ -459,159 +457,18 @@ export default function UserManagementPage() {
 
       {/* Users Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
-        {filteredUsers.map((user) => {
-          const statusInfo = getStatusInfo(user.current_status)
-          return (
-            <div
-              key={user.id}
-              className="glass-card p-4 lg:p-6 rounded-2xl hover:shadow-lg transition-all duration-300"
-            >
-              <div className="flex items-start justify-between mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 lg:gap-3 min-w-0 flex-1">
-                  <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white font-semibold text-sm lg:text-base flex-shrink-0">
-                    {user.full_name.charAt(0)}
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <h3 className="font-semibold text-foreground text-sm lg:text-base truncate">{user.full_name}</h3>
-                    <p className="text-xs lg:text-sm text-muted-foreground truncate">
-                      {user.email || `@${user.telegram_username}` || "No contact info"}
-                    </p>
-                  </div>
-                </div>
-                <Badge variant={statusInfo.variant} className="text-xs flex-shrink-0">
-                  {statusInfo.text}
-                </Badge>
-              </div>
-
-              <div className="space-y-1 lg:space-y-2 mb-3 lg:mb-4">
-                <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                  <Calendar className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Joined: {new Date(user.created_at).toLocaleDateString("en-US")}</span>
-                </div>
-                {user.approved_at && (
-                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                    <CheckCircle className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <span className="truncate">Approved: {new Date(user.approved_at).toLocaleDateString("en-US")}</span>
-                  </div>
-                )}
-                {user.expiration_date && (
-                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                    <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <span className="truncate">
-                      Expires: {new Date(user.expiration_date).toLocaleDateString("en-US")}
-                    </span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                  <Activity className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Updated: {new Date(user.updated_at).toLocaleDateString("en-US")}</span>
-                </div>
-                <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                  <Monitor className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                  <span className="truncate">Active Sessions: {user.active_sessions_count || 0}</span>
-                </div>
-                {user.last_login && (
-                  <div className="flex items-center gap-2 text-xs lg:text-sm text-muted-foreground">
-                    <Clock className="w-3 h-3 lg:w-4 lg:w-4 flex-shrink-0" />
-                    <span className="truncate">Last Login: {new Date(user.last_login).toLocaleString("en-US")}</span>
-                  </div>
-                )}
-                <div className="flex items-center gap-2 text-xs lg:text-sm">
-                  <div className={`w-2 h-2 rounded-full ${user.is_active ? "bg-green-500" : "bg-red-500"}`}></div>
-                  <span className={user.is_active ? "text-green-600" : "text-red-600"}>
-                    {user.is_active ? "Account Active" : "Account Deactivated"}
-                  </span>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                {/* Primary Actions Row */}
-                <div className="flex items-center gap-2">
-                  {user.current_status === "pending" && (
-                    <>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleApproveUser(user)}
-                        className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 flex-1 text-xs font-medium"
-                      >
-                        <CheckCircle className="h-3 w-3 mr-1.5" />
-                        Approve
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRejectUser(user.id)}
-                        className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 flex-1 text-xs font-medium"
-                      >
-                        <XCircle className="h-3 w-3 mr-1.5" />
-                        Reject
-                      </Button>
-                    </>
-                  )}
-
-                  {/* Activation Toggle - Most Important Action */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      console.log("[v0] Toggle button clicked for user:", user.id, "current is_active:", user.is_active)
-                      toggleUserStatus(user.id, user.is_active)
-                    }}
-                    className={`flex-1 text-xs font-medium transition-all duration-200 ${
-                      user.is_active
-                        ? "bg-red-50 border-red-200 text-red-700 hover:bg-red-100 hover:border-red-300"
-                        : "bg-green-50 border-green-200 text-green-700 hover:bg-green-100 hover:border-green-300"
-                    }`}
-                  >
-                    {user.is_active ? (
-                      <>
-                        <UserX className="h-3 w-3 mr-1.5" />
-                        Deactivate
-                      </>
-                    ) : (
-                      <>
-                        <UserCheck className="h-3 w-3 mr-1.5" />
-                        Activate
-                      </>
-                    )}
-                  </Button>
-                </div>
-
-                {/* Secondary Actions Row */}
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewUser(user)}
-                    className="bg-blue-50 border-blue-200 text-blue-700 hover:bg-blue-100 flex-1 text-xs font-medium"
-                  >
-                    <Eye className="h-3 w-3 mr-1.5" />
-                    View
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleViewSessions(user)}
-                    className="bg-green-50 border-green-200 text-green-700 hover:bg-green-100 flex-1 text-xs font-medium"
-                    disabled={!user.active_sessions_count || user.active_sessions_count === 0}
-                  >
-                    <Monitor className="h-3 w-3 mr-1.5" />
-                    Sessions ({user.active_sessions_count || 0})
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleDeleteUser(user.id)}
-                    className="bg-red-50 border-red-200 text-red-700 hover:bg-red-100 p-2"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )
-        })}
+        {filteredUsers.map((user) => (
+          <UserCard
+            key={user.id}
+            user={user}
+            onToggleStatus={handleToggleUserStatus}
+            onViewUser={handleViewUser}
+            onViewSessions={handleViewSessions}
+            onDeleteUser={handleDeleteUser}
+            onApproveUser={handleApproveUser}
+            onRejectUser={handleRejectUser}
+          />
+        ))}
       </div>
 
       {filteredUsers.length === 0 && (

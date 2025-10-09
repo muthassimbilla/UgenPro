@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -8,6 +8,8 @@ import { Label } from "@/components/ui/label"
 import { Loader2, Mail, Copy, CheckCircle, Clipboard } from "lucide-react"
 import { toast } from "sonner"
 import { Checkbox } from "@/components/ui/checkbox"
+import { ApiUsageCounter } from "@/components/api-usage-counter"
+import { useApiClient } from "@/lib/api-client"
 
 interface NameData {
   fullName: string
@@ -23,6 +25,35 @@ export default function Email2NamePage() {
   const [isLoading, setIsLoading] = useState(false)
   const [autoGenerate, setAutoGenerate] = useState(true)
   const [copiedField, setCopiedField] = useState<string | null>(null)
+  const [isPasteEvent, setIsPasteEvent] = useState(false)
+  const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const usageCounterRef = useRef<any>(null)
+  const { apiCall } = useApiClient()
+
+  // Auto generate when email changes and auto generate is enabled
+  useEffect(() => {
+    if (autoGenerate && email.trim() && email.includes("@") && isPasteEvent) {
+      // Clear any existing timeout
+      if (pasteTimeoutRef.current) {
+        clearTimeout(pasteTimeoutRef.current)
+      }
+      
+      // Set a timeout to generate name after paste
+      pasteTimeoutRef.current = setTimeout(() => {
+        generateName()
+        setIsPasteEvent(false) // Reset paste event flag
+      }, 300)
+    }
+  }, [email, autoGenerate, isPasteEvent])
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (pasteTimeoutRef.current) {
+        clearTimeout(pasteTimeoutRef.current)
+      }
+    }
+  }, [])
 
   const generateName = async () => {
     if (!email.trim() || !email.includes("@")) {
@@ -32,19 +63,32 @@ export default function Email2NamePage() {
 
     setIsLoading(true)
     try {
-      const response = await fetch("/api/email2name", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email: email.trim() }),
-      })
+    const response = await apiCall("/api/email2name", {
+      method: "POST",
+      body: { email: email.trim() }
+    })
 
       const result = await response.json()
 
       if (result.success) {
         setNameData(result.data)
         toast.success("Name generated successfully")
+        
+        // Update usage counter
+        if (result.rate_limit && usageCounterRef.current) {
+          usageCounterRef.current.updateAfterApiCall(result.rate_limit)
+        }
       } else {
-        toast.error(result.error || "Failed to generate name")
+        if (result.auth_required) {
+          toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
+        } else if (result.rate_limit && result.error && result.error.includes('লিমিট')) {
+          toast.error(result.error)
+          if (usageCounterRef.current) {
+            usageCounterRef.current.updateAfterApiCall(result.rate_limit)
+          }
+        } else {
+          toast.error(result.error || "নাম জেনারেট করতে পারিনি")
+        }
         setNameData(null)
       }
     } catch (error) {
@@ -61,13 +105,18 @@ export default function Email2NamePage() {
       setEmail(text.trim())
       toast.success("Pasted from clipboard")
 
-      if (autoGenerate && text.trim().includes("@")) {
-        setTimeout(() => {
-          generateName()
-        }, 100)
+      if (text.trim().includes("@")) {
+        setIsPasteEvent(true) // Mark that this is a paste event
       }
     } catch (err) {
       toast.error("Cannot access clipboard")
+    }
+  }
+
+  const handlePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const pastedText = e.clipboardData.getData('text')
+    if (pastedText.trim() && pastedText.includes("@")) {
+      setIsPasteEvent(true) // Mark that this is a paste event
     }
   }
 
@@ -87,6 +136,15 @@ export default function Email2NamePage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
+          {/* API Usage Counter */}
+          <div className="lg:col-span-2">
+            <ApiUsageCounter 
+              ref={usageCounterRef}
+              apiType="email2name" 
+              className="mb-6" 
+            />
+          </div>
+          
           {/* Left Card - Input */}
           <Card className="h-[550px] flex flex-col">
             <CardHeader>
@@ -106,6 +164,7 @@ export default function Email2NamePage() {
                     placeholder="example@domain.com"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    onPaste={handlePaste}
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         generateName()
