@@ -16,14 +16,14 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ugenpro.com'),
+  metadataBase: new URL('https://ugenpro.site'),
   title: {
     default: "UGen Pro - Advanced Generator Tools Platform",
     template: "%s | UGen Pro"
   },
   description:
-    "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
-  keywords: "generator tools, user agent generator, address generator, online tools, productivity tools",
+    "The complete platform for advanced generator tools. Create user agents, addresses, email2name, and more with our powerful and secure tools.",
+  keywords: "generator tools, user agent generator, address generator, email2name, online tools, productivity tools",
   authors: [{ name: "UGen Pro" }],
   creator: "UGen Pro",
   publisher: "UGen Pro",
@@ -32,19 +32,22 @@ export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",
   icons: {
     icon: [
-      { url: "/ugenpro-logo.svg", type: "image/svg+xml" },
-      { url: "/favicon-32x32.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/favicon.ico", sizes: "any" },
       { url: "/favicon-16x16.ico", sizes: "16x16", type: "image/x-icon" },
+      { url: "/favicon-32x32.ico", sizes: "32x32", type: "image/x-icon" },
+      { url: "/ugenpro-logo.svg", type: "image/svg+xml" },
     ],
-    shortcut: "/ugenpro-logo.svg",
-    apple: "/ugenpro-logo.svg",
+    shortcut: "/favicon.ico",
+    apple: [
+      { url: "/ugenpro-logo.svg", sizes: "180x180", type: "image/svg+xml" },
+    ],
   },
   manifest: "/manifest.json",
   openGraph: {
     title: "UGen Pro - Advanced Generator Tools Platform",
-    description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
+    description: "The complete platform for advanced generator tools. Create user agents, addresses, email2name, and more with our powerful and secure tools.",
     type: "website",
-    url: "https://ugenpro.com",
+    url: "https://ugenpro.site",
     siteName: "UGen Pro",
     images: [
       {
@@ -59,7 +62,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "UGen Pro - Advanced Generator Tools Platform",
-    description: "The complete platform for advanced generator tools. Create user agents, addresses, and more with our powerful and secure tools.",
+    description: "The complete platform for advanced generator tools. Create user agents, addresses, email2name, and more with our powerful and secure tools.",
     images: ["/ugenpro-social-sharing.jpg"],
     creator: "@ugenpro",
   },
