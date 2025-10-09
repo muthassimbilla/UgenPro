@@ -54,11 +54,14 @@ export function ToolsSection() {
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-            <span className="text-shadow-lg">Everything you need to</span>{" "}
+            <span className="text-shadow-lg">Advanced Generator Tools</span>{" "}
             <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent text-shadow-lg">
-              build faster
+              for Developers
             </span>
           </h2>
+          <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium mt-4">
+            Professional-grade generator tools including user agent generator, address generator, email2name converter, and more. Built for developers and professionals in Bangladesh.
+          </p>
         </motion.div>
 
         {/* All tools in same size - 3 cards in one row */}

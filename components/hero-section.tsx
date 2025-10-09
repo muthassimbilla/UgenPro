@@ -80,7 +80,10 @@ export const HeroSection = memo(function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.3 }}
                 className="hidden sm:block"
               >
-                <FlippingText text="Premium Tools For" words={["CPA Marketing", "CPA Self Sign-Up"]} duration={2500} />
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
+                  <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
+                  <span className="gradient-text-rainbow text-shadow-lg">for Developers</span>
+                </h1>
               </motion.div>
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
@@ -89,8 +92,8 @@ export const HeroSection = memo(function HeroSection() {
                 className="block sm:hidden"
               >
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-                  <span className="text-shadow-lg">Premium Tools For</span>{" "}
-                  <span className="gradient-text-rainbow text-shadow-lg">CPA Marketing</span>
+                  <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
+                  <span className="gradient-text-rainbow text-shadow-lg">for Developers</span>
                 </h1>
               </motion.div>
 
@@ -100,8 +103,7 @@ export const HeroSection = memo(function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="text-sm sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium px-2 sm:px-0"
               >
-                Supercharge your CPA marketing with AI-powered tools. Leads, content, and automation in seconds	—with our
-                <span className="text-[#2B7FFF] dark:text-[#2B7FFF] font-semibold"> premium toolkit</span>.
+                Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.
               </motion.p>
 
               <motion.div
@@ -115,7 +117,7 @@ export const HeroSection = memo(function HeroSection() {
                   onClick={handleGetStarted}
                   className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all group interactive-scale w-full sm:w-auto"
                 >
-                  Get Started
+                  <span className="font-noto-bengali">এখনই শুরু করুন</span>
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button
