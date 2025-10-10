@@ -11,7 +11,10 @@ import { Layers } from "lucide-react"
 const LazyToolModal = lazy(() =>
   import("@/components/tool-modal").then((mod) => ({
     default: mod.ToolModal,
-  })),
+  })).catch((error) => {
+    console.error('Failed to load ToolModal:', error)
+    return { default: () => <div>Failed to load modal</div> }
+  }),
 )
 
 export function ToolsSection() {
@@ -47,20 +50,12 @@ export function ToolsSection() {
           animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
           transition={{ duration: 0.6 }}
         >
-          <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] text-xs sm:text-sm font-bold mb-2 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30">
-            <Layers className="h-4 w-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
-            <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
-              Powerful Tools
-            </span>
-          </div>
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-            <span className="text-shadow-lg">Advanced Generator Tools</span>{" "}
-            <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent text-shadow-lg">
-              for Developers
-            </span>
+            <span className="text-shadow-lg">Our Tools</span>
           </h2>
           <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium mt-4">
-            Professional-grade generator tools including user agent generator, address generator, email2name converter, and more. Built for developers and professionals in Bangladesh.
+            Professional generator tools for CPA self signup, user agent generation,<br />
+            address generation, and email2name conversion. Fast, secure, and reliable online tools.
           </p>
         </motion.div>
 

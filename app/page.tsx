@@ -11,29 +11,107 @@ const LoadingSkeleton = ({ height = "h-96" }: { height?: string }) => (
   <div className={`${height} bg-gradient-to-r from-muted/5 to-muted/10 animate-pulse rounded-lg`} />
 )
 
-// Lazy load heavy components with optimized loading states
-const ToolsSection = dynamic(() => import("@/components/tools-section").then(mod => ({ default: mod.ToolsSection })), {
+// Lazy load heavy components with optimized loading states and better error handling
+const ToolsSection = dynamic(() => {
+  return import("@/components/tools-section")
+    .then(mod => ({ default: mod.ToolsSection }))
+    .catch((error) => {
+      console.error('Failed to load ToolsSection:', error)
+      return { 
+        default: () => (
+          <div className="h-[400px] sm:h-[600px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <div className="text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load tools section</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )
+      }
+    })
+}, {
   loading: () => <LoadingSkeleton height="h-[400px] sm:h-[600px]" />,
   ssr: false,
 })
 
-const PricingSection = dynamic(
-  () => import("@/components/pricing-section").then((mod) => ({ default: mod.PricingSection })),
-  {
-    loading: () => <LoadingSkeleton height="h-[300px] sm:h-[500px]" />,
-    ssr: false,
-  },
-)
+const PricingSection = dynamic(() => {
+  return import("@/components/pricing-section")
+    .then(mod => ({ default: mod.PricingSection }))
+    .catch((error) => {
+      console.error('Failed to load PricingSection:', error)
+      return { 
+        default: () => (
+          <div className="h-[300px] sm:h-[500px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <div className="text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load pricing section</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )
+      }
+    })
+}, {
+  loading: () => <LoadingSkeleton height="h-[300px] sm:h-[500px]" />,
+  ssr: false,
+})
 
-const ContactSection = dynamic(
-  () => import("@/components/contact-section").then((mod) => ({ default: mod.ContactSection })),
-  {
-    loading: () => <LoadingSkeleton height="h-[250px] sm:h-[400px]" />,
-    ssr: false,
-  },
-)
+const ContactSection = dynamic(() => {
+  return import("@/components/contact-section")
+    .then(mod => ({ default: mod.ContactSection }))
+    .catch((error) => {
+      console.error('Failed to load ContactSection:', error)
+      return { 
+        default: () => (
+          <div className="h-[250px] sm:h-[400px] flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <div className="text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load contact section</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )
+      }
+    })
+}, {
+  loading: () => <LoadingSkeleton height="h-[250px] sm:h-[400px]" />,
+  ssr: false,
+})
 
-const Footer = dynamic(() => import("@/components/footer").then((mod) => ({ default: mod.Footer })), {
+const Footer = dynamic(() => {
+  return import("@/components/footer")
+    .then(mod => ({ default: mod.Footer }))
+    .catch((error) => {
+      console.error('Failed to load Footer:', error)
+      return { 
+        default: () => (
+          <div className="h-32 sm:h-64 flex items-center justify-center bg-red-50 dark:bg-red-900/20 rounded-lg">
+            <div className="text-center">
+              <p className="text-red-600 dark:text-red-400">Failed to load footer</p>
+              <button 
+                onClick={() => window.location.reload()} 
+                className="mt-2 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Retry
+              </button>
+            </div>
+          </div>
+        )
+      }
+    })
+}, {
   loading: () => <LoadingSkeleton height="h-32 sm:h-64" />,
   ssr: false,
 })

@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: false,
         error: rateLimitResult.error === 'Daily limit exceeded' 
-          ? `আপনার দৈনিক লিমিট (${rateLimitResult.daily_limit}) শেষ হয়েছে। কাল আবার চেষ্টা করুন।`
+          ? `Your daily limit (${rateLimitResult.daily_limit}) has been reached. Please try again tomorrow.`
           : 'Rate limit check failed',
         rate_limit: {
           daily_count: rateLimitResult.daily_count,

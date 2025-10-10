@@ -1,8 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
-import { createServerSupabaseClient } from './auth-server'
+import { createClient } from "@supabase/supabase-js"
 
 // API types যেগুলো rate limit করা হবে
-export type ApiType = 'address_generator' | 'email2name'
+export type ApiType = "address_generator" | "email2name"
 
 // Rate limit result interface
 export interface RateLimitResult {
@@ -10,7 +9,7 @@ export interface RateLimitResult {
   unlimited: boolean
   daily_count: number
   daily_limit: number
-  remaining: number | 'unlimited'
+  remaining: number | "unlimited"
   error?: string
 }
 
@@ -54,18 +53,9 @@ export class ApiRateLimiter {
   private supabase: any
 
   constructor() {
-    try {
-      // Use service role key for admin operations to bypass RLS
-      this.supabase = createClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.SUPABASE_SERVICE_ROLE_KEY!
-      )
-      console.log('ApiRateLimiter initialized with service role')
-    } catch (error) {
-      console.error('Error initializing ApiRateLimiter:', error)
-      // Fallback to server client
-      this.supabase = createServerSupabaseClient()
-    }
+    // Use service role key for admin operations to bypass RLS
+    this.supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY!)
+    console.log("ApiRateLimiter initialized with service role")
   }
 
   /**
@@ -80,39 +70,39 @@ export class ApiRateLimiter {
           daily_count: 0,
           daily_limit: 0,
           remaining: 0,
-          error: 'User not authenticated'
+          error: "User not authenticated",
         }
       }
 
       // Database function call করে usage increment করি
-      const { data, error } = await this.supabase.rpc('increment_api_usage', {
+      const { data, error } = await this.supabase.rpc("increment_api_usage", {
         p_user_id: userId,
         p_api_type: apiType,
-        p_usage_date: new Date().toISOString().split('T')[0] // YYYY-MM-DD format
+        p_usage_date: new Date().toISOString().split("T")[0], // YYYY-MM-DD format
       })
 
       if (error) {
-        console.error('Rate limiter error:', error)
+        console.error("Rate limiter error:", error)
         return {
           success: false,
           unlimited: false,
           daily_count: 0,
           daily_limit: 200,
           remaining: 0,
-          error: 'Database error'
+          error: "Database error",
         }
       }
 
       return data as RateLimitResult
     } catch (error) {
-      console.error('Rate limiter exception:', error)
+      console.error("Rate limiter exception:", error)
       return {
         success: false,
         unlimited: false,
         daily_count: 0,
         daily_limit: 200,
         remaining: 0,
-        error: 'Service error'
+        error: "Service error",
       }
     }
   }
@@ -124,24 +114,24 @@ export class ApiRateLimiter {
     try {
       if (!userId) return null
 
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date().toISOString().split("T")[0]
 
       const { data, error } = await this.supabase
-        .from('api_usage')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('api_type', apiType)
-        .eq('usage_date', today)
+        .from("api_usage")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("api_type", apiType)
+        .eq("usage_date", today)
         .single()
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching usage status:', error)
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching usage status:", error)
         return null
       }
 
       return data as ApiUsage | null
     } catch (error) {
-      console.error('Exception fetching usage status:', error)
+      console.error("Exception fetching usage status:", error)
       return null
     }
   }
@@ -154,29 +144,29 @@ export class ApiRateLimiter {
       if (!userId) {
         return {
           address_generator: null,
-          email2name: null
+          email2name: null,
         }
       }
 
-      const today = new Date().toISOString().split('T')[0]
+      const today = new Date().toISOString().split("T")[0]
 
       const { data, error } = await this.supabase
-        .from('api_usage')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('usage_date', today)
+        .from("api_usage")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("usage_date", today)
 
       if (error) {
-        console.error('Error fetching all usage:', error)
+        console.error("Error fetching all usage:", error)
         return {
           address_generator: null,
-          email2name: null
+          email2name: null,
         }
       }
 
       const usageMap: Record<ApiType, ApiUsage | null> = {
         address_generator: null,
-        email2name: null
+        email2name: null,
       }
 
       if (data) {
@@ -187,10 +177,10 @@ export class ApiRateLimiter {
 
       return usageMap
     } catch (error) {
-      console.error('Exception fetching all usage:', error)
+      console.error("Exception fetching all usage:", error)
       return {
         address_generator: null,
-        email2name: null
+        email2name: null,
       }
     }
   }
@@ -198,29 +188,36 @@ export class ApiRateLimiter {
   /**
    * Admin function: Set user specific limits
    */
-  async setUserLimit(userId: string, apiType: ApiType, dailyLimit: number, isUnlimited: boolean = false, adminUserId?: string): Promise<boolean> {
+  async setUserLimit(
+    userId: string,
+    apiType: ApiType,
+    dailyLimit: number,
+    isUnlimited = false,
+    adminUserId?: string,
+  ): Promise<boolean> {
     try {
-      const { error } = await this.supabase
-        .from('api_user_limits')
-        .upsert({
+      const { error } = await this.supabase.from("api_user_limits").upsert(
+        {
           user_id: userId,
           api_type: apiType,
           daily_limit: dailyLimit,
           is_unlimited: isUnlimited,
           created_by: adminUserId || null,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'user_id, api_type'
-        })
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "user_id, api_type",
+        },
+      )
 
       if (error) {
-        console.error('Error setting user limit:', error)
+        console.error("Error setting user limit:", error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Exception setting user limit:', error)
+      console.error("Exception setting user limit:", error)
       return false
     }
   }
@@ -230,19 +227,16 @@ export class ApiRateLimiter {
    */
   async getUserLimits(userId: string): Promise<ApiUserLimit[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('api_user_limits')
-        .select('*')
-        .eq('user_id', userId)
+      const { data, error } = await this.supabase.from("api_user_limits").select("*").eq("user_id", userId)
 
       if (error) {
-        console.error('Error fetching user limits:', error)
+        console.error("Error fetching user limits:", error)
         return []
       }
 
-      return data as ApiUserLimit[] || []
+      return (data as ApiUserLimit[]) || []
     } catch (error) {
-      console.error('Exception fetching user limits:', error)
+      console.error("Exception fetching user limits:", error)
       return []
     }
   }
@@ -250,26 +244,26 @@ export class ApiRateLimiter {
   /**
    * Admin function: Get all users usage for a specific date
    */
-  async getAllUsageByDate(date: string = new Date().toISOString().split('T')[0]): Promise<ApiUsage[]> {
+  async getAllUsageByDate(date: string = new Date().toISOString().split("T")[0]): Promise<ApiUsage[]> {
     try {
-      console.log('Getting all usage for date:', date)
-      
+      console.log("Getting all usage for date:", date)
+
       // First try without profiles join
       const { data, error } = await this.supabase
-        .from('api_usage')
-        .select('*')
-        .eq('usage_date', date)
-        .order('daily_count', { ascending: false })
+        .from("api_usage")
+        .select("*")
+        .eq("usage_date", date)
+        .order("daily_count", { ascending: false })
 
       if (error) {
-        console.error('Error fetching all usage by date:', error)
+        console.error("Error fetching all usage by date:", error)
         return []
       }
 
-      console.log('Raw usage data:', data)
-      return data as ApiUsage[] || []
+      console.log("Raw usage data:", data)
+      return (data as ApiUsage[]) || []
     } catch (error) {
-      console.error('Exception fetching all usage by date:', error)
+      console.error("Exception fetching all usage by date:", error)
       return []
     }
   }
@@ -277,26 +271,30 @@ export class ApiRateLimiter {
   /**
    * Admin function: Reset user's daily usage
    */
-  async resetUserDailyUsage(userId: string, apiType: ApiType, date: string = new Date().toISOString().split('T')[0]): Promise<boolean> {
+  async resetUserDailyUsage(
+    userId: string,
+    apiType: ApiType,
+    date: string = new Date().toISOString().split("T")[0],
+  ): Promise<boolean> {
     try {
       const { error } = await this.supabase
-        .from('api_usage')
+        .from("api_usage")
         .update({
           daily_count: 0,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
         })
-        .eq('user_id', userId)
-        .eq('api_type', apiType)
-        .eq('usage_date', date)
+        .eq("user_id", userId)
+        .eq("api_type", apiType)
+        .eq("usage_date", date)
 
       if (error) {
-        console.error('Error resetting daily usage:', error)
+        console.error("Error resetting daily usage:", error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Exception resetting daily usage:', error)
+      console.error("Exception resetting daily usage:", error)
       return false
     }
   }
@@ -304,29 +302,29 @@ export class ApiRateLimiter {
   /**
    * Get user usage statistics (last 30 days)
    */
-  async getUserUsageStats(userId: string, apiType: ApiType, days: number = 30): Promise<ApiUsage[]> {
+  async getUserUsageStats(userId: string, apiType: ApiType, days = 30): Promise<ApiUsage[]> {
     try {
       const endDate = new Date()
       const startDate = new Date()
       startDate.setDate(endDate.getDate() - days)
 
       const { data, error } = await this.supabase
-        .from('api_usage')
-        .select('*')
-        .eq('user_id', userId)
-        .eq('api_type', apiType)
-        .gte('usage_date', startDate.toISOString().split('T')[0])
-        .lte('usage_date', endDate.toISOString().split('T')[0])
-        .order('usage_date', { ascending: false })
+        .from("api_usage")
+        .select("*")
+        .eq("user_id", userId)
+        .eq("api_type", apiType)
+        .gte("usage_date", startDate.toISOString().split("T")[0])
+        .lte("usage_date", endDate.toISOString().split("T")[0])
+        .order("usage_date", { ascending: false })
 
       if (error) {
-        console.error('Error fetching usage stats:', error)
+        console.error("Error fetching usage stats:", error)
         return []
       }
 
-      return data as ApiUsage[] || []
+      return (data as ApiUsage[]) || []
     } catch (error) {
-      console.error('Exception fetching usage stats:', error)
+      console.error("Exception fetching usage stats:", error)
       return []
     }
   }
@@ -343,25 +341,23 @@ export class ApiRateLimiter {
     errorMessage?: string,
     ipAddress?: string,
     userAgent?: string,
-    responseTimeMs?: number
+    responseTimeMs?: number,
   ): Promise<void> {
     try {
-      await this.supabase
-        .from('api_request_logs')
-        .insert({
-          user_id: userId,
-          api_type: apiType,
-          request_data: requestData,
-          response_data: responseData,
-          success: success,
-          error_message: errorMessage || null,
-          ip_address: ipAddress || null,
-          user_agent: userAgent || null,
-          response_time_ms: responseTimeMs || null
-        })
+      await this.supabase.from("api_request_logs").insert({
+        user_id: userId,
+        api_type: apiType,
+        request_data: requestData,
+        response_data: responseData,
+        success: success,
+        error_message: errorMessage || null,
+        ip_address: ipAddress || null,
+        user_agent: userAgent || null,
+        response_time_ms: responseTimeMs || null,
+      })
     } catch (error) {
       // Silent fail for logging
-      console.error('Error logging API request:', error)
+      console.error("Error logging API request:", error)
     }
   }
 
@@ -370,20 +366,20 @@ export class ApiRateLimiter {
    */
   async getOrCreateTodayUsage(userId: string, apiType: ApiType): Promise<RateLimitResult> {
     try {
-      const { data, error } = await this.supabase.rpc('get_or_create_daily_usage', {
+      const { data, error } = await this.supabase.rpc("get_or_create_daily_usage", {
         p_user_id: userId,
         p_api_type: apiType,
-        p_usage_date: new Date().toISOString().split('T')[0]
+        p_usage_date: new Date().toISOString().split("T")[0],
       })
 
       if (error) {
-        console.error('Error getting today usage:', error)
+        console.error("Error getting today usage:", error)
         return {
           success: true,
           unlimited: false,
           daily_count: 0,
           daily_limit: 200,
-          remaining: 200
+          remaining: 200,
         }
       }
 
@@ -393,16 +389,16 @@ export class ApiRateLimiter {
         unlimited: usage.is_unlimited,
         daily_count: usage.daily_count,
         daily_limit: usage.daily_limit,
-        remaining: usage.is_unlimited ? 'unlimited' : (usage.daily_limit - usage.daily_count)
+        remaining: usage.is_unlimited ? "unlimited" : usage.daily_limit - usage.daily_count,
       }
     } catch (error) {
-      console.error('Exception getting today usage:', error)
+      console.error("Exception getting today usage:", error)
       return {
         success: true,
         unlimited: false,
         daily_count: 0,
         daily_limit: 200,
-        remaining: 200
+        remaining: 200,
       }
     }
   }
@@ -412,19 +408,16 @@ export class ApiRateLimiter {
    */
   async getGlobalLimits(): Promise<GlobalApiLimit[]> {
     try {
-      const { data, error } = await this.supabase
-        .from('global_api_limits')
-        .select('*')
-        .order('api_type')
+      const { data, error } = await this.supabase.from("global_api_limits").select("*").order("api_type")
 
       if (error) {
-        console.error('Error fetching global limits:', error)
+        console.error("Error fetching global limits:", error)
         return []
       }
 
-      return data as GlobalApiLimit[] || []
+      return (data as GlobalApiLimit[]) || []
     } catch (error) {
-      console.error('Exception fetching global limits:', error)
+      console.error("Exception fetching global limits:", error)
       return []
     }
   }
@@ -432,27 +425,28 @@ export class ApiRateLimiter {
   /**
    * Admin function: Set global limit for an API type
    */
-  async setGlobalLimit(apiType: ApiType, dailyLimit: number, isUnlimited: boolean = false): Promise<boolean> {
+  async setGlobalLimit(apiType: ApiType, dailyLimit: number, isUnlimited = false): Promise<boolean> {
     try {
-      const { error } = await this.supabase
-        .from('global_api_limits')
-        .upsert({
+      const { error } = await this.supabase.from("global_api_limits").upsert(
+        {
           api_type: apiType,
           daily_limit: dailyLimit,
           is_unlimited: isUnlimited,
-          updated_at: new Date().toISOString()
-        }, {
-          onConflict: 'api_type'
-        })
+          updated_at: new Date().toISOString(),
+        },
+        {
+          onConflict: "api_type",
+        },
+      )
 
       if (error) {
-        console.error('Error setting global limit:', error)
+        console.error("Error setting global limit:", error)
         return false
       }
 
       return true
     } catch (error) {
-      console.error('Exception setting global limit:', error)
+      console.error("Exception setting global limit:", error)
       return false
     }
   }
@@ -462,20 +456,16 @@ export class ApiRateLimiter {
    */
   async getGlobalLimit(apiType: ApiType): Promise<GlobalApiLimit | null> {
     try {
-      const { data, error } = await this.supabase
-        .from('global_api_limits')
-        .select('*')
-        .eq('api_type', apiType)
-        .single()
+      const { data, error } = await this.supabase.from("global_api_limits").select("*").eq("api_type", apiType).single()
 
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error fetching global limit:', error)
+      if (error && error.code !== "PGRST116") {
+        console.error("Error fetching global limit:", error)
         return null
       }
 
       return data as GlobalApiLimit | null
     } catch (error) {
-      console.error('Exception fetching global limit:', error)
+      console.error("Exception fetching global limit:", error)
       return null
     }
   }
@@ -487,18 +477,18 @@ export class ApiRateLimiter {
     try {
       // Get current global limits
       const globalLimits = await this.getGlobalLimits()
-      
+
       for (const globalLimit of globalLimits) {
         // Update existing usage records for today
         const { error } = await this.supabase
-          .from('api_usage')
+          .from("api_usage")
           .update({
             daily_limit: globalLimit.daily_limit,
             is_unlimited: globalLimit.is_unlimited,
-            updated_at: new Date().toISOString()
+            updated_at: new Date().toISOString(),
           })
-          .eq('api_type', globalLimit.api_type)
-          .eq('usage_date', new Date().toISOString().split('T')[0])
+          .eq("api_type", globalLimit.api_type)
+          .eq("usage_date", new Date().toISOString().split("T")[0])
 
         if (error) {
           console.error(`Error updating usage records for ${globalLimit.api_type}:`, error)
@@ -508,7 +498,7 @@ export class ApiRateLimiter {
 
       return true
     } catch (error) {
-      console.error('Exception updating existing usage records:', error)
+      console.error("Exception updating existing usage records:", error)
       return false
     }
   }

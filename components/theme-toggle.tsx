@@ -1,12 +1,12 @@
 "use client"
 
 import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
+import { useSmoothTheme } from "@/hooks/use-smooth-theme"
 
 export function ThemeToggle() {
   const [mounted, setMounted] = useState(false)
-  const { theme, setTheme, resolvedTheme } = useTheme()
+  const { resolvedTheme, toggleTheme } = useSmoothTheme()
 
   useEffect(() => {
     setMounted(true)
@@ -14,14 +14,6 @@ export function ThemeToggle() {
 
   if (!mounted) {
     return <div className="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 animate-pulse" />
-  }
-
-  const toggleTheme = () => {
-    if (resolvedTheme === "dark") {
-      setTheme("light")
-    } else {
-      setTheme("dark")
-    }
   }
 
   const getIcon = () => {

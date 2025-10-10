@@ -15,7 +15,7 @@
 ### ✅ **সমাধান:**
 
 #### 1. **Signup Process আপডেট করেছি:**
-```typescript
+\`\`\`typescript
 // এখন signup time এ IP address track করে
 const currentIP = await this.getUserCurrentIP().catch(() => "unknown")
 
@@ -27,10 +27,10 @@ await supabase.from("user_ip_history").insert({
   first_seen: new Date().toISOString(),
   last_seen: new Date().toISOString(),
 })
-```
+\`\`\`
 
 #### 2. **Login Process (ইতিমধ্যে ছিল):**
-```typescript
+\`\`\`typescript
 // login time এ IP address track করে
 const currentIP = await this.getUserCurrentIP().catch(() => "unknown")
 
@@ -42,7 +42,7 @@ await supabase.from("user_sessions").insert({
   user_agent: navigator.userAgent,
   is_active: true,
 })
-```
+\`\`\`
 
 ### 🚀 **এখন যা হবে:**
 
@@ -58,13 +58,13 @@ await supabase.from("user_sessions").insert({
 
 ### 🔧 **IP Tracking Flow:**
 
-```
+\`\`\`
 User Signup → Get IP → Store in user_ip_history
      ↓
 User Login → Get IP → Store in user_sessions + Update user_ip_history
      ↓
 Admin Panel → Display IP from user_sessions
-```
+\`\`\`
 
 ### 📊 **Database Tables:**
 
@@ -97,10 +97,10 @@ Admin Panel → Display IP from user_sessions
 #### **যদি এখনও "Unknown" দেখায়:**
 
 1. **Check Database**:
-   ```sql
+   \`\`\`sql
    SELECT ip_address FROM user_sessions WHERE user_id = 'user_id';
    SELECT ip_address FROM user_ip_history WHERE user_id = 'user_id';
-   ```
+   \`\`\`
 
 2. **Check IP Fetch**:
    - Browser console এ error messages

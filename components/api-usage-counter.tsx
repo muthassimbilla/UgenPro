@@ -280,7 +280,7 @@ export const ApiUsageCounter = forwardRef<ApiUsageCounterRef, ApiUsageCounterPro
 
           {unlimited && (
             <div className="text-xs text-purple-600 font-medium">
-              আপনার unlimited access আছে
+              You have unlimited access
             </div>
           )}
 
@@ -292,7 +292,7 @@ export const ApiUsageCounter = forwardRef<ApiUsageCounterRef, ApiUsageCounterPro
 
           {isNearLimit && (
             <div className="text-xs text-orange-600">
-              সতর্কতা: আপনার লিমিট প্রায় শেষ হয়ে যাচ্ছে
+              Warning: Your limit is almost reached
             </div>
           )}
 

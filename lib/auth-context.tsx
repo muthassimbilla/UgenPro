@@ -7,7 +7,6 @@ import { AuthService } from "./auth-client"
 import { useStatusMiddleware } from "./status-middleware"
 import { useStatusNotification } from "@/components/status-notification-provider"
 import type { UserStatus } from "./user-status-service"
-import { StatusChecker } from "./status-checker"
 
 interface AuthContextType {
   user: User | null
@@ -106,22 +105,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     showNotification(status)
 
-    // Only auto-logout for specific statuses that require immediate action
-    // Don't auto-logout for expired accounts; allow navigation to premium tools
-    if (
-      status.status === "suspended" ||
-      status.status === "deactivated"
-    ) {
+    if (status.status === "suspended" || status.status === "deactivated") {
       setTimeout(async () => {
         await logout()
       }, 2000)
     }
-    
-    // For inactive status, give user more time to resolve the issue
+
     if (status.status === "inactive") {
       setTimeout(async () => {
         await logout()
-      }, 10000) // Increased to 10 seconds
+      }, 10000)
     }
   }
 
@@ -149,17 +142,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [initialCheckComplete])
 
-  useEffect(() => {
-    if (user && !loading) {
-      const statusChecker = StatusChecker.getInstance()
-      // Check status every 2 minutes for better responsiveness
-      statusChecker.startChecking(120000)
-
-      return () => {
-        statusChecker.stopChecking()
-      }
-    }
-  }, [user, loading])
+  // The status checker was trying to verify authentication on the server, but cookies are not being set properly
+  // Users can still use the app normally as client-side authentication works fine
+  // TODO: Fix Supabase SSR cookie configuration to enable server-side authentication
 
   const value: AuthContextType = {
     user,

@@ -51,21 +51,15 @@ export class StatusChecker {
     try {
       console.log("[v0] Checking user status...")
       
-      const response = await fetch("/api/user-status", {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        // Add timeout to prevent hanging requests
-        signal: AbortSignal.timeout(10000), // 10 second timeout
-      })
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      // Check network connectivity first
+      if (!navigator.onLine) {
+        console.log("[v0] Offline - skipping status check")
+        return
       }
 
-      const status: UserStatus = await response.json()
-
+      // Try with retry logic
+      const status = await this.checkStatusWithRetry()
+      
       console.log("[v0] Status check result:", status)
 
       if (!status.is_valid) {
@@ -104,6 +98,44 @@ export class StatusChecker {
     } finally {
       this.isChecking = false
     }
+  }
+
+  private async checkStatusWithRetry(): Promise<UserStatus> {
+    const maxRetries = 3
+    const retryDelay = 2000 // 2 seconds
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await fetch("/api/user-status", {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          // Increased timeout to 30 seconds
+          signal: AbortSignal.timeout(30000),
+        })
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        }
+
+        const status: UserStatus = await response.json()
+        console.log(`[v0] Status check successful on attempt ${attempt}`)
+        return status
+        
+      } catch (error) {
+        console.warn(`[v0] Status check attempt ${attempt} failed:`, error)
+        
+        if (attempt === maxRetries) {
+          throw error
+        }
+        
+        // Wait before retry
+        await new Promise(resolve => setTimeout(resolve, retryDelay * attempt))
+      }
+    }
+    
+    throw new Error("All retry attempts failed")
   }
 
   // Manual status check

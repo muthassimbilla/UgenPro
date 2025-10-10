@@ -65,72 +65,69 @@ Thank you!`
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px]">
+      <DialogContent className="sm:max-w-[500px] mx-auto">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-xl">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
             <Crown className="h-6 w-6 text-yellow-500" />
             Purchase Premium Package
           </DialogTitle>
-          <DialogDescription>
+          <DialogDescription className="text-base">
             Contact the admin to purchase this premium package.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-6">
-          {/* Plan Details */}
-          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border-blue-200 dark:border-blue-700">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between">
+          {/* Plan Details - Screenshot Style */}
+          <Card className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-700 border-gray-200 dark:border-gray-600">
+            <CardContent className="p-6">
+              <div className="flex items-center justify-between mb-4">
                 <div>
-                  <h3 className="font-semibold text-lg">{planName}</h3>
+                  <h3 className="font-bold text-xl">{planName}</h3>
                   <p className="text-sm text-muted-foreground">{planDuration}</p>
                 </div>
-                <Badge variant="secondary" className="text-lg font-bold px-3 py-1">
-                  {planPrice}
-                </Badge>
+                <div className="text-right">
+                  <div className="text-2xl font-bold text-gray-900 dark:text-white">{planPrice}</div>
+                </div>
               </div>
-              <div className="mt-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg">
-                <p className="text-xs text-gray-600 dark:text-gray-400">
-                  📦 This package information will be automatically sent to the admin
-                </p>
+              <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-700 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-4 h-4 bg-amber-500 rounded-sm flex items-center justify-center">
+                    <span className="text-white text-xs">📦</span>
+                  </div>
+                  <p className="text-sm text-amber-800 dark:text-amber-200">
+                    This package information will be automatically sent to the admin
+                  </p>
+                </div>
               </div>
             </CardContent>
           </Card>
 
-          {/* Contact Options */}
+          {/* Contact Admin Section */}
           <div className="space-y-4">
-            <h4 className="font-semibold flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-purple-500" />
+            <h4 className="font-bold text-lg flex items-center gap-2">
+              <Sparkles className="h-5 w-5 text-purple-500" />
               Contact Admin
             </h4>
             
-            <div className="grid gap-3">
-              {/* Telegram Bot */}
-              <Button
-                onClick={handleTelegramContact}
-                disabled={isLoading}
-                className="w-full h-12 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                <MessageCircle className="h-5 w-5 mr-2" />
-                {isLoading ? "Opening Telegram..." : "Contact Admin"}
-                <ExternalLink className="h-4 w-4 ml-2" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Additional Info */}
-          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
-            <p className="text-sm text-blue-800 dark:text-blue-200">
-              <strong>Note:</strong> After contacting the admin, you will receive payment instructions and your premium access will be activated within 24 hours.
-            </p>
-          </div>
-
-          {/* Close Button */}
-          <div className="flex justify-end">
-            <Button variant="ghost" onClick={onClose}>
-              Close
+            <Button
+              onClick={handleTelegramContact}
+              disabled={isLoading}
+              className="w-full h-12 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base shadow-lg hover:shadow-xl transition-all duration-300"
+            >
+              <MessageCircle className="h-5 w-5 mr-2" />
+              {isLoading ? "Opening Telegram..." : "Contact Admin"}
+              <ExternalLink className="h-4 w-4 ml-2" />
             </Button>
           </div>
+
+          {/* Note Section */}
+          <Card className="bg-gray-50 dark:bg-gray-800 border-gray-200 dark:border-gray-600">
+            <CardContent className="p-4">
+              <p className="text-sm text-gray-700 dark:text-gray-300">
+                <strong className="text-gray-900 dark:text-white">Note:</strong> After contacting the admin, you will receive payment instructions and your premium access will be activated within 24 hours.
+              </p>
+            </CardContent>
+          </Card>
         </div>
       </DialogContent>
     </Dialog>

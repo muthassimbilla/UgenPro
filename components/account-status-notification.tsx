@@ -16,13 +16,13 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
   const [isVisible, setIsVisible] = useState(true)
 
   useEffect(() => {
-    // If status is invalid, auto logout after 5 seconds, except for expired accounts
+    // If status is invalid, auto logout after 15 seconds, except for expired accounts
     if (!status.is_valid && status.status !== "expired") {
       const timer = setTimeout(() => {
         if (onLogout) {
           onLogout()
         }
-      }, 5000)
+      }, 15000) // Increased to 15 seconds
 
       return () => clearTimeout(timer)
     }
@@ -73,7 +73,7 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
           titleColor: "text-gray-800",
           textColor: "text-gray-700",
           badgeVariant: "outline" as const,
-          title: "Account Status",
+          title: "Connection Issue",
           autoClose: true,
         }
     }
@@ -115,12 +115,12 @@ export function AccountStatusNotification({ status, onClose, onLogout }: Account
           {!status.is_valid && status.status !== "expired" && (
             <div className="flex items-center gap-2 mb-3">
               <div className="flex-1">
-                <div className="text-xs text-gray-600 mb-1">Auto logout in 5 seconds...</div>
+                <div className="text-xs text-gray-600 mb-1">Auto logout in 15 seconds...</div>
                 <div className="w-full bg-gray-200 rounded-full h-1">
                   <div
-                    className="bg-red-500 h-1 rounded-full transition-all duration-5000 ease-linear"
+                    className="bg-red-500 h-1 rounded-full transition-all duration-15000 ease-linear"
                     style={{
-                      animation: "countdown 5s linear forwards",
+                      animation: "countdown 15s linear forwards",
                       width: "100%",
                     }}
                   />

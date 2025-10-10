@@ -3,7 +3,7 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import type { Tool } from "@/lib/tools-config"
-import { X, ArrowRight, Check } from "lucide-react"
+import { X, ArrowRight, Check, Loader2, Play } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useEffect, useState } from "react"
@@ -16,6 +16,7 @@ interface ToolModalProps {
 
 export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
   const [videoError, setVideoError] = useState(false)
+  const [videoLoading, setVideoLoading] = useState(true)
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -43,6 +44,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
     // Reset video error state when modal opens
     if (isOpen) {
       setVideoError(false)
+      setVideoLoading(true)
     }
   }, [isOpen, tool])
 
@@ -60,9 +62,20 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="w-[90vw] max-w-[800px] h-[56.25vw] max-h-[450px] p-0 border-0 bg-transparent shadow-none [&>button]:hidden">
+      <DialogContent className="w-[90vw] max-w-[800px] h-[56.25vw] max-h-[450px] p-0 border-0 bg-transparent shadow-none [&>button]:hidden mx-auto">
         <DialogTitle className="sr-only">{tool.name} Demo Video</DialogTitle>
         <div className="relative w-full h-full rounded-lg overflow-hidden bg-black">
+          {/* Video Loading Animation */}
+          {videoLoading && tool.demoVideo && !videoError && (
+            <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-10">
+              <div className="text-center text-white">
+                <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-[#2B7FFF]" />
+                <p className="text-lg font-semibold mb-2">Loading Demo Video</p>
+                <p className="text-sm text-gray-300">Please wait while we prepare the video...</p>
+              </div>
+            </div>
+          )}
+
           {/* Video Section */}
           {tool.demoVideo && !videoError && (
             <iframe
@@ -75,9 +88,14 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               referrerPolicy="strict-origin-when-cross-origin"
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-presentation"
+              onLoad={() => {
+                console.log("Video loaded successfully");
+                setVideoLoading(false);
+              }}
               onError={() => {
                 console.log("Video failed to load, showing fallback");
                 setVideoError(true);
+                setVideoLoading(false);
               }}
             />
           )}

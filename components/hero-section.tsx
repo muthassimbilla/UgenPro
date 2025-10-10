@@ -5,10 +5,7 @@ import { ArrowRight, Sparkles, Zap, TrendingUp } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { motion } from "framer-motion"
 import { memo, useCallback, useMemo } from "react"
-import { FlippingText } from "./flipping-text"
-import { TextGenerateEffect } from "./text-generate-effect"
 import { PerformanceOptimizer, useReducedMotion } from "./performance-optimizer"
-import { OptimizedImage, preloadImage } from "./optimized-image"
 
 export const HeroSection = memo(function HeroSection() {
   const router = useRouter()
@@ -25,34 +22,38 @@ export const HeroSection = memo(function HeroSection() {
   }, [router])
 
   // Memoize animation variants for better performance
-  const animationVariants = useMemo(() => ({
-    container: {
-      hidden: { opacity: 0 },
-      visible: {
-        opacity: 1,
-        transition: {
-          staggerChildren: 0.1,
-          delayChildren: 0.2,
+  const animationVariants = useMemo(
+    () => ({
+      container: {
+        hidden: { opacity: 0 },
+        visible: {
+          opacity: 1,
+          transition: {
+            staggerChildren: 0.1,
+            delayChildren: 0.2,
+          },
         },
       },
-    },
-    item: {
-      hidden: { opacity: 0, y: 20 },
-      visible: {
-        opacity: 1,
-        y: 0,
-        transition: {
-          duration: 0.6,
-          ease: "easeOut",
+      item: {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+          opacity: 1,
+          y: 0,
+          transition: {
+            duration: 0.6,
+            ease: "easeOut",
+          },
         },
       },
-    },
-  }), [])
+    }),
+    [],
+  )
 
   return (
-    <section id="hero" className="relative min-h-[80vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden pt-12 pb-4 sm:pt-16 sm:pb-6">
-
-
+    <section
+      id="hero"
+      className="relative min-h-[80vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden pt-12 pb-4 sm:pt-16 sm:pb-6"
+    >
       <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-12">
         <div className="max-w-4xl mx-auto text-center">
           <PerformanceOptimizer>
@@ -82,7 +83,7 @@ export const HeroSection = memo(function HeroSection() {
               >
                 <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
                   <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
-                  <span className="gradient-text-rainbow text-shadow-lg">for Developers</span>
+                  <span className="gradient-text-rainbow text-shadow-lg">CPA Self SignUp</span>
                 </h1>
               </motion.div>
               <motion.div
@@ -93,7 +94,7 @@ export const HeroSection = memo(function HeroSection() {
               >
                 <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
                   <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
-                  <span className="gradient-text-rainbow text-shadow-lg">for Developers</span>
+                  <span className="gradient-text-rainbow text-shadow-lg">CPA Self SignUp</span>
                 </h1>
               </motion.div>
 
@@ -103,7 +104,9 @@ export const HeroSection = memo(function HeroSection() {
                 transition={{ duration: 0.6, delay: 0.5 }}
                 className="text-sm sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium px-2 sm:px-0"
               >
-                Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.
+                Professional generator tools platform for CPA self signup offering user agent generator, address
+                generator, email2name converter, and more. Fast, secure, and reliable online tools for CPA professionals
+                and marketers.
               </motion.p>
 
               <motion.div
@@ -117,7 +120,7 @@ export const HeroSection = memo(function HeroSection() {
                   onClick={handleGetStarted}
                   className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all group interactive-scale w-full sm:w-auto"
                 >
-                  <span className="font-noto-bengali">এখনই শুরু করুন</span>
+                  Get Started Now
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
                 <Button

@@ -20,7 +20,7 @@ const nextConfig = {
   experimental: {
     scrollRestoration: true,
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', 'framer-motion'],
-    esmExternals: true,
+    esmExternals: false, // Changed from true to false
     webVitalsAttribution: ['CLS', 'LCP', 'FCP', 'FID', 'TTFB'],
     // optimizeCss: true, // temporarily disabled
     turbo: {
@@ -125,34 +125,92 @@ const nextConfig = {
       }
     }
     
-    // Optimize bundle size - temporarily disabled for build
-    // if (!dev) {
-    //   config.optimization = {
-    //     ...config.optimization,
-    //     splitChunks: {
-    //       chunks: 'all',
-    //       cacheGroups: {
-    //         vendor: {
-    //           test: /[\\/]node_modules[\\/]/,
-    //           name: 'vendors',
-    //           chunks: 'all',
-    //         },
-    //         common: {
-    //           name: 'common',
-    //           minChunks: 2,
-    //           chunks: 'all',
-    //           enforce: true,
-    //         },
-    //       },
-    //     },
-    //   }
-    // }
-    
-    // Optimize imports
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': new URL('./', import.meta.url).pathname,
+    // Fix exports is not defined error
+    config.output = {
+      ...config.output,
+      globalObject: 'self',
+      environment: {
+        arrowFunction: true,
+        bigIntLiteral: true,
+        const: true,
+        destructuring: true,
+        dynamicImport: true,
+        forOf: true,
+        module: true,
+      },
     }
+    
+    // Additional webpack fixes for module loading
+    config.resolve = {
+      ...config.resolve,
+      alias: {
+        ...config.resolve.alias,
+        '@': new URL('./', import.meta.url).pathname,
+      },
+      fallback: {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        crypto: false,
+        stream: false,
+        url: false,
+        zlib: false,
+        http: false,
+        https: false,
+        assert: false,
+        os: false,
+        path: false,
+      },
+    }
+    
+    // Fix module resolution for better compatibility
+    config.module = {
+      ...config.module,
+      rules: [
+        ...config.module.rules,
+        {
+          test: /\.m?js$/,
+          resolve: {
+            fullySpecified: false,
+          },
+        },
+      ],
+    }
+    
+    // Additional optimization for chunk loading
+    config.optimization = {
+      ...config.optimization,
+      splitChunks: {
+        chunks: 'all',
+        minSize: 20000,
+        maxSize: 244000,
+        cacheGroups: {
+          default: {
+            minChunks: 2,
+            priority: -20,
+            reuseExistingChunk: true,
+          },
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            priority: -10,
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            priority: -5,
+            reuseExistingChunk: true,
+          },
+        },
+      },
+      runtimeChunk: {
+        name: 'runtime',
+      },
+    }
+    
     
     return config
   }

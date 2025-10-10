@@ -75,7 +75,7 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
               Key Features:
             </h4>
             <ul className="space-y-1.5">
-              {tool.features.slice(0, 3).map((feature, index) => (
+              {tool.features.map((feature, index) => (
                 <li
                   key={index}
                   className="flex items-start gap-2 text-xs text-muted-foreground group-hover:text-foreground transition-colors"
@@ -84,11 +84,6 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
                   <span className="leading-relaxed">{feature}</span>
                 </li>
               ))}
-              {tool.features.length > 3 && (
-                <li className="text-xs font-medium bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] bg-clip-text text-transparent">
-                  +{tool.features.length - 3} more features
-                </li>
-              )}
             </ul>
           </div>
         </div>

@@ -5,6 +5,7 @@ import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
 import ClientProviders from "@/components/client-providers"
+import ChunkLoadErrorHandler from "@/components/chunk-load-error-handler"
 
 const inter = Inter({
   subsets: ["latin"],
@@ -25,14 +26,15 @@ const notoSansBengali = Noto_Sans_Bengali({
 })
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ugenpro.site'),
+  metadataBase: new URL("https://ugenpro.site"),
   title: {
     default: "UGen Pro - Advanced Generator Tools Platform | User Agent Generator, Address Generator, Email2Name",
-    template: "%s | UGen Pro"
+    template: "%s | UGen Pro",
   },
   description:
     "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.",
-  keywords: "generator tools, user agent generator, address generator, email2name, online tools, productivity tools, Bangladesh, Dhaka, developer tools, web tools, free online generators",
+  keywords:
+    "generator tools, user agent generator, address generator, email2name, online tools, productivity tools, Bangladesh, Dhaka, developer tools, web tools, free online generators",
   authors: [{ name: "UGen Pro" }],
   creator: "UGen Pro",
   publisher: "UGen Pro",
@@ -47,14 +49,13 @@ export const metadata: Metadata = {
       { url: "/ugenpro-logo.svg", type: "image/svg+xml" },
     ],
     shortcut: "/favicon.ico",
-    apple: [
-      { url: "/ugenpro-logo.svg", sizes: "180x180", type: "image/svg+xml" },
-    ],
+    apple: [{ url: "/ugenpro-logo.svg", sizes: "180x180", type: "image/svg+xml" }],
   },
   manifest: "/manifest.json",
   openGraph: {
     title: "UGen Pro - Advanced Generator Tools Platform | User Agent Generator, Address Generator, Email2Name",
-    description: "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.",
+    description:
+      "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.",
     type: "website",
     url: "https://ugenpro.site",
     siteName: "UGen Pro",
@@ -75,7 +76,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "UGen Pro - Advanced Generator Tools Platform | User Agent Generator, Address Generator, Email2Name",
-    description: "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.",
+    description:
+      "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more. Fast, secure, and reliable online tools for developers and professionals in Bangladesh.",
     images: ["/ugenpro-social-sharing.jpg"],
     creator: "@ugenpro",
   },
@@ -119,54 +121,72 @@ export default function RootLayout({
         <link rel="alternate" hrefLang="bn" href="https://ugenpro.site/bn" />
         <link rel="alternate" hrefLang="x-default" href="https://ugenpro.site" />
         <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              // Prevent theme transition flicker on page load
+              (function() {
+                const theme = localStorage.getItem('ugenpro-theme') || 'dark';
+                document.documentElement.classList.add('theme-transitioning');
+                document.documentElement.setAttribute('data-theme', theme);
+                
+                // Remove transitioning class after a short delay
+                setTimeout(() => {
+                  document.documentElement.classList.remove('theme-transitioning');
+                }, 100);
+              })();
+            `,
+          }}
+        />
+        <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
-              "name": "UGen Pro",
-              "description": "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more.",
-              "url": "https://ugenpro.site",
-              "logo": "https://ugenpro.site/ugenpro-logo.svg",
-              "image": "https://ugenpro.site/ugenpro-social-sharing.jpg",
-              "address": {
+              name: "UGen Pro",
+              description:
+                "Professional generator tools platform offering user agent generator, address generator, email2name converter, and more.",
+              url: "https://ugenpro.site",
+              logo: "https://ugenpro.site/ugenpro-logo.svg",
+              image: "https://ugenpro.site/ugenpro-social-sharing.jpg",
+              address: {
                 "@type": "PostalAddress",
-                "addressLocality": "Dhaka",
-                "addressCountry": "BD"
+                addressLocality: "Dhaka",
+                addressCountry: "BD",
               },
-              "contactPoint": {
+              contactPoint: {
                 "@type": "ContactPoint",
-                "contactType": "customer service",
-                "availableLanguage": ["English", "Bengali"]
+                contactType: "customer service",
+                availableLanguage: ["English", "Bengali"],
               },
-              "sameAs": [
-                "https://twitter.com/ugenpro"
-              ],
-              "offers": {
+              sameAs: ["https://twitter.com/ugenpro"],
+              offers: {
                 "@type": "Offer",
-                "description": "Free online generator tools",
-                "price": "0",
-                "priceCurrency": "USD"
+                description: "Free online generator tools",
+                price: "0",
+                priceCurrency: "USD",
               },
-              "serviceArea": {
+              serviceArea: {
                 "@type": "Country",
-                "name": "Bangladesh"
-              }
-            })
+                name: "Bangladesh",
+              },
+            }),
           }}
         />
       </head>
       <body className={`${inter.className} ${notoSansBengali.variable}`} suppressHydrationWarning>
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem={false}
-          disableTransitionOnChange={true}
-          storageKey="taskflow-theme"
-        >
-          <ClientProviders>{children}</ClientProviders>
-          <Toaster />
-        </ThemeProvider>
+        <ChunkLoadErrorHandler>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem={false}
+            disableTransitionOnChange={true}
+            storageKey="ugenpro-theme"
+          >
+            <ClientProviders>{children}</ClientProviders>
+            <Toaster />
+          </ThemeProvider>
+        </ChunkLoadErrorHandler>
       </body>
     </html>
   )

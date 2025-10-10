@@ -1,10 +1,11 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect, useCallback, memo, useTransition } from "react"
-import ClientOnly from "@/components/client-only"
+import { useState, useEffect, useCallback, useTransition } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
+import { AuthService } from "@/lib/auth-client"
+import { UserStatusService } from "@/lib/user-status-service"
 import { getClientFlashMessage, clearClientFlashMessage, type FlashMessage } from "@/lib/flash-messages"
 import { useNetwork } from "@/contexts/network-context"
 import NoInternet from "@/components/no-internet"
@@ -12,8 +13,12 @@ import AuthLayout from "@/components/auth/auth-layout"
 import AuthHero from "@/components/auth/auth-hero"
 import AuthForm from "@/components/auth/auth-form"
 import LoadingOverlay from "@/components/loading-overlay"
+import AuthLoadingScreen from "@/components/auth-loading-screen"
+import { Button } from "@/components/ui/button"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { Mail } from "lucide-react"
 
-const LoginPage = memo(function LoginPage() {
+export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const { login, user, loading: authLoading } = useAuth()
@@ -36,6 +41,11 @@ const LoginPage = memo(function LoginPage() {
   const [isPending, startTransition] = useTransition()
   const [isCheckingAuth, setIsCheckingAuth] = useState(true)
   const [isInitialized, setIsInitialized] = useState(false)
+  const [showResendVerification, setShowResendVerification] = useState(false)
+  const [resendingVerification, setResendingVerification] = useState(false)
+  const [resendSuccess, setResendSuccess] = useState(false)
+  const [isVerifyingAccount, setIsVerifyingAccount] = useState(false)
+  const [verificationTimeout, setVerificationTimeout] = useState(false)
 
   const clearSessionData = () => {
     try {
@@ -90,6 +100,54 @@ const LoginPage = memo(function LoginPage() {
     return newErrors
   }, [formData.email, formData.password])
 
+  const verifyAccountAndRedirect = async (userId: string) => {
+    try {
+      console.log("[v0] Starting account verification for user:", userId)
+      setIsVerifyingAccount(true)
+
+      const status = await UserStatusService.checkUserStatus(userId)
+      console.log("[v0] Account status result:", status)
+
+      const redirectParam = searchParams.get("redirect")
+
+      if (status.status === "active") {
+        const destination = redirectParam || "/tool"
+        console.log("[v0] Redirecting active user to:", destination)
+        router.push(destination)
+        // Loading screen will stay visible until new page loads
+      } else if (status.status === "expired" || status.status === "pending") {
+        console.log("[v0] Redirecting expired/pending user to premium tools")
+        router.push("/premium-tools")
+        // Loading screen will stay visible until new page loads
+      } else if (status.status === "suspended" || status.status === "deactivated" || status.status === "inactive") {
+        console.log("[v0] Redirecting suspended/deactivated user to error page")
+        router.push(`/account-error?type=${status.status}&message=${encodeURIComponent(status.message)}`)
+        // Loading screen will stay visible until error page loads
+      } else {
+        console.log("[v0] Unknown status, redirecting to error page")
+        router.push(`/account-error?type=unknown&message=${encodeURIComponent(status.message)}`)
+        // Loading screen will stay visible until error page loads
+      }
+    } catch (error: any) {
+      console.error("[v0] Account verification error:", error)
+      setIsVerifyingAccount(false)
+      setLoading(false)
+      setIsSubmitting(false)
+
+      // Show error and allow user to try again
+      setErrors(["Failed to verify account status. Please try again."])
+    }
+  }
+
+  const handleVerificationTimeout = () => {
+    console.log("[v0] Account verification timeout")
+    setVerificationTimeout(true)
+    setTimeout(() => {
+      router.push("/account-error?type=error&message=Server%20not%20responding")
+      // Loading screen will stay visible until error page loads
+    }, 2000)
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
@@ -100,6 +158,8 @@ const LoginPage = memo(function LoginPage() {
     setErrors([])
     setSuccessMessage("")
     setPendingApproval(false)
+    setShowResendVerification(false)
+    setResendSuccess(false)
 
     try {
       const validationErrors = validateForm()
@@ -111,35 +171,53 @@ const LoginPage = memo(function LoginPage() {
       }
 
       const loginResult = await login(formData.email.trim(), formData.password)
+      console.log("[v0] Login successful, starting account verification")
 
-      startTransition(() => {
-        // If account is expired, redirect directly to premium tools page
-        const redirectTo =
-          loginResult?.userStatus === "expired"
-            ? "/premium-tools"
-            : searchParams.get("redirect") || "/tool"
-        console.log("[v0] Login successful, redirecting to:", redirectTo)
-        router.push(redirectTo)
-      })
+      if (loginResult.user) {
+        await verifyAccountAndRedirect(loginResult.user.id)
+      } else {
+        throw new Error("Login succeeded but user data is missing")
+      }
     } catch (error: any) {
       console.error("[v0] Login error:", error)
 
       const errorMsg = error.message?.toLowerCase() || ""
 
-      if (errorMsg.includes("deactivated")) {
+      if (errorMsg.includes("verify your email") || errorMsg.includes("email not confirmed")) {
+        setErrors(["Please verify your email address before logging in. Check your inbox for the verification link."])
+        setShowResendVerification(true)
+      } else if (errorMsg.includes("deactivated")) {
         setErrors(["Your account has been deactivated. Please contact support."])
       } else if (errorMsg.includes("suspended")) {
         setErrors(["Your account suspended by admin"])
       } else if (errorMsg.includes("invalid") || errorMsg.includes("credentials")) {
         setErrors(["Invalid email or password. Please check your credentials and try again."])
-      } else if (errorMsg.includes("email not confirmed")) {
-        setErrors(["Please verify your email address before logging in. Check your inbox for the verification link."])
       } else {
         setErrors([error.message || "Login failed. Please try again."])
       }
-    } finally {
+
       setLoading(false)
       setIsSubmitting(false)
+    }
+  }
+
+  const handleResendVerification = async () => {
+    if (!formData.email || resendingVerification) return
+
+    setResendingVerification(true)
+    setResendSuccess(false)
+
+    try {
+      await AuthService.resendVerificationEmail(formData.email.trim())
+      setResendSuccess(true)
+      setShowResendVerification(false)
+      setSuccessMessage("Verification email sent! Please check your inbox.")
+      setShowSuccessMessage(true)
+    } catch (error: any) {
+      console.error("[v0] Resend verification error:", error)
+      setErrors([error.message || "Failed to resend verification email. Please try again."])
+    } finally {
+      setResendingVerification(false)
     }
   }
 
@@ -147,6 +225,21 @@ const LoginPage = memo(function LoginPage() {
     const message = searchParams.get("message")
     const reason = searchParams.get("reason")
     const success = searchParams.get("success")
+    const verified = searchParams.get("verified")
+    const error = searchParams.get("error")
+
+    if (verified === "true") {
+      setSuccessMessage("Email verified successfully! You can now log in.")
+      setTimeout(() => {
+        setShowSuccessMessage(true)
+      }, 100)
+      return
+    }
+
+    if (error) {
+      setErrors([decodeURIComponent(error)])
+      return
+    }
 
     const flash = getClientFlashMessage()
     if (flash) {
@@ -198,15 +291,23 @@ const LoginPage = memo(function LoginPage() {
   }, [authLoading])
 
   useEffect(() => {
-    // Initialize component after a brief delay to prevent flashing
     const timer = setTimeout(() => {
       setIsInitialized(true)
     }, 100)
-    
+
     return () => clearTimeout(timer)
   }, [])
 
-  // Show loading spinner only when actually checking auth or not initialized
+  if (isVerifyingAccount) {
+    return (
+      <AuthLoadingScreen
+        message={verificationTimeout ? "Server not responding" : "Verifying your account"}
+        onTimeout={handleVerificationTimeout}
+        timeoutMs={10000}
+      />
+    )
+  }
+
   if (!isInitialized || (isCheckingAuth && authLoading)) {
     return <LoadingOverlay message="Loading..." fullScreen />
   }
@@ -216,31 +317,46 @@ const LoginPage = memo(function LoginPage() {
   }
 
   return (
-    <ClientOnly fallback={<LoadingOverlay message="Loading..." fullScreen />}>
-      <AuthLayout variant="login">
-        <div className="space-y-8 page-transition">
-          <AuthHero variant="login" />
-          <AuthForm
-            variant="login"
-            formData={formData}
-            errors={errors}
-            loading={loading}
-            isSubmitting={isSubmitting}
-            showPassword={showPassword}
-            onInputChange={handleInputChange}
-            onSubmit={handleSubmit}
-            onTogglePassword={handleTogglePassword}
-            flashMessage={flashMessage}
-            showSuccessMessage={showSuccessMessage}
-            successMessage={successMessage}
-            sessionInvalidReason={sessionInvalidReason}
-            ipChangeLogout={ipChangeLogout}
-            pendingApproval={pendingApproval}
-          />
-        </div>
-      </AuthLayout>
-    </ClientOnly>
-  )
-})
+    <AuthLayout variant="login">
+      <div className="space-y-8 page-transition">
+        <AuthHero variant="login" />
 
-export default LoginPage
+        {showResendVerification && (
+          <Alert className="border-blue-500/50 bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
+            <Mail className="h-4 w-4 text-blue-500" />
+            <AlertDescription className="flex items-center justify-between">
+              <span className="text-sm">Didn't receive the verification email?</span>
+              <Button
+                onClick={handleResendVerification}
+                disabled={resendingVerification}
+                size="sm"
+                variant="outline"
+                className="ml-4 bg-transparent"
+              >
+                {resendingVerification ? "Sending..." : "Resend Email"}
+              </Button>
+            </AlertDescription>
+          </Alert>
+        )}
+
+        <AuthForm
+          variant="login"
+          formData={formData}
+          errors={errors}
+          loading={loading}
+          isSubmitting={isSubmitting}
+          showPassword={showPassword}
+          onInputChange={handleInputChange}
+          onSubmit={handleSubmit}
+          onTogglePassword={handleTogglePassword}
+          flashMessage={flashMessage}
+          showSuccessMessage={showSuccessMessage}
+          successMessage={successMessage}
+          sessionInvalidReason={sessionInvalidReason}
+          ipChangeLogout={ipChangeLogout}
+          pendingApproval={pendingApproval}
+        />
+      </div>
+    </AuthLayout>
+  )
+}

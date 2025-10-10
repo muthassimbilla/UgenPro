@@ -16,9 +16,9 @@ Active Sessions ০ দেখানোর কারণ এবং সমাধা
 
 নিম্নলিখিত SQL script run করুন আপনার Supabase database এ:
 
-```sql
+\`\`\`sql
 -- scripts/add_admin_policies.sql ফাইলটি run করুন
-```
+\`\`\`
 
 এই script:
 - `is_admin()` function তৈরি করবে
@@ -29,20 +29,20 @@ Active Sessions ০ দেখানোর কারণ এবং সমাধা
 
 `.env.local` ফাইলে নিম্নলিখিত variables যোগ করুন:
 
-```env
+\`\`\`env
 NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
 SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
-```
+\`\`\`
 
 ### 3. Admin User Setup
 
 নিশ্চিত করুন যে আপনি `admins` table এ registered:
 
-```sql
+\`\`\`sql
 INSERT INTO public.admins (id, username, is_active) 
 VALUES ('your_user_id', 'your_username', true);
-```
+\`\`\`
 
 ## 🚀 **এখন যা যা কাজ করবে:**
 
@@ -72,19 +72,19 @@ VALUES ('your_user_id', 'your_username', true);
 ### যদি এখনও ০ দেখায়:
 
 1. **Database Policies Check**:
-   ```sql
+   \`\`\`sql
    SELECT is_admin(); -- true return করবে যদি admin হন
-   ```
+   \`\`\`
 
 2. **Sessions Data Check**:
-   ```sql
+   \`\`\`sql
    SELECT COUNT(*) FROM user_sessions WHERE is_active = true;
-   ```
+   \`\`\`
 
 3. **Admin Status Check**:
-   ```sql
+   \`\`\`sql
    SELECT * FROM admins WHERE id = auth.uid();
-   ```
+   \`\`\`
 
 4. **Console Logs**: Browser console এ error messages check করুন
 

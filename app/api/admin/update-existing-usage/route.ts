@@ -1,31 +1,25 @@
-import { NextRequest, NextResponse } from 'next/server'
-import { ApiRateLimiter } from '@/lib/api-rate-limiter'
-
-const rateLimiter = new ApiRateLimiter()
+import { type NextRequest, NextResponse } from "next/server"
+import { ApiRateLimiter } from "@/lib/api-rate-limiter"
 
 // Manual API to update existing usage records
 export async function POST(request: NextRequest) {
   try {
-    console.log('Updating existing usage records...')
-    
+    const rateLimiter = new ApiRateLimiter()
+
+    console.log("Updating existing usage records...")
+
     const success = await rateLimiter.updateExistingUsageRecords()
-    
+
     if (success) {
       return NextResponse.json({
         success: true,
-        message: 'Existing usage records updated successfully'
+        message: "Existing usage records updated successfully",
       })
     } else {
-      return NextResponse.json(
-        { error: 'Failed to update existing usage records' },
-        { status: 500 }
-      )
+      return NextResponse.json({ error: "Failed to update existing usage records" }, { status: 500 })
     }
   } catch (error) {
-    console.error('Error updating existing usage records:', error)
-    return NextResponse.json(
-      { error: 'Failed to update existing usage records' },
-      { status: 500 }
-    )
+    console.error("Error updating existing usage records:", error)
+    return NextResponse.json({ error: "Failed to update existing usage records" }, { status: 500 })
   }
 }

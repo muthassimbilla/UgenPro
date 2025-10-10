@@ -488,14 +488,6 @@ export default function AddressGeneratorPage() {
               </TabsContent>
             </Tabs>
 
-            {/* API Usage Counter - Compact version at bottom */}
-            <ApiUsageCounter 
-              ref={usageCounterRef}
-              apiType="address_generator" 
-              compact={true}
-              showProgressBar={false}
-              className="mt-4 pt-3 border-t border-gray-200" 
-            />
           </div>
 
           {/* Right Side - Output Section */}

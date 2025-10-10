@@ -99,14 +99,14 @@ export async function GET(request: NextRequest) {
       {
         id: "welcome",
         title: "স্বাগতম UGen Pro তে!",
-        message: "আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে। আমাদের টুলস ব্যবহার করা শুরু করুন।",
+        message: "Your account has been created successfully. Start using our tools now.",
         type: "success",
         link: "/tool",
       },
       {
         id: "account_approved",
         title: "অ্যাকাউন্ট অনুমোদিত",
-        message: "আপনার অ্যাকাউন্ট অনুমোদিত হয়েছে। এখন আপনি সকল ফিচার ব্যবহার করতে পারবেন।",
+        message: "Your account has been approved. You can now use all features.",
         type: "success",
         link: "/profile",
       },
@@ -127,14 +127,14 @@ export async function GET(request: NextRequest) {
       {
         id: "account_expiring",
         title: "অ্যাকাউন্ট শীঘ্রই মেয়াদ উত্তীর্ণ",
-        message: "আপনার অ্যাকাউন্ট ৭ দিনের মধ্যে মেয়াদ উত্তীর্ণ হবে। সেবা অব্যাহত রাখতে নবায়ন করুন।",
+        message: "Your account will expire in 7 days. Please renew to continue service.",
         type: "warning",
         link: "/profile",
       },
       {
         id: "security_alert",
         title: "নিরাপত্তা সতর্কতা",
-        message: "আপনার অ্যাকাউন্টে সন্দেহজনক কার্যকলাপ সনাক্ত হয়েছে। অবিলম্বে পাসওয়ার্ড পরিবর্তন করুন।",
+        message: "Suspicious activity detected on your account. Please change your password immediately.",
         type: "error",
         link: "/change-password",
       },

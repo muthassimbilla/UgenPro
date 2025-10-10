@@ -105,26 +105,26 @@ export default function ProfilePage() {
   return (
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
-        <div className="container mx-auto px-4 py-8 max-w-6xl">
-          <div className="space-y-8">
+        <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
+          <div className="space-y-4 sm:space-y-8">
             {/* Hero Section */}
             <div className="relative overflow-hidden">
-              <div className="relative glass-card p-8 rounded-3xl">
-                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-                  <div className="flex items-center gap-6">
+              <div className="relative glass-card p-4 sm:p-6 lg:p-8 rounded-2xl sm:rounded-3xl">
+                <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4 sm:gap-6">
+                  <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 sm:gap-6">
                     <div className="relative">
-                      <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-3xl font-bold shadow-xl">
+                      <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-xl sm:rounded-2xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xl sm:text-2xl lg:text-3xl font-bold shadow-xl">
                         {user?.full_name?.charAt(0) || "U"}
                       </div>
-                      <div className="absolute -bottom-2 -right-2 w-8 h-8 bg-green-500 rounded-full flex items-center justify-center border-4 border-white dark:border-slate-900">
-                        <CheckCircle className="w-4 h-4 text-white" />
+                      <div className="absolute -bottom-1 -right-1 sm:-bottom-2 sm:-right-2 w-6 h-6 sm:w-8 sm:h-8 bg-green-500 rounded-full flex items-center justify-center border-2 sm:border-4 border-white dark:border-slate-900">
+                        <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                       </div>
                     </div>
                     <div>
-                      <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
+                      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent text-center sm:text-left">
                         {user?.full_name || "User"}
                       </h1>
-                      <div className="flex items-center gap-2 mt-3">
+                      <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mt-3">
                         <Badge variant="default" className="bg-green-500 hover:bg-green-600">
                           <Shield className="w-3 h-3 mr-1" />
                           Active Account
@@ -136,11 +136,11 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <div className="flex gap-3">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       onClick={() => setIsChangePasswordModalOpen(true)}
-                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
+                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300 w-full sm:w-auto"
                     >
                       <Lock className="w-4 h-4 mr-2" />
                       Change Password
@@ -148,7 +148,7 @@ export default function ProfilePage() {
                     <Button
                       variant="outline"
                       onClick={handleLogout}
-                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300"
+                      className="bg-white/50 backdrop-blur-sm border-white/20 hover:bg-white/70 transition-all duration-300 w-full sm:w-auto"
                     >
                       <LogOut className="w-4 h-4 mr-2" />
                       Logout
@@ -159,9 +159,9 @@ export default function ProfilePage() {
             </div>
 
             {/* Stats Overview */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Account Status</p>
@@ -175,7 +175,7 @@ export default function ProfilePage() {
               </Card>
 
               <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Member Since</p>
@@ -193,7 +193,7 @@ export default function ProfilePage() {
               </Card>
 
               <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
-                <CardContent className="p-6">
+                <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm font-medium text-muted-foreground">Account Type</p>
@@ -207,25 +207,25 @@ export default function ProfilePage() {
               </Card>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
               {/* Personal Information */}
               <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl">
-                    <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                      <User className="w-5 h-5 text-white" />
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
+                    <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
+                      <User className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                     </div>
                     Personal Information
                   </CardTitle>
                   <CardDescription>Your account's main information</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="space-y-2 sm:space-y-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                       <span className="text-sm font-medium text-muted-foreground">Full Name</span>
                       <span className="font-semibold">{user?.full_name || "Not provided"}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                       <span className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                         <Mail className="w-4 h-4" />
                         Email
@@ -233,16 +233,16 @@ export default function ProfilePage() {
                       <span className="font-semibold">{user?.email || "Not provided"}</span>
                     </div>
                     {user?.telegram_username && !user?.telegram_username.includes("@") && (
-                      <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                         <span className="text-sm font-medium text-muted-foreground">Telegram Username</span>
                         <span className="font-semibold">@{user.telegram_username}</span>
                       </div>
                     )}
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                       <span className="text-sm font-medium text-muted-foreground">Account Created</span>
                       <span className="font-semibold">{formatDate(user?.created_at)}</span>
                     </div>
-                    <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                       <span className="text-sm font-medium text-muted-foreground">Last Updated</span>
                       <span className="font-semibold">{formatDate(user?.updated_at)}</span>
                     </div>
@@ -252,8 +252,8 @@ export default function ProfilePage() {
 
               {/* Account Expiration */}
               <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl">
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-orange-500 to-red-600 flex items-center justify-center">
                       <Clock className="w-5 h-5 text-white" />
                     </div>
@@ -261,7 +261,7 @@ export default function ProfilePage() {
                   </CardTitle>
                   <CardDescription>Your account validity information</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3 sm:space-y-4">
                   {expirationInfo.hasExpiration ? (
                     <div className="space-y-4">
                       <div className="text-center p-6 rounded-xl bg-gradient-to-br from-orange-50 to-red-50 dark:from-orange-900/20 dark:to-red-900/20">
@@ -269,8 +269,8 @@ export default function ProfilePage() {
                         <div className="text-sm text-muted-foreground">Days Remaining</div>
                       </div>
 
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                      <div className="space-y-2 sm:space-y-3">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                           <span className="text-sm font-medium text-muted-foreground">Expiration Date</span>
                           <span className="font-semibold">
                             {expirationInfo.expirationDate?.toLocaleDateString("en-US", {
@@ -281,7 +281,7 @@ export default function ProfilePage() {
                           </span>
                         </div>
 
-                        <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 gap-1 sm:gap-0">
                           <span className="text-sm font-medium text-muted-foreground">Status</span>
                           <Badge
                             variant={
@@ -315,8 +315,8 @@ export default function ProfilePage() {
 
               {/* Account Access System */}
               <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
-                <CardHeader className="pb-4">
-                  <CardTitle className="flex items-center gap-3 text-xl">
+                <CardHeader className="pb-3 sm:pb-4">
+                  <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
                     <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center">
                       <Key className="w-5 h-5 text-white" />
                     </div>
@@ -324,9 +324,9 @@ export default function ProfilePage() {
                   </CardTitle>
                   <CardDescription>Your account access and permissions</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid grid-cols-2 gap-3">
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                <CardContent className="space-y-3 sm:space-y-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3">
+                    <div className="p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
                       <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center mx-auto mb-2">
                         <CheckCircle className="w-4 h-4 text-green-600" />
                       </div>
@@ -334,7 +334,7 @@ export default function ProfilePage() {
                       <div className="text-sm font-semibold text-green-600">Active</div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                    <div className="p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
                       <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center mx-auto mb-2">
                         <Crown className="w-4 h-4 text-blue-600" />
                       </div>
@@ -342,7 +342,7 @@ export default function ProfilePage() {
                       <div className="text-sm font-semibold text-blue-600">Premium</div>
                     </div>
 
-                    <div className="p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
+                    <div className="p-2 sm:p-3 rounded-lg bg-slate-50 dark:bg-slate-800/50 text-center">
                       <div className="w-8 h-8 rounded-lg bg-orange-500/20 flex items-center justify-center mx-auto mb-2">
                         <Clock className="w-4 h-4 text-orange-600" />
                       </div>
@@ -356,16 +356,16 @@ export default function ProfilePage() {
 
             {/* IP Information */}
             <Card className="glass-card border-0 hover:shadow-xl transition-all duration-300">
-              <CardHeader className="pb-4">
-                <CardTitle className="flex items-center gap-3 text-xl">
-                  <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
-                    <Globe className="w-5 h-5 text-white" />
+              <CardHeader className="pb-3 sm:pb-4">
+                <CardTitle className="flex items-center gap-2 sm:gap-3 text-lg sm:text-xl">
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center">
+                    <Globe className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                   </div>
                   Network Information
                 </CardTitle>
-                <CardDescription>Your current IP address and device information</CardDescription>
+                <CardDescription className="text-sm sm:text-base">Your current IP address and device information</CardDescription>
               </CardHeader>
-              <CardContent>
+              <CardContent className="p-3 sm:p-6">
                 <UserIPDisplay />
               </CardContent>
             </Card>

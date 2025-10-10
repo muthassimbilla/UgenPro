@@ -11,21 +11,9 @@ export async function updateSession(request: NextRequest) {
     "https://www.ugenpro.site",
   ]
 
-  // Set CORS headers if origin is allowed
-  const response = NextResponse.next()
-  if (origin && allowedOrigins.some((allowed) => origin.includes(allowed.replace(/^https?:\/\//, "")))) {
-    response.headers.set("Access-Control-Allow-Origin", origin)
-    response.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-    response.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    response.headers.set("Access-Control-Allow-Credentials", "true")
-  }
-
-  // Skip middleware for API routes - let them handle their own authentication
-  if (request.nextUrl.pathname.startsWith("/api/")) {
-    return response
-  }
-
-  let supabaseResponse = response
+  let supabaseResponse = NextResponse.next({
+    request,
+  })
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -46,48 +34,119 @@ export async function updateSession(request: NextRequest) {
     },
   )
 
-  const publicRoutes = [
-    "/login",
-    "/signup", 
-    "/forgot-password",
-    "/reset-password",
-    "/auth",
-    "/adminbilla",
-    "/contact",
-    "/",
-    "/tool", // Tool pages should be accessible but API calls will handle authentication
-    "/premium-tools",
-    "/profile"
-  ]
-
-  const isPublicRoute = publicRoutes.some((route) => request.nextUrl.pathname.startsWith(route))
-
-  // If it's a public route, allow access without authentication check
-  if (isPublicRoute) {
-    return supabaseResponse
-  }
-
-  // For protected routes, check authentication
+  // This ensures the session is valid when API routes call getUser()
   const {
     data: { user },
   } = await supabase.auth.getUser()
 
-  console.log(`[Middleware] Path: ${request.nextUrl.pathname}, User: ${user ? user.id : 'null'}, Public: ${isPublicRoute}`)
+  // Set CORS headers if origin is allowed
+  if (origin && allowedOrigins.some((allowed) => origin.includes(allowed.replace(/^https?:\/\//, "")))) {
+    supabaseResponse.headers.set("Access-Control-Allow-Origin", origin)
+    supabaseResponse.headers.set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+    supabaseResponse.headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+    supabaseResponse.headers.set("Access-Control-Allow-Credentials", "true")
+  }
 
-  // Redirect authenticated users away from auth pages
+  // Don't do any redirects for API routes
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return supabaseResponse
+  }
+
+  const publicRoutes = [
+    "/",
+    "/login",
+    "/signup",
+    "/forgot-password",
+    "/reset-password",
+    "/privacy-policy",
+    "/terms-of-service",
+    "/adminbilla",
+  ]
+
+  const isPublicRoute = publicRoutes.some((route) => {
+    // Exact match for home page
+    if (route === "/" && request.nextUrl.pathname === "/") {
+      return true
+    }
+    // For other routes, check if pathname starts with the route
+    return route !== "/" && request.nextUrl.pathname.startsWith(route)
+  })
+
   if (user && (request.nextUrl.pathname === "/login" || request.nextUrl.pathname === "/signup")) {
-    console.log(`[Middleware] Redirecting authenticated user from ${request.nextUrl.pathname} to /tool`)
     const url = request.nextUrl.clone()
     url.pathname = "/tool"
     return NextResponse.redirect(url)
   }
 
-  // Redirect unauthenticated users to login for protected routes
   if (!user && !isPublicRoute) {
-    console.log(`[Middleware] Redirecting unauthenticated user from ${request.nextUrl.pathname} to /login`)
     const url = request.nextUrl.clone()
+    const redirectPath = request.nextUrl.pathname + request.nextUrl.search
     url.pathname = "/login"
+    url.searchParams.set("redirect", redirectPath)
     return NextResponse.redirect(url)
+  }
+
+  if (user && !isPublicRoute) {
+    // Don't check status if already on status-related pages (avoid redirect loops)
+    const statusPages = ["/premium-tools", "/account-error", "/account-blocked"]
+    const isOnStatusPage = statusPages.some((page) => request.nextUrl.pathname.startsWith(page))
+
+    if (!isOnStatusPage) {
+      try {
+        // Fetch user profile to check account status
+        const { data: profile, error } = await supabase
+          .from("profiles")
+          .select("account_status, is_approved, expiration_date, is_active")
+          .eq("id", user.id)
+          .single()
+
+        if (error) {
+          console.error("[v0] Error fetching user profile:", error)
+          // If we can't fetch profile, allow access (fail open to avoid blocking legitimate users)
+          return supabaseResponse
+        }
+
+        if (profile) {
+          const now = new Date()
+          const expirationDate = profile.expiration_date ? new Date(profile.expiration_date) : null
+          const isExpired = expirationDate && expirationDate < now
+
+          // Check if account is suspended or inactive
+          if (profile.account_status === "suspended" || profile.account_status === "inactive" || !profile.is_active) {
+            console.log("[v0] User account is suspended/inactive, redirecting to error page")
+            const url = request.nextUrl.clone()
+            url.pathname = "/account-error"
+            url.searchParams.set("reason", "suspended")
+            return NextResponse.redirect(url)
+          }
+
+          // Check if account is not approved (pending)
+          if (!profile.is_approved) {
+            console.log("[v0] User account is pending approval, redirecting to premium-tools")
+            const url = request.nextUrl.clone()
+            url.pathname = "/premium-tools"
+            url.searchParams.set("reason", "pending")
+            return NextResponse.redirect(url)
+          }
+
+          // Check if account is expired
+          if (isExpired) {
+            console.log("[v0] User account is expired, redirecting to premium-tools")
+            const url = request.nextUrl.clone()
+            url.pathname = "/premium-tools"
+            url.searchParams.set("reason", "expired")
+            return NextResponse.redirect(url)
+          }
+
+          // If all checks pass, user has active status and can access protected routes
+          console.log("[v0] User account is active, allowing access")
+        }
+      } catch (error) {
+        console.error("[v0] Error checking user status:", error)
+        // If there's an error, allow access (fail open)
+        return supabaseResponse
+      }
+    }
   }
 
   return supabaseResponse

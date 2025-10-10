@@ -69,16 +69,16 @@ export class EmailUtils {
 
     // Check for common disposable email domains
     const disposableDomains = [
-      '10minutemail.com',
-      'tempmail.org',
-      'guerrillamail.com',
-      'mailinator.com',
-      'yopmail.com',
-      'temp-mail.org',
-      'throwaway.email'
+      "10minutemail.com",
+      "tempmail.org",
+      "guerrillamail.com",
+      "mailinator.com",
+      "yopmail.com",
+      "temp-mail.org",
+      "throwaway.email",
     ]
 
-    const domain = email.split('@')[1]?.toLowerCase()
+    const domain = email.split("@")[1]?.toLowerCase()
     if (domain && disposableDomains.includes(domain)) {
       errors.push("Disposable email addresses are not allowed")
     }
@@ -128,11 +128,10 @@ export class AuthService {
       console.log("[v0] User signup IP address:", currentIP)
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
-      const redirectUrl =
-        process.env.NEXT_PUBLIC_SUPABASE_REDIRECT_URL ||
-        (isLocalhost
-          ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/login"
-          : "https://ugenpro.site/login")
+      const baseUrl = isLocalhost ? "http://localhost:3000" : "https://ugenpro.site"
+
+      // Use auth callback route for email verification
+      const redirectUrl = `${baseUrl}/api/auth/callback?next=/login`
 
       const { data, error } = await supabase.auth.signUp({
         email: signupData.email,
@@ -170,11 +169,9 @@ export class AuthService {
 
       if (profileError) {
         console.warn("[v0] Profile check warning:", profileError)
-        // Don't fail signup if profile check fails - the trigger should handle it
       } else {
         console.log("[v0] Profile created successfully:", profile.id)
-        
-        // Store IP address in user_ip_history for signup tracking
+
         if (currentIP && currentIP !== "unknown") {
           console.log("[v0] Storing signup IP address:", currentIP)
           await supabase
@@ -228,6 +225,13 @@ export class AuthService {
         throw new Error("No user data returned from login")
       }
 
+      if (!data.user.email_confirmed_at) {
+        console.error("[v0] Email not verified")
+        throw new Error(
+          "Please verify your email address before logging in. Check your inbox for the verification link.",
+        )
+      }
+
       const [profileResponse, currentIP] = await Promise.all([
         supabase.from("profiles").select("*").eq("id", data.user.id).single(),
         ipPromise,
@@ -243,7 +247,6 @@ export class AuthService {
 
       let userStatus: "approved" | "pending" | "expired" = "approved"
 
-      // This prevents login for suspended/inactive accounts
       if (profile.account_status === "suspended") {
         console.error("[v0] Account is suspended")
         throw new Error("Your account has been suspended by admin")
@@ -254,19 +257,16 @@ export class AuthService {
         throw new Error("Account is deactivated")
       }
 
-      // Check if account is expired
       if (profile.expiration_date && new Date(profile.expiration_date) < new Date()) {
         console.log("[v0] Account is expired")
         userStatus = "expired"
-      }
-      // Check if pending approval
-      else if (!profile.is_approved) {
+      } else if (!profile.is_approved) {
         console.log("[v0] Account is pending approval")
         userStatus = "pending"
       }
 
       const sessionToken = uuidv4() + "-" + Date.now().toString(36)
-      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 7 days
+      const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)
 
       const sessionPromise = supabase.from("user_sessions").insert({
         user_id: data.user.id,
@@ -378,9 +378,8 @@ export class AuthService {
       const supabase = createClient()
 
       const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
-      const redirectUrl = isLocalhost
-        ? process.env.NEXT_PUBLIC_DEV_SUPABASE_REDIRECT_URL || "http://localhost:3000/reset-password"
-        : "https://ugenpro.site/reset-password"
+      const baseUrl = isLocalhost ? "http://localhost:3000" : "https://ugenpro.site"
+      const redirectUrl = `${baseUrl}/api/auth/callback?next=/reset-password`
 
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: redirectUrl,
@@ -436,6 +435,33 @@ export class AuthService {
     } catch (error: any) {
       console.warn("[v0] IP detection error:", error.message)
       return null
+    }
+  }
+
+  static async resendVerificationEmail(email: string): Promise<void> {
+    try {
+      const supabase = createClient()
+
+      const isLocalhost = typeof window !== "undefined" && window.location.hostname === "localhost"
+      const baseUrl = isLocalhost ? "http://localhost:3000" : "https://ugenpro.site"
+      const redirectUrl = `${baseUrl}/api/auth/callback?next=/login`
+
+      const { error } = await supabase.auth.resend({
+        type: "signup",
+        email: email,
+        options: {
+          emailRedirectTo: redirectUrl,
+        },
+      })
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      console.log("[v0] Verification email resent successfully")
+    } catch (error: any) {
+      console.error("[v0] Resend verification error:", error)
+      throw error
     }
   }
 }

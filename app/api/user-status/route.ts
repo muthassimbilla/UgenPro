@@ -73,17 +73,20 @@ export async function GET(request: NextRequest) {
     })
   } catch (error) {
     console.error("[v0] User status check error:", error)
-    
+
     // For server errors, return a safe status that doesn't trigger auto-logout
     // Only return invalid status for authentication-related errors
     if (error instanceof Error && error.message?.includes("auth")) {
-      return NextResponse.json({
-        is_valid: false,
-        status: "inactive",
-        message: "Authentication error. Please login again.",
-      }, { status: 401 })
+      return NextResponse.json(
+        {
+          is_valid: false,
+          status: "inactive",
+          message: "Authentication error. Please login again.",
+        },
+        { status: 401 },
+      )
     }
-    
+
     // For other errors, assume user is active to prevent unnecessary logouts
     return NextResponse.json({
       is_valid: true,
