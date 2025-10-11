@@ -2,10 +2,10 @@
 
 import { useCallback } from "react"
 
-import { useState, useEffect, memo, startTransition } from "react"
+import { useState, useEffect, startTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Smartphone, Copy, Download, Loader2 } from "lucide-react"
+import { Copy, Download } from "lucide-react"
 import dynamic from "next/dynamic"
 import type { GenerationHistory } from "@/lib/supabase" // Declared the variable here
 
@@ -50,7 +50,13 @@ const loadSupabaseModules = async () => {
       PixelInstagramVersion: module.InstagramVersion,
       PixelInstagramChromeVersion: module.ChromeVersion,
       PixelInstagramResolutionDpi: module.ResolutionDpi,
-      SamsungInstagramBuildNumber: module.InstagramBuildNumber,
+      SamsungInstagramDeviceModel: module.InstagramDeviceModel,
+      SamsungInstagramVersion: module.InstagramVersion,
+      SamsungInstagramChromeVersion: module.ChromeVersion,
+      SamsungInstagramResolutionDpi: module.ResolutionDpi,
+      SamsungFacebookDeviceModel: module.AndroidDeviceModel, // Added for Samsung Facebook
+      SamsungFacebookBuildNumber: module.FacebookBuildNumber, // Added for Samsung Facebook
+      SamsungFacebookAppVersion: module.AndroidAppVersion, // Added for Samsung Facebook
       UserAgentHistory: module.GenerationHistory, // Using GenerationHistory as UserAgentHistory
       FacebookBuildNumber: module.FacebookBuildNumber, // Added for Samsung Facebook
       InstagramBuildNumber: module.InstagramBuildNumber, // Added for Samsung Instagram
@@ -61,7 +67,6 @@ const loadSupabaseModules = async () => {
     return null
   }
 }
-
 
 export default function UserAgentGenerator() {
   const [platform, setPlatform] = useState("")
@@ -227,6 +232,13 @@ export default function UserAgentGenerator() {
         PixelInstagramVersion,
         PixelInstagramChromeVersion,
         PixelInstagramResolutionDpi,
+        SamsungFacebookDeviceModel, // Added for Samsung Facebook
+        SamsungFacebookBuildNumber, // Added for Samsung Facebook
+        SamsungFacebookAppVersion, // Added for Samsung Facebook
+        SamsungInstagramDeviceModel,
+        SamsungInstagramVersion,
+        SamsungInstagramChromeVersion,
+        SamsungInstagramResolutionDpi,
       } = supabaseModules
 
       const loadBatch1 = Promise.all([
@@ -260,7 +272,24 @@ export default function UserAgentGenerator() {
         PixelInstagramResolutionDpi?.list() || Promise.resolve([]),
       ])
 
-      const [batch1, batch2, batch3, batch4] = await Promise.all([loadBatch1, loadBatch2, loadBatch3, loadBatch4])
+      // Added Samsung specific data loading
+      const loadBatch5 = Promise.all([
+        SamsungFacebookDeviceModel?.list() || Promise.resolve([]),
+        SamsungFacebookBuildNumber?.list() || Promise.resolve([]),
+        SamsungFacebookAppVersion?.list() || Promise.resolve([]),
+        SamsungInstagramDeviceModel?.list() || Promise.resolve([]),
+        SamsungInstagramVersion?.list() || Promise.resolve([]),
+        SamsungInstagramChromeVersion?.list() || Promise.resolve([]),
+        SamsungInstagramResolutionDpi?.list() || Promise.resolve([]),
+      ])
+
+      const [batch1, batch2, batch3, batch4, batch5] = await Promise.all([
+        loadBatch1,
+        loadBatch2,
+        loadBatch3,
+        loadBatch4,
+        loadBatch5,
+      ])
 
       const [devices, ios, apps, configs] = batch1
       const [blacklisted, androidDevices, androidBuilds, androidApps] = batch2
@@ -275,6 +304,17 @@ export default function UserAgentGenerator() {
         pixelInstaResolutions,
       ] = batch4
 
+      // Destructure Samsung specific data
+      const [
+        samsungFbDevices,
+        samsungFbBuilds,
+        samsungFbApps,
+        samsungInstaDevices,
+        samsungInstaVersions,
+        samsungInstaChromes,
+        samsungInstaResolutions,
+      ] = batch5
+
       console.log("[v0] Pixel Facebook devices loaded:", pixelFbDevices?.length || 0)
       console.log("[v0] Pixel Facebook builds loaded:", pixelFbBuilds?.length || 0)
       console.log("[v0] Pixel Facebook apps loaded:", pixelFbApps?.length || 0)
@@ -282,10 +322,13 @@ export default function UserAgentGenerator() {
       console.log("[v0] Pixel Instagram versions loaded:", pixelInstaVersions?.length || 0)
       console.log("[v0] Pixel Instagram chrome versions loaded:", pixelInstaChromes?.length || 0)
       console.log("[v0] Pixel Instagram resolutions loaded:", pixelInstaResolutions?.length || 0)
-      console.log("[v0] Samsung Instagram devices loaded:", instaDevices?.length || 0)
-      console.log("[v0] Samsung Instagram versions loaded:", instaVersions?.length || 0)
-      console.log("[v0] Samsung Chrome versions loaded:", chromeVersions?.length || 0)
-      console.log("[v0] Samsung Resolution DPIs loaded:", resolutionDpis?.length || 0)
+      console.log("[v0] Samsung Instagram devices loaded:", samsungInstaDevices?.length || 0) // Log Samsung Instagram devices
+      console.log("[v0] Samsung Instagram versions loaded:", samsungInstaVersions?.length || 0) // Log Samsung Instagram versions
+      console.log("[v0] Samsung Chrome versions loaded:", samsungInstaChromes?.length || 0) // Log Samsung Instagram Chrome versions
+      console.log("[v0] Samsung Resolution DPIs loaded:", samsungInstaResolutions?.length || 0) // Log Samsung Instagram resolutions
+      console.log("[v0] Samsung Facebook devices loaded:", samsungFbDevices?.length || 0) // Log Samsung Facebook devices
+      console.log("[v0] Samsung Facebook builds loaded:", samsungFbBuilds?.length || 0) // Log Samsung Facebook builds
+      console.log("[v0] Samsung Facebook apps loaded:", samsungFbApps?.length || 0) // Log Samsung Facebook apps
 
       startTransition(() => {
         const configsObj = {}
@@ -325,6 +368,11 @@ export default function UserAgentGenerator() {
       setPixelInstagramVersions(pixelInstaVersions || [])
       setPixelInstagramChromeVersions(pixelInstaChromes || [])
       setPixelInstagramResolutionDpis(pixelInstaResolutions || [])
+
+      // Set Samsung specific states
+      setDeviceType("samsung") // Defaulting deviceType to samsung for this section
+      // Note: Direct state setting for Samsung data might need adjustment based on intended use
+      // For now, assuming they are used within specific generation functions.
 
       console.log("[v0] Data loading completed successfully")
       setIsDataLoaded(true)
@@ -510,10 +558,11 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
+      // Use SamsungInstagramDeviceModel for Samsung devices
       const samsungDevices = instagramDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
       if (samsungDevices.length === 0) {
-        console.log("[v0] No Samsung devices found, using all devices")
+        console.log("[v0] No Samsung devices found, using all available Instagram devices")
       }
 
       const devicePool = samsungDevices.length > 0 ? samsungDevices : instagramDeviceModels
@@ -573,10 +622,12 @@ export default function UserAgentGenerator() {
         instagramVersion.version || instagramVersion.app_version || instagramVersion.toString()
       const chromeVersionString = chromeVersion.version || chromeVersion.chrome_version || chromeVersion.toString()
 
+      const chipset = device.chipset || device.board || device.model || "qcom"
+
       const userAgent =
-        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
+        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}; wv) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${device.model || "Unknown"}; qcom; ${language}; 123456789)`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; qcom; ${language}; 123456789)`
 
       return userAgent
     } catch (error) {
@@ -604,8 +655,12 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      // Filter Samsung devices
-      const samsungDevices = androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+      // Filter Samsung devices using the appropriate data source if available, otherwise default to androidDeviceModels
+      const samsungDevices = (
+        supabaseModules?.SamsungFacebookDeviceModel?.list
+          ? await supabaseModules.SamsungFacebookDeviceModel.list()
+          : androidDeviceModels
+      ).filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
       console.log("[v0] Total Facebook devices:", androidDeviceModels.length)
       console.log("[v0] Samsung Facebook devices:", samsungDevices.length)
@@ -1444,7 +1499,7 @@ export default function UserAgentGenerator() {
       <div className="fixed inset-0 -z-10">
         {/* Light mode background */}
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 dark:hidden" />
-        
+
         {/* Dark mode enhanced background */}
         <div className="hidden dark:block absolute inset-0">
           {/* Multiple gradient layers for depth */}
@@ -1452,31 +1507,66 @@ export default function UserAgentGenerator() {
           <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-pink-900/10" />
           <div className="absolute inset-0 bg-gradient-to-bl from-emerald-900/8 via-transparent to-orange-900/8" />
           <div className="absolute inset-0 bg-gradient-to-tl from-violet-900/5 via-transparent to-rose-900/5" />
-      </div>
+        </div>
 
         {/* Animated orbs - Light mode */}
         <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-200/30 dark:hidden rounded-full blur-3xl animate-pulse" />
-        <div className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:hidden rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        
+        <div
+          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:hidden rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+
         {/* Enhanced animated orbs - Dark mode */}
         <div className="hidden dark:block absolute top-1/6 -left-48 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-cyan-500/15 rounded-full blur-3xl animate-pulse" />
-        <div className="hidden dark:block absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-500/25 to-pink-500/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "2s" }} />
-        <div className="hidden dark:block absolute bottom-1/4 -right-32 w-72 h-72 bg-gradient-to-r from-indigo-500/20 to-blue-500/15 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "1s" }} />
-        <div className="hidden dark:block absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "3s" }} />
-        <div className="hidden dark:block absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-violet-500/12 to-rose-500/10 rounded-full blur-3xl animate-pulse" style={{ animationDelay: "4s" }} />
-        
+        <div
+          className="hidden dark:block absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-500/25 to-pink-500/20 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "2s" }}
+        />
+        <div
+          className="hidden dark:block absolute bottom-1/4 -right-32 w-72 h-72 bg-gradient-to-r from-indigo-500/20 to-blue-500/15 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
+        <div
+          className="hidden dark:block absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "3s" }}
+        />
+        <div
+          className="hidden dark:block absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-violet-500/12 to-rose-500/10 rounded-full blur-3xl animate-pulse"
+          style={{ animationDelay: "4s" }}
+        />
+
         {/* Floating particles - Dark mode only */}
-        <div className="hidden dark:block absolute top-20 left-20 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce" style={{ animationDelay: "0.5s" }} />
-        <div className="hidden dark:block absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-bounce" style={{ animationDelay: "1.5s" }} />
-        <div className="hidden dark:block absolute bottom-32 left-16 w-2.5 h-2.5 bg-cyan-400/50 rounded-full animate-bounce" style={{ animationDelay: "2.5s" }} />
-        <div className="hidden dark:block absolute bottom-20 right-20 w-1 h-1 bg-pink-400/50 rounded-full animate-bounce" style={{ animationDelay: "3s" }} />
-        <div className="hidden dark:block absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-emerald-400/50 rounded-full animate-bounce" style={{ animationDelay: "4s" }} />
-        <div className="hidden dark:block absolute top-1/3 left-1/4 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce" style={{ animationDelay: "5s" }} />
-        <div className="hidden dark:block absolute bottom-1/3 right-1/4 w-2 h-2 bg-rose-400/50 rounded-full animate-bounce" style={{ animationDelay: "6s" }} />
+        <div
+          className="hidden dark:block absolute top-20 left-20 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "0.5s" }}
+        />
+        <div
+          className="hidden dark:block absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "1.5s" }}
+        />
+        <div
+          className="hidden dark:block absolute bottom-32 left-16 w-2.5 h-2.5 bg-cyan-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "2.5s" }}
+        />
+        <div
+          className="hidden dark:block absolute bottom-20 right-20 w-1 h-1 bg-pink-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "3s" }}
+        />
+        <div
+          className="hidden dark:block absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-emerald-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "4s" }}
+        />
+        <div
+          className="hidden dark:block absolute top-1/3 left-1/4 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "5s" }}
+        />
+        <div
+          className="hidden dark:block absolute bottom-1/3 right-1/4 w-2 h-2 bg-rose-400/50 rounded-full animate-bounce"
+          style={{ animationDelay: "6s" }}
+        />
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
-
         <div className="space-y-8">
           <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
             <CardContent className="p-0">
