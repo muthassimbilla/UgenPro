@@ -48,10 +48,7 @@ export default function ToolsPage() {
             const isActive = tool.status === "Active"
 
             return (
-              <Card
-                key={tool.name}
-                className="group hover:shadow-xl transition-all duration-300 border-2 hover:border-primary/50"
-              >
+              <Card key={tool.name} className="group hover:shadow-xl transition-all duration-300">
                 <CardHeader className="pb-4">
                   <div className={`p-4 rounded-2xl ${tool.color} w-fit mb-4`}>
                     <IconComponent className="w-8 h-8 text-white" />

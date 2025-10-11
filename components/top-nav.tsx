@@ -78,7 +78,7 @@ export function TopNav({ title, onMenuClick }: TopNavProps) {
         <Link href="/profile" className="ml-1">
           <div className="group relative">
             <Avatar className="h-9 w-9 cursor-pointer transition-all duration-200 hover:scale-105 ring-2 ring-transparent hover:ring-purple-300 dark:hover:ring-purple-600">
-              <AvatarFallback className="bg-gradient-to-br from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] text-white text-sm font-bold">
+              <AvatarFallback className="bg-indigo-600 text-white text-sm font-bold">
                 {user?.full_name?.substring(0, 2).toUpperCase() || user?.email?.substring(0, 2).toUpperCase() || "MU"}
               </AvatarFallback>
             </Avatar>
