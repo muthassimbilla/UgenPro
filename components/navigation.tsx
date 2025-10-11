@@ -12,7 +12,7 @@ interface NavigationProps {
 
 export function Navigation({ activeSection = "hero" }: NavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  
+
   // Improve UX: lock body scroll when drawer is open and close on ESC
   useEffect(() => {
     if (mobileMenuOpen) {
@@ -28,11 +28,22 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
       }
     }
   }, [mobileMenuOpen])
+
+  const scrollToSection = (sectionId: string) => {
+    const element = document.getElementById(sectionId)
+    if (element) {
+      element.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      })
+    }
+  }
+
   const navItems = [
-    { id: "hero", label: "Home", href: "#hero" },
-    { id: "tools", label: "Tools", href: "#tools" },
-    { id: "pricing", label: "Pricing", href: "#pricing" },
-    { id: "contact", label: "Contact", href: "#contact" },
+    { id: "hero", label: "Home" },
+    { id: "tools", label: "Tools" },
+    { id: "pricing", label: "Pricing" },
+    { id: "contact", label: "Contact" },
   ]
 
   return (
@@ -48,9 +59,9 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-2">
           {navItems.map((item) => (
-            <a
+            <button
               key={item.id}
-              href={item.href}
+              onClick={() => scrollToSection(item.id)}
               className={`px-5 py-2.5 text-sm font-semibold transition-all rounded-xl relative overflow-hidden group ${
                 activeSection === item.id
                   ? "text-primary bg-primary/10 shadow-glow border border-primary/20"
@@ -61,7 +72,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               {activeSection === item.id && (
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-50 rounded-xl" />
               )}
-            </a>
+            </button>
           ))}
         </div>
 
@@ -121,18 +132,20 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             </div>
             <div className="px-4 py-4 space-y-2">
               {navItems.map((item) => (
-                <a
+                <button
                   key={item.id}
-                  href={item.href}
-                  className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
+                  onClick={() => {
+                    scrollToSection(item.id)
+                    setMobileMenuOpen(false)
+                  }}
+                  className={`block w-full text-left px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
                     activeSection === item.id
                       ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
                       : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
                   }`}
-                  onClick={() => setMobileMenuOpen(false)}
                 >
                   {item.label}
-                </a>
+                </button>
               ))}
               <div className="pt-4 flex flex-col gap-3">
                 <Link href="/login" className="block">
