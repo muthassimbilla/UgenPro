@@ -1,20 +1,18 @@
-import { z } from "zod"
 import { MapPin, Mail, Monitor } from "lucide-react"
+import type { LucideIcon } from "lucide-react"
 
-export const ToolSchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  description: z.string(),
-  icon: z.any(),
-  features: z.array(z.string()),
-  demoImage: z.string().optional(),
-  demoVideo: z.string().optional(),
-  ctaText: z.string(),
-  ctaLink: z.string(),
-  color: z.string(),
-})
-
-export type Tool = z.infer<typeof ToolSchema>
+export interface Tool {
+  id: string
+  name: string
+  description: string
+  icon: LucideIcon
+  features: string[]
+  demoImage?: string
+  demoVideo?: string
+  ctaText: string
+  ctaLink: string
+  color: string
+}
 
 export const toolsData: Tool[] = [
   {

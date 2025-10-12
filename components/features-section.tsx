@@ -1,8 +1,6 @@
 "use client"
 
 import { Zap, Users, BarChart3, Shield, Workflow, Clock } from "lucide-react"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import { motion } from "framer-motion"
 
 const features = [
   {
@@ -62,29 +60,18 @@ const features = [
 ]
 
 export function FeaturesSection() {
-  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 })
-
   return (
-    <section id="features" ref={sectionRef} className="relative py-8 md:py-20 overflow-hidden">
-      {/* Simple mobile background */}
+    <section id="features" className="relative py-8 md:py-20 overflow-hidden">
       <div className="absolute inset-0 -z-10 sm:hidden bg-gradient-to-b from-background to-background/95" />
-      
-      {/* Enhanced background with purple gradient layers - hidden on mobile for performance */}
+
       <div className="absolute inset-0 -z-10 hidden sm:block">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/3 via-accent/2 to-background" />
-        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-gradient-radial from-primary/8 to-transparent rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-64 h-64 bg-gradient-radial from-accent/6 to-transparent rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/2 to-background" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
-          className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12 max-w-4xl mx-auto"
-        >
+        <div className="text-center space-y-3 sm:space-y-4 mb-8 sm:mb-12 max-w-4xl mx-auto">
           <div className="inline-flex items-center gap-2 rounded-full glass shadow-glow px-6 py-3 backdrop-blur-xl">
-            <Zap className="h-4 w-4 text-primary animate-pulse" />
+            <Zap className="h-4 w-4 text-primary" />
             <span className="gradient-text font-bold text-sm">Powerful Features</span>
           </div>
 
@@ -97,29 +84,21 @@ export function FeaturesSection() {
             Powerful features designed to help your team work smarter, not harder, with
             <span className="text-primary font-semibold"> cutting-edge technology</span>.
           </p>
-        </motion.div>
+        </div>
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 max-w-6xl mx-auto">
           {features.map((feature, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.1 * index }}
-              className={`group rounded-3xl border-2 ${feature.borderColor} p-4 sm:p-8 bg-gradient-to-br ${feature.color} backdrop-blur-xl hover:backdrop-blur-2xl transition-all duration-500 hover-lift cursor-pointer relative overflow-hidden shadow-lg hover:shadow-2xl hover:shadow-primary/20`}
+              className={`group rounded-3xl p-4 sm:p-8 bg-gradient-to-br ${feature.color} backdrop-blur-xl hover:backdrop-blur-2xl transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 cursor-pointer relative overflow-hidden shadow-lg hover:shadow-xl hover:shadow-primary/15`}
             >
               <div
-                className={`absolute inset-0 bg-gradient-to-br ${feature.iconBg} opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-3xl`}
+                className={`absolute inset-0 bg-gradient-to-br ${feature.iconBg} opacity-0 group-hover:opacity-20 transition-opacity duration-300 rounded-3xl`}
               />
 
               <div className="relative z-10">
                 <div
-                  className={`mb-5 inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-lg group-hover:shadow-2xl group-hover:scale-110 transition-all duration-300 border border-white/20`}
+                  className={`mb-5 inline-flex p-4 rounded-2xl bg-gradient-to-br ${feature.iconBg} shadow-md group-hover:shadow-lg group-hover:scale-105 transition-all duration-300`}
                 >
                   <feature.icon className={`h-7 w-7 ${feature.textColor}`} />
                 </div>
@@ -136,9 +115,9 @@ export function FeaturesSection() {
                   className={`mt-4 w-12 h-1.5 bg-gradient-to-r ${feature.iconBg} rounded-full opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-glow`}
                 />
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       </div>
     </section>
   )

@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     console.log(`[DEBUG] Testing Email2Name API with email: ${testEmail}`)
     
     // Check environment variables
-    const apiKey = process.env.GOOGLE_API_KEY
+    const apiKey = process.env.LONGCAT_API_KEY
     const hasApiKey = !!apiKey
     const apiKeyPreview = apiKey ? `${apiKey.substring(0, 8)}...` : 'Not set'
     
@@ -22,26 +22,23 @@ export async function GET(request: NextRequest) {
     if (hasApiKey) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+          "https://api.longcat.chat/openai/v1/chat/completions",
           {
             method: "POST",
             headers: {
               "Content-Type": "application/json",
+              "Authorization": `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-              contents: [
+              model: "LongCat-Flash-Chat",
+              messages: [
                 {
-                  parts: [
-                    {
-                      text: `Generate a name for this email: ${testEmail}. Reply with: Full Name: John Doe, First Name: John, Last Name: Doe, Gender: male, Country: US, Type: Personal`,
-                    },
-                  ],
+                  role: "user",
+                  content: `Generate a name for this email: ${testEmail}. Reply with: Full Name: John Doe, First Name: John, Last Name: Doe, Gender: male, Country: US, Type: Personal`,
                 },
               ],
-              generationConfig: {
-                temperature: 0.7,
-                maxOutputTokens: 200,
-              },
+              temperature: 0.7,
+              max_tokens: 200,
             }),
           },
         )
@@ -88,12 +85,12 @@ export async function GET(request: NextRequest) {
     
     // Add recommendations based on results
     if (!hasApiKey) {
-      debugInfo.recommendations.push("Set GOOGLE_API_KEY in your environment variables")
+      debugInfo.recommendations.push("Set LONGCAT_API_KEY in your environment variables")
     }
     
     if (apiError) {
       if (apiError.status === 429) {
-        debugInfo.recommendations.push("API quota exceeded - check your Google API limits")
+        debugInfo.recommendations.push("API quota exceeded - check your Longcat API limits")
       } else if (apiError.status === 403) {
         debugInfo.recommendations.push("API key invalid or permissions issue")
       } else if (apiError.type === 'network_error') {

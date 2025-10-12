@@ -4,12 +4,12 @@ export async function GET(request: NextRequest) {
   try {
     const startTime = Date.now()
     
-    // Check if GOOGLE_API_KEY is available
-    const apiKey = process.env.GOOGLE_API_KEY
+    // Check if LONGCAT_API_KEY is available
+    const apiKey = process.env.LONGCAT_API_KEY
     if (!apiKey) {
       return NextResponse.json({
         status: "error",
-        message: "GOOGLE_API_KEY not configured",
+        message: "LONGCAT_API_KEY not configured",
         timestamp: new Date().toISOString(),
         responseTime: Date.now() - startTime
       }, { status: 500 })
@@ -17,26 +17,23 @@ export async function GET(request: NextRequest) {
 
     // Test API with a simple request
     const testResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      "https://api.longcat.chat/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          model: "LongCat-Flash-Chat",
+          messages: [
             {
-              parts: [
-                {
-                  text: "Test API connection. Reply with 'OK' only.",
-                },
-              ],
+              role: "user",
+              content: "Test API connection. Reply with 'OK' only.",
             },
           ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 10,
-          },
+          temperature: 0.1,
+          max_tokens: 10,
         }),
       },
     )
@@ -47,7 +44,7 @@ export async function GET(request: NextRequest) {
       const errorData = await testResponse.json()
       return NextResponse.json({
         status: "error",
-        message: "Google Gemini API error",
+        message: "Longcat API error",
         error: errorData,
         responseTime,
         timestamp: new Date().toISOString()
@@ -55,7 +52,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await testResponse.json()
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const generatedText = data.choices?.[0]?.message?.content
 
     return NextResponse.json({
       status: "healthy",

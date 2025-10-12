@@ -1,11 +1,9 @@
 "use client"
 
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import type { Tool } from "@/lib/tools-config"
-import { X, ArrowRight, Check, Loader2, Play } from "lucide-react"
+import { Loader2 } from "lucide-react"
 import Image from "next/image"
-import Link from "next/link"
 import { useEffect, useState } from "react"
 
 interface ToolModalProps {
@@ -89,22 +87,20 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               loading="lazy"
               sandbox="allow-scripts allow-same-origin allow-presentation"
               onLoad={() => {
-                console.log("Video loaded successfully");
-                setVideoLoading(false);
+                setVideoLoading(false)
               }}
               onError={() => {
-                console.log("Video failed to load, showing fallback");
-                setVideoError(true);
-                setVideoLoading(false);
+                setVideoError(true)
+                setVideoLoading(false)
               }}
             />
           )}
-          
+
           {/* Fallback Image */}
           {(videoError || !tool.demoVideo) && tool.demoImage && (
             <div className="relative w-full h-full">
               <Image
-                src={tool.demoImage}
+                src={tool.demoImage || "/placeholder.svg"}
                 alt={tool.name}
                 fill
                 className="object-cover"
@@ -115,14 +111,14 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
                 <div className="absolute inset-0 bg-black/80 flex items-center justify-center">
                   <div className="text-center text-white">
                     <p className="text-xl mb-4 font-semibold">Demo Video Not Available</p>
-                    <a 
-                      href={tool.demoVideo?.replace('/embed/', '/watch?v=')} 
-                      target="_blank" 
+                    <a
+                      href={tool.demoVideo?.replace("/embed/", "/watch?v=")}
+                      target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm px-4 py-2 rounded-lg transition-colors"
                     >
                       <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                        <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z" />
                       </svg>
                       Watch on YouTube
                     </a>

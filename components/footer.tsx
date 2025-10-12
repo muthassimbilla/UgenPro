@@ -21,16 +21,6 @@ export function Footer() {
     window.scrollTo({ top: 0, behavior: "smooth" })
   }
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
-    if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
-    }
-  }
-
   return (
     <footer className="relative bg-gradient-to-br from-[#2B7FFF]/5 via-[#4a9fff]/3 to-[#2B7FFF]/5 dark:from-[#2B7FFF]/10 dark:via-[#4a9fff]/5 dark:to-[#2B7FFF]/10 border-t border-border/50 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-[#2B7FFF]/5 via-[#4a9fff]/5 to-[#2B7FFF]/5" />
@@ -94,26 +84,26 @@ export function Footer() {
                 </Link>
               </li>
               <li>
-                <button
-                  onClick={() => scrollToSection("tools")}
-                  className="w-full text-left text-sm text-muted-foreground hover:text-teal-500 transition-all font-medium block py-2 px-3 rounded-xl hover:bg-teal-500/10 hover:text-teal-500 group"
+                <Link
+                  href="#tools"
+                  className="text-sm text-muted-foreground hover:text-teal-500 transition-all font-medium block py-2 px-3 rounded-xl hover:bg-teal-500/10 hover:text-teal-500 group"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-teal-500" />
                     Tools
                   </span>
-                </button>
+                </Link>
               </li>
               <li>
-                <button
-                  onClick={() => scrollToSection("pricing")}
-                  className="w-full text-left text-sm text-muted-foreground hover:text-cyan-500 transition-all font-medium block py-2 px-3 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-500 group"
+                <Link
+                  href="#pricing"
+                  className="text-sm text-muted-foreground hover:text-cyan-500 transition-all font-medium block py-2 px-3 rounded-xl hover:bg-cyan-500/10 hover:text-cyan-500 group"
                 >
                   <span className="inline-flex items-center gap-2">
                     <Sparkles className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity text-cyan-500" />
                     Pricing
                   </span>
-                </button>
+                </Link>
               </li>
               <li>
                 <Link

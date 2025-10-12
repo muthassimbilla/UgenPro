@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Menu, X } from "lucide-react"
@@ -29,14 +31,13 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
     }
   }, [mobileMenuOpen])
 
-  const scrollToSection = (sectionId: string) => {
-    const element = document.getElementById(sectionId)
+  const handleSmoothScroll = (e: React.MouseEvent<HTMLAnchorElement>, targetId: string) => {
+    e.preventDefault()
+    const element = document.getElementById(targetId)
     if (element) {
-      element.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      })
+      element.scrollIntoView({ behavior: "smooth", block: "start" })
     }
+    setMobileMenuOpen(false)
   }
 
   const navItems = [
@@ -59,9 +60,10 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-2">
           {navItems.map((item) => (
-            <button
+            <a
               key={item.id}
-              onClick={() => scrollToSection(item.id)}
+              href={`#${item.id}`}
+              onClick={(e) => handleSmoothScroll(e, item.id)}
               className={`px-5 py-2.5 text-sm font-semibold transition-all rounded-xl relative overflow-hidden group ${
                 activeSection === item.id
                   ? "text-primary bg-primary/10 shadow-glow border border-primary/20"
@@ -72,7 +74,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               {activeSection === item.id && (
                 <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-50 rounded-xl" />
               )}
-            </button>
+            </a>
           ))}
         </div>
 
@@ -84,7 +86,7 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             <Button
               variant="outline"
               size="sm"
-              className="font-semibold rounded-xl border-2 border-emerald-500/30 hover:border-emerald-500/50 bg-gradient-to-r from-emerald-500/5 to-teal-500/5 hover:from-emerald-500/10 hover:to-teal-500/10 text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-all shadow-sm hover:shadow-glow"
+              className="font-semibold rounded-xl border-2 border-[#2B7FFF]/30 hover:border-[#2B7FFF]/50 bg-gradient-to-r from-[#2B7FFF]/5 to-[#4a9fff]/5 hover:from-[#2B7FFF]/10 hover:to-[#4a9fff]/10 text-foreground hover:text-[#2B7FFF] dark:hover:text-[#4a9fff] transition-all shadow-sm hover:shadow-glow"
             >
               Sign In
             </Button>
@@ -132,20 +134,18 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
             </div>
             <div className="px-4 py-4 space-y-2">
               {navItems.map((item) => (
-                <button
+                <a
                   key={item.id}
-                  onClick={() => {
-                    scrollToSection(item.id)
-                    setMobileMenuOpen(false)
-                  }}
-                  className={`block w-full text-left px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
+                  href={`#${item.id}`}
+                  onClick={(e) => handleSmoothScroll(e, item.id)}
+                  className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
                     activeSection === item.id
                       ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
                       : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
                   }`}
                 >
                   {item.label}
-                </button>
+                </a>
               ))}
               <div className="pt-4 flex flex-col gap-3">
                 <Link href="/login" className="block">

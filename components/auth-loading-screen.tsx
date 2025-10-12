@@ -57,7 +57,7 @@ export default function AuthLoadingScreen({
           {/* Logo */}
           <div className="relative w-16 h-16 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl shadow-2xl flex items-center justify-center animate-pulse">
             <Image
-              src="/ugenpro-logo.svg"
+              src="/placeholder-logo.svg"
               alt="UgenPro Logo"
               width={40}
               height={40}

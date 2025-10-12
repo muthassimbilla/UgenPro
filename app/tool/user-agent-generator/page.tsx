@@ -44,7 +44,7 @@ const loadSupabaseModules = async () => {
       ChromeVersion: module.ChromeVersion,
       ResolutionDpi: module.ResolutionDpi,
       PixelFacebookDeviceModel: module.PixelFacebookDeviceModel,
-      PixelFacebookBuildNumber: module.PixelFacebookBuildNumber,
+      PixelFacebookBuildNumber: module.FacebookBuildNumber, // Corrected from module.PixelFacebookBuildNumber
       PixelFacebookAppVersion: module.PixelFacebookAppVersion,
       PixelInstagramDeviceModel: module.PixelInstagramDeviceModel,
       PixelInstagramVersion: module.InstagramVersion,
@@ -54,9 +54,9 @@ const loadSupabaseModules = async () => {
       SamsungInstagramVersion: module.InstagramVersion,
       SamsungInstagramChromeVersion: module.ChromeVersion,
       SamsungInstagramResolutionDpi: module.ResolutionDpi,
-      SamsungFacebookDeviceModel: module.AndroidDeviceModel, // Added for Samsung Facebook
-      SamsungFacebookBuildNumber: module.FacebookBuildNumber, // Added for Samsung Facebook
-      SamsungFacebookAppVersion: module.AndroidAppVersion, // Added for Samsung Facebook
+      SamsungFacebookDeviceModel: module.AndroidDeviceModel, // Using AndroidDeviceModel for Samsung Facebook
+      SamsungFacebookBuildNumber: module.FacebookBuildNumber,
+      SamsungFacebookAppVersion: module.AndroidAppVersion, // Using AndroidAppVersion for Samsung Facebook
       UserAgentHistory: module.GenerationHistory, // Using GenerationHistory as UserAgentHistory
       FacebookBuildNumber: module.FacebookBuildNumber, // Added for Samsung Facebook
       InstagramBuildNumber: module.InstagramBuildNumber, // Added for Samsung Instagram
@@ -136,6 +136,10 @@ export default function UserAgentGenerator() {
 
   // Added deviceType state for Samsung Facebook generation
   const [deviceType, setDeviceType] = useState("")
+
+  const [selectedModel, setSelectedModel] = useState("random")
+  const [availableModels, setAvailableModels] = useState([])
+  const [selectedModelInfo, setSelectedModelInfo] = useState(null)
 
   const {
     deviceModels,
@@ -232,13 +236,6 @@ export default function UserAgentGenerator() {
         PixelInstagramVersion,
         PixelInstagramChromeVersion,
         PixelInstagramResolutionDpi,
-        SamsungFacebookDeviceModel, // Added for Samsung Facebook
-        SamsungFacebookBuildNumber, // Added for Samsung Facebook
-        SamsungFacebookAppVersion, // Added for Samsung Facebook
-        SamsungInstagramDeviceModel,
-        SamsungInstagramVersion,
-        SamsungInstagramChromeVersion,
-        SamsungInstagramResolutionDpi,
       } = supabaseModules
 
       const loadBatch1 = Promise.all([
@@ -272,24 +269,7 @@ export default function UserAgentGenerator() {
         PixelInstagramResolutionDpi?.list() || Promise.resolve([]),
       ])
 
-      // Added Samsung specific data loading
-      const loadBatch5 = Promise.all([
-        SamsungFacebookDeviceModel?.list() || Promise.resolve([]),
-        SamsungFacebookBuildNumber?.list() || Promise.resolve([]),
-        SamsungFacebookAppVersion?.list() || Promise.resolve([]),
-        SamsungInstagramDeviceModel?.list() || Promise.resolve([]),
-        SamsungInstagramVersion?.list() || Promise.resolve([]),
-        SamsungInstagramChromeVersion?.list() || Promise.resolve([]),
-        SamsungInstagramResolutionDpi?.list() || Promise.resolve([]),
-      ])
-
-      const [batch1, batch2, batch3, batch4, batch5] = await Promise.all([
-        loadBatch1,
-        loadBatch2,
-        loadBatch3,
-        loadBatch4,
-        loadBatch5,
-      ])
+      const [batch1, batch2, batch3, batch4] = await Promise.all([loadBatch1, loadBatch2, loadBatch3, loadBatch4])
 
       const [devices, ios, apps, configs] = batch1
       const [blacklisted, androidDevices, androidBuilds, androidApps] = batch2
@@ -304,17 +284,6 @@ export default function UserAgentGenerator() {
         pixelInstaResolutions,
       ] = batch4
 
-      // Destructure Samsung specific data
-      const [
-        samsungFbDevices,
-        samsungFbBuilds,
-        samsungFbApps,
-        samsungInstaDevices,
-        samsungInstaVersions,
-        samsungInstaChromes,
-        samsungInstaResolutions,
-      ] = batch5
-
       console.log("[v0] Pixel Facebook devices loaded:", pixelFbDevices?.length || 0)
       console.log("[v0] Pixel Facebook builds loaded:", pixelFbBuilds?.length || 0)
       console.log("[v0] Pixel Facebook apps loaded:", pixelFbApps?.length || 0)
@@ -322,13 +291,10 @@ export default function UserAgentGenerator() {
       console.log("[v0] Pixel Instagram versions loaded:", pixelInstaVersions?.length || 0)
       console.log("[v0] Pixel Instagram chrome versions loaded:", pixelInstaChromes?.length || 0)
       console.log("[v0] Pixel Instagram resolutions loaded:", pixelInstaResolutions?.length || 0)
-      console.log("[v0] Samsung Instagram devices loaded:", samsungInstaDevices?.length || 0) // Log Samsung Instagram devices
-      console.log("[v0] Samsung Instagram versions loaded:", samsungInstaVersions?.length || 0) // Log Samsung Instagram versions
-      console.log("[v0] Samsung Chrome versions loaded:", samsungInstaChromes?.length || 0) // Log Samsung Instagram Chrome versions
-      console.log("[v0] Samsung Resolution DPIs loaded:", samsungInstaResolutions?.length || 0) // Log Samsung Instagram resolutions
-      console.log("[v0] Samsung Facebook devices loaded:", samsungFbDevices?.length || 0) // Log Samsung Facebook devices
-      console.log("[v0] Samsung Facebook builds loaded:", samsungFbBuilds?.length || 0) // Log Samsung Facebook builds
-      console.log("[v0] Samsung Facebook apps loaded:", samsungFbApps?.length || 0) // Log Samsung Facebook apps
+      console.log("[v0] Samsung Instagram devices loaded:", instaDevices?.length || 0)
+      console.log("[v0] Samsung Instagram versions loaded:", instaVersions?.length || 0)
+      console.log("[v0] Samsung Chrome versions loaded:", chromeVersions?.length || 0)
+      console.log("[v0] Samsung Resolution DPIs loaded:", resolutionDpis?.length || 0)
 
       startTransition(() => {
         const configsObj = {}
@@ -369,10 +335,25 @@ export default function UserAgentGenerator() {
       setPixelInstagramChromeVersions(pixelInstaChromes || [])
       setPixelInstagramResolutionDpis(pixelInstaResolutions || [])
 
-      // Set Samsung specific states
-      setDeviceType("samsung") // Defaulting deviceType to samsung for this section
-      // Note: Direct state setting for Samsung data might need adjustment based on intended use
-      // For now, assuming they are used within specific generation functions.
+      const allDevices = [...(instaDevices || []), ...(androidDevices || []), ...(pixelInstaDevices || [])]
+      const uniqueModels = Array.from(
+        new Map(
+          allDevices.map((device) => [
+            device.model || device.model_name,
+            {
+              model: device.model || device.model_name,
+              chipset: device.chipset || "N/A",
+              code: device.code || device.device_codename || "N/A",
+              android_version: device.android_version?.toString() || "N/A",
+              resolutions: Array.isArray(device.resolutions)
+                ? device.resolutions.join(", ")
+                : device.resolutions || "N/A",
+            },
+          ]),
+        ).values(),
+      ).sort((a, b) => a.model.localeCompare(b.model))
+
+      setAvailableModels(uniqueModels)
 
       console.log("[v0] Data loading completed successfully")
       setIsDataLoaded(true)
@@ -409,6 +390,15 @@ export default function UserAgentGenerator() {
       loadHistory()
     }
   }, [supabaseModules, isDataLoaded])
+
+  useEffect(() => {
+    if (selectedModel === "random") {
+      setSelectedModelInfo(null)
+    } else {
+      const modelInfo = availableModels.find((m) => m.model === selectedModel)
+      setSelectedModelInfo(modelInfo || null)
+    }
+  }, [selectedModel, availableModels])
 
   const handleHistoryDownload = useCallback(
     async (historyItem) => {
@@ -525,7 +515,7 @@ export default function UserAgentGenerator() {
     return apiLevels[version] || "35" // Latest API level as fallback
   }
 
-  const generateAndroidInstagramUserAgent = async (cachedBuildNumbers = null) => {
+  const generateAndroidInstagramUserAgent = async (cachedBuildNumbers = null, specificModel = null) => {
     try {
       if (!instagramDeviceModels.length || !instagramVersions.length || !chromeVersions.length) {
         console.error("Missing Instagram configuration data")
@@ -558,15 +548,25 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      // Use SamsungInstagramDeviceModel for Samsung devices
       const samsungDevices = instagramDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
       if (samsungDevices.length === 0) {
-        console.log("[v0] No Samsung devices found, using all available Instagram devices")
+        console.log("[v0] No Samsung devices found, using all devices")
       }
 
       const devicePool = samsungDevices.length > 0 ? samsungDevices : instagramDeviceModels
-      const device = devicePool[Math.floor(Math.random() * devicePool.length)]
+
+      let device
+      if (specificModel && specificModel !== "random") {
+        device = devicePool.find((d) => (d.model || d.model_name) === specificModel)
+        if (!device) {
+          console.log(`[v0] Specific model ${specificModel} not found, using random`)
+          device = devicePool[Math.floor(Math.random() * devicePool.length)]
+        }
+      } else {
+        device = devicePool[Math.floor(Math.random() * devicePool.length)]
+      }
+
       const androidVersion = device.android_version.toString()
 
       const versionPair = versionPairs[androidVersion] || `28/${androidVersion}`
@@ -622,12 +622,23 @@ export default function UserAgentGenerator() {
         instagramVersion.version || instagramVersion.app_version || instagramVersion.toString()
       const chromeVersionString = chromeVersion.version || chromeVersion.chrome_version || chromeVersion.toString()
 
-      const chipset = device.chipset || device.board || device.model || "qcom"
+      const chipset = device.chipset
+      const deviceCode = device.code || device.device_codename
+
+      // If chipset is missing, throw error
+      if (!chipset) {
+        throw new Error(`No chipset found for ${device.model || "Unknown"}. Please add chipset in admin panel.`)
+      }
+
+      // If device code is missing, throw error
+      if (!deviceCode) {
+        throw new Error(`No device code found for ${device.model || "Unknown"}. Please add device code in admin panel.`)
+      }
 
       const userAgent =
-        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}; wv) ` +
+        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; qcom; ${language}; 123456789)`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; 123456789)`
 
       return userAgent
     } catch (error) {
@@ -636,7 +647,7 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generateSamsungFacebookUserAgent = async () => {
+  const generateSamsungFacebookUserAgent = async (specificModel = null) => {
     try {
       if (!androidDeviceModels.length || !androidAppVersions.length) {
         console.error("Missing Facebook configuration data")
@@ -655,12 +666,8 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      // Filter Samsung devices using the appropriate data source if available, otherwise default to androidDeviceModels
-      const samsungDevices = (
-        supabaseModules?.SamsungFacebookDeviceModel?.list
-          ? await supabaseModules.SamsungFacebookDeviceModel.list()
-          : androidDeviceModels
-      ).filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+      // Filter Samsung devices
+      const samsungDevices = androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
       console.log("[v0] Total Facebook devices:", androidDeviceModels.length)
       console.log("[v0] Samsung Facebook devices:", samsungDevices.length)
@@ -670,7 +677,18 @@ export default function UserAgentGenerator() {
       }
 
       const devicePool = samsungDevices.length > 0 ? samsungDevices : androidDeviceModels
-      const device = devicePool[Math.floor(Math.random() * devicePool.length)]
+
+      let device
+      if (specificModel && specificModel !== "random") {
+        device = devicePool.find((d) => (d.model_name || d.model) === specificModel)
+        if (!device) {
+          console.log(`[v0] Specific model ${specificModel} not found, using random`)
+          device = devicePool[Math.floor(Math.random() * devicePool.length)]
+        }
+      } else {
+        device = devicePool[Math.floor(Math.random() * devicePool.length)]
+      }
+
       const androidVersion = device.android_version.toString()
 
       console.log("[v0] Selected Samsung device:", device.model_name, "Android version:", androidVersion)
@@ -766,14 +784,14 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generateAndroidUserAgent = async () => {
+  const generateAndroidUserAgent = async (specificModel = null) => {
     try {
       if (appType === "instagram") {
-        return await generateAndroidInstagramUserAgent()
+        return await generateAndroidInstagramUserAgent(null, specificModel)
       }
 
       if (deviceType === "samsung") {
-        return await generateSamsungFacebookUserAgent()
+        return await generateSamsungFacebookUserAgent(specificModel)
       }
 
       const device = androidDeviceModels[Math.floor(Math.random() * androidDeviceModels.length)]
@@ -839,14 +857,14 @@ export default function UserAgentGenerator() {
     return normalizedLanguages[0][0]
   }
 
-  const generatePixelUserAgent = async () => {
+  const generatePixelUserAgent = async (specificModel = null) => {
     try {
       console.log("[v0] Generating Pixel user agent, appType:", appType)
       console.log("[v0] Available Pixel Facebook devices:", pixelFacebookDeviceModels?.length || 0)
       console.log("[v0] Available Pixel Instagram devices:", pixelInstagramDeviceModels?.length || 0)
 
       if (appType === "instagram") {
-        return await generatePixelInstagramUserAgent()
+        return await generatePixelInstagramUserAgent(specificModel)
       }
 
       if (!pixelFacebookDeviceModels || pixelFacebookDeviceModels.length === 0) {
@@ -859,8 +877,17 @@ export default function UserAgentGenerator() {
         throw new Error("No Pixel app versions available")
       }
 
-      // Use Pixel Facebook device data
-      const device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+      let device
+      if (specificModel && specificModel !== "random") {
+        device = pixelFacebookDeviceModels.find((d) => (d.model_name || d.device_model || d.model) === specificModel)
+        if (!device) {
+          console.log(`[v0] Specific model ${specificModel} not found, using random`)
+          device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+        }
+      } else {
+        device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+      }
+
       console.log("[v0] Selected Pixel device:", device)
 
       console.log("[v0] Using device build number:", device.build_number)
@@ -894,7 +921,7 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generatePixelInstagramUserAgent = async () => {
+  const generatePixelInstagramUserAgent = async (specificModel = null) => {
     try {
       console.log("[v0] Generating Pixel Instagram user agent")
       console.log("[v0] Available devices:", pixelInstagramDeviceModels?.length || 0)
@@ -920,7 +947,17 @@ export default function UserAgentGenerator() {
         throw new Error("No Pixel Instagram resolution DPIs available")
       }
 
-      const device = pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+      let device
+      if (specificModel && specificModel !== "random") {
+        device = pixelInstagramDeviceModels.find((d) => (d.model || d.model_name || d.device_model) === specificModel)
+        if (!device) {
+          console.log(`[v0] Specific model ${specificModel} not found, using random`)
+          device = pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+        }
+      } else {
+        device = pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+      }
+
       const version = pixelInstagramVersions[Math.floor(Math.random() * pixelInstagramVersions.length)]
       const chromeVersion =
         pixelInstagramChromeVersions[Math.floor(Math.random() * pixelInstagramChromeVersions.length)]
@@ -1124,6 +1161,7 @@ export default function UserAgentGenerator() {
 
       console.log(`[v0] Starting generation: ${quantity} requested`)
       console.log(`[v0] Blacklisted UAs: ${blacklistedUAs.size}`)
+      console.log(`[v0] Selected model: ${selectedModel}`)
 
       while (
         newUserAgents.length < quantity &&
@@ -1135,17 +1173,19 @@ export default function UserAgentGenerator() {
         let userAgent = null
 
         try {
+          const modelToUse = selectedModel === "random" ? null : selectedModel
+
           if (platform === "android") {
             if (appType === "instagram") {
-              userAgent = await generateAndroidInstagramUserAgent(cachedInstagramBuildNumbers)
+              userAgent = await generateAndroidInstagramUserAgent(cachedInstagramBuildNumbers, modelToUse)
             } else if (appType === "facebook") {
               if (deviceType === "samsung") {
-                userAgent = await generateSamsungFacebookUserAgent()
+                userAgent = await generateSamsungFacebookUserAgent(modelToUse)
               } else {
-                userAgent = await generateAndroidUserAgent()
+                userAgent = await generateAndroidUserAgent(modelToUse)
               }
             } else {
-              userAgent = await generateAndroidUserAgent()
+              userAgent = await generateAndroidUserAgent(modelToUse)
             }
           } else if (platform === "ios") {
             userAgent = generateUserAgent(
@@ -1165,7 +1205,7 @@ export default function UserAgentGenerator() {
               resolutionDpis,
             )
           } else if (platform === "pixel") {
-            userAgent = await generatePixelUserAgent()
+            userAgent = await generatePixelUserAgent(modelToUse)
           }
 
           if (userAgent && !newUserAgents.includes(userAgent)) {
@@ -1296,6 +1336,7 @@ export default function UserAgentGenerator() {
     chromeVersions,
     resolutionDpis,
     deviceType,
+    selectedModel,
     showModal,
     showProgressModal,
     hideProgressModal,
@@ -1584,8 +1625,11 @@ export default function UserAgentGenerator() {
                 quantity={quantity}
                 setQuantity={setQuantity}
                 isGenerating={isGenerating}
-                // Changed onGenerate prop to onGenerate={handleGenerate}
                 onGenerate={handleGenerate}
+                selectedModel={selectedModel}
+                setSelectedModel={setSelectedModel}
+                availableModels={availableModels}
+                selectedModelInfo={selectedModelInfo}
               />
 
               {userAgents.length > 0 && (

@@ -25,10 +25,10 @@ const PricingCard = memo(
     return (
       <div className="group h-full">
         <Card
-          className={`h-full hover-lift border-2 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl transition-all duration-500 overflow-hidden flex flex-col relative ${
+          className={`h-full hover-lift rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl transition-all duration-500 overflow-hidden flex flex-col relative ${
             plan.is_popular
-              ? "ring-2 ring-primary shadow-2xl shadow-primary/30 border-primary/50 scale-105"
-              : "border-[#2B7FFF]/40 dark:border-[#2B7FFF]/50 hover:border-[#2B7FFF]/60 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3"
+              ? "ring-2 ring-primary shadow-2xl shadow-primary/30 border border-primary/50 scale-105"
+              : "border border-[#2B7FFF]/20 dark:border-[#2B7FFF]/30 hover:border-[#2B7FFF]/40 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3"
           }`}
         >
           <div
@@ -39,11 +39,11 @@ const PricingCard = memo(
             } opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none`}
           />
 
-        {plan.is_popular && (
-          <div className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] text-white text-center py-2.5 text-sm font-bold shadow-lg">
-            ⭐ Most Popular
-          </div>
-        )}
+          {plan.is_popular && (
+            <div className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] text-white text-center py-2.5 text-sm font-bold shadow-lg">
+              ⭐ Most Popular
+            </div>
+          )}
 
           <CardHeader className={`p-8 flex-shrink-0 relative z-10 ${plan.is_popular ? "" : "pt-12"}`}>
             <div className="space-y-4">
@@ -115,7 +115,7 @@ const PricingCard = memo(
                   console.log(`Buy Now clicked for plan: ${plan.id}`)
                   onButtonClick(plan.id)
                 }}
-                className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 text-white shadow-lg hover:shadow-2xl hover:scale-105 cursor-pointer border-2 relative overflow-hidden group/btn ${
+                className={`w-full py-4 px-6 rounded-xl font-bold text-lg transition-all duration-300 text-white shadow-lg hover:shadow-2xl hover:scale-105 cursor-pointer border relative overflow-hidden group/btn ${
                   plan.is_popular
                     ? "bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] border-[#2B7FFF]/50"
                     : "bg-[#2B7FFF] border-[#2B7FFF]/50"
@@ -160,13 +160,13 @@ export function PricingCards({
     console.log("Button clicked:", planId, "showContactAdmin:", showContactAdmin)
     if (showContactAdmin) {
       // Find the selected plan
-      const plan = pricingPlans.find(p => p.id === planId)
+      const plan = pricingPlans.find((p) => p.id === planId)
       console.log("Found plan:", plan)
       if (plan) {
         setSelectedPlan({
           name: plan.name,
           price: plan.price,
-          duration: plan.duration
+          duration: plan.duration,
         })
         setIsModalOpen(true)
         console.log("Modal should open now")

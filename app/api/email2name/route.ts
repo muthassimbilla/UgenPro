@@ -3,7 +3,15 @@ import { addApiRequest } from "../admin/api-stats/route"
 import { ApiRateLimiter } from "@/lib/api-rate-limiter"
 import { getAuthenticatedUser } from "@/lib/api-auth-helper"
 
-const SYSTEM_PROMPT = `Generate a realistic US first and last name and gender using ONLY the email; use email letters for initials, no middle names, short and realistic. Return: Full Name: [first last], Gender: [male/female]`
+const SYSTEM_PROMPT = `Generate a realistic US first and last name and gender using ONLY the email. Use email letters for initials, no middle names, short and realistic. 
+
+Return format:
+Full Name: [first last]
+Gender: [male/female]
+
+Example:
+Full Name: John Smith
+Gender: male`
 
 export async function POST(request: NextRequest) {
   const startTime = Date.now()
@@ -74,19 +82,19 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     })
 
-    // Check if GROQ_API_KEY is available
-    const apiKey = process.env.GROQ_API_KEY
+    // Check if LONGCAT_API_KEY is available
+    const apiKey = process.env.LONGCAT_API_KEY
     if (!apiKey) {
-      addApiRequest(false, Date.now() - startTime, "GROQ_API_KEY not configured", email, requestId)
+      addApiRequest(false, Date.now() - startTime, "LONGCAT_API_KEY not configured", email, requestId)
       return NextResponse.json(
-        { success: false, error: "GROQ_API_KEY not configured. Please add it to your environment variables." },
+        { success: false, error: "LONGCAT_API_KEY not configured. Please add it to your environment variables." },
         { status: 500 },
       )
     }
 
-    // Call Groq Chat Completions API (OpenAI-compatible)
+    // Call Longcat Chat Completions API (OpenAI-compatible)
     const response = await fetch(
-      "https://api.groq.com/openai/v1/chat/completions",
+      "https://api.longcat.chat/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -94,7 +102,7 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "llama-3.1-8b-instant",
+          model: "LongCat-Flash-Chat",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: `Email: ${email}` },
@@ -107,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error(`[${requestId}] Groq API error:`, {
+      console.error(`[${requestId}] Longcat API error:`, {
         status: response.status,
         statusText: response.statusText,
         error: errorData,
@@ -117,12 +125,12 @@ export async function POST(request: NextRequest) {
       
       // Check for quota exceeded error
       if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
-        console.error(`[${requestId}] GROQ QUOTA EXCEEDED for email: ${email}`)
+        console.error(`[${requestId}] LONGCAT QUOTA EXCEEDED for email: ${email}`)
         addApiRequest(false, Date.now() - startTime, "API quota exceeded", email, requestId)
         return NextResponse.json(
           { 
             success: false, 
-            error: "API quota exceeded. Please check your Groq API key limits or upgrade your plan.",
+            error: "Longcat API quota exceeded. Please check your API key limits or upgrade your plan.",
             requestId: requestId,
             timestamp: new Date().toISOString()
           },
@@ -134,7 +142,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: `Failed to generate name from email: ${errorData.error?.message || "Unknown error"}`,
+          error: `Failed to generate name from email using Longcat: ${errorData.error?.message || "Unknown error"}`,
           requestId: requestId,
           timestamp: new Date().toISOString()
         },
@@ -150,7 +158,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: "No response from AI" }, { status: 500 })
     }
 
-    // Parse the response
+    // Parse the response with improved logic
     const result = {
       fullName: "",
       firstName: "",
@@ -160,19 +168,24 @@ export async function POST(request: NextRequest) {
       type: "Personal", // Default type
     }
 
-    const lines = generatedText.trim().split("\n")
+    // Clean the response text
+    const cleanText = generatedText.trim()
+    
+    // Try to parse different response formats
+    const lines = cleanText.split(/[\n,]/)
+    
     for (const line of lines) {
-      const parts = line.split(":", 2)
-      if (parts.length === 2) {
-        const key = parts[0].trim().toLowerCase()
-        const value = parts[1].trim()
-
-        if (key.includes("full name")) {
-          // Remove any trailing punctuation (e.g., commas) from the full name
-          const cleanedFullName = value.replace(/[\s,.;:]+$/g, "").trim()
-          result.fullName = cleanedFullName
+      const trimmedLine = line.trim()
+      
+      // Look for "Full Name:" pattern
+      if (trimmedLine.toLowerCase().includes("full name")) {
+        const match = trimmedLine.match(/full name:\s*(.+)/i)
+        if (match) {
+          const fullName = match[1].trim().replace(/[,;:]+$/, "")
+          result.fullName = fullName
+          
           // Split full name into first and last name
-          const nameParts = cleanedFullName.split(" ")
+          const nameParts = fullName.split(" ")
           if (nameParts.length >= 2) {
             result.firstName = nameParts[0]
             result.lastName = nameParts.slice(1).join(" ")
@@ -180,8 +193,39 @@ export async function POST(request: NextRequest) {
             result.firstName = nameParts[0]
             result.lastName = ""
           }
-        } else if (key.includes("gender")) {
-          result.gender = value
+        }
+      }
+      
+      // Look for "Gender:" pattern
+      if (trimmedLine.toLowerCase().includes("gender")) {
+        const match = trimmedLine.match(/gender:\s*(.+)/i)
+        if (match) {
+          result.gender = match[1].trim().toLowerCase()
+        }
+      }
+    }
+    
+    // Fallback: if no structured format found, try to extract from single line
+    if (!result.fullName && !result.gender) {
+      // Try to parse format like "John Doe, male" or "John Doe, Gender: male"
+      const fallbackMatch = cleanText.match(/^([^,]+?)(?:,\s*(?:gender:\s*)?(male|female))?$/i)
+      if (fallbackMatch) {
+        const fullName = fallbackMatch[1].trim()
+        result.fullName = fullName
+        
+        // Split full name
+        const nameParts = fullName.split(" ")
+        if (nameParts.length >= 2) {
+          result.firstName = nameParts[0]
+          result.lastName = nameParts.slice(1).join(" ")
+        } else if (nameParts.length === 1) {
+          result.firstName = nameParts[0]
+          result.lastName = ""
+        }
+        
+        // Extract gender if present
+        if (fallbackMatch[2]) {
+          result.gender = fallbackMatch[2].toLowerCase()
         }
       }
     }
@@ -225,6 +269,7 @@ export async function POST(request: NextRequest) {
     })
   } catch (error) {
     const responseTime = Date.now() - startTime
+    const email = (await request.json().catch(() => ({}))).email || 'unknown'
     addApiRequest(false, responseTime, error instanceof Error ? error.message : "Unknown error", email, requestId)
     
     console.error(`[${requestId}] Email2Name API error:`, {

@@ -2,20 +2,15 @@
 
 import { toolsData } from "@/lib/tools-config"
 import { ToolCard } from "@/components/tool-card"
-import { useState, lazy, Suspense, useMemo } from "react"
+import { useState, useMemo } from "react"
+import dynamic from "next/dynamic"
 import type { Tool } from "@/lib/tools-config"
 import { useScrollAnimation } from "@/hooks/use-scroll-animation"
-import { motion } from "framer-motion"
-import { Layers } from "lucide-react"
 
-const LazyToolModal = lazy(() =>
-  import("@/components/tool-modal").then((mod) => ({
-    default: mod.ToolModal,
-  })).catch((error) => {
-    console.error('Failed to load ToolModal:', error)
-    return { default: () => <div>Failed to load modal</div> }
-  }),
-)
+const LazyToolModal = dynamic(() => import("@/components/tool-modal").then((mod) => mod.ToolModal), {
+  loading: () => null,
+  ssr: false,
+})
 
 export function ToolsSection() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null)
@@ -44,65 +39,63 @@ export function ToolsSection() {
       </div>
 
       <div className="container relative z-10 mx-auto px-4 sm:px-6">
-        <motion.div
-          className="max-w-4xl mb-4 text-center mx-auto px-4 sm:px-0"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6 }}
+        <div
+          className={`max-w-4xl mb-4 text-center mx-auto px-4 sm:px-0 transition-all duration-600 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          }`}
         >
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
             <span className="text-shadow-lg">Our Tools</span>
           </h2>
           <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium mt-4">
-            Professional generator tools for CPA self signup, user agent generation,<br />
+            Professional generator tools for CPA self signup, user agent generation,
+            <br />
             address generation, and email2name conversion. Fast, secure, and reliable online tools.
           </p>
-        </motion.div>
+        </div>
 
         {/* All tools in same size - 3 cards in one row */}
-        <motion.div
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto"
-          initial={{ opacity: 0, y: 20 }}
-          animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
+        <div
+          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto transition-all duration-600 delay-200 ${
+            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+          }`}
         >
           {firstThreeTools.map((tool, index) => (
-            <motion.div
+            <div
               key={tool.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-              transition={{ duration: 0.6, delay: 0.1 * index }}
+              className={`transition-all duration-600 ${
+                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+              }`}
+              style={{ transitionDelay: `${100 * index}ms` }}
             >
               <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
 
         {/* Additional tools if more than 3 */}
         {remainingTools.length > 0 && (
-          <motion.div
-            className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8"
-            initial={{ opacity: 0, y: 20 }}
-            animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-            transition={{ duration: 0.6, delay: 0.4 }}
+          <div
+            className={`grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8 transition-all duration-600 delay-400 ${
+              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+            }`}
           >
             {remainingTools.map((tool, index) => (
-              <motion.div
+              <div
                 key={tool.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={isVisible ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
-                transition={{ duration: 0.6, delay: 0.1 * index }}
+                className={`transition-all duration-600 ${
+                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
+                }`}
+                style={{ transitionDelay: `${100 * index}ms` }}
               >
                 <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
-              </motion.div>
+              </div>
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
 
-      <Suspense fallback={null}>
-        <LazyToolModal tool={selectedTool} isOpen={isModalOpen} onClose={handleCloseModal} />
-      </Suspense>
+      <LazyToolModal tool={selectedTool} isOpen={isModalOpen} onClose={handleCloseModal} />
     </section>
   )
 }
