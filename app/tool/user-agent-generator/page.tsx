@@ -635,10 +635,12 @@ export default function UserAgentGenerator() {
         throw new Error(`No device code found for ${device.model || "Unknown"}. Please add device code in admin panel.`)
       }
 
+      const instagramUniqueId = instagramVersion.unique_id || instagramVersion.version_code || "123456789"
+
       const userAgent =
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; 123456789)`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; ${instagramUniqueId})`
 
       return userAgent
     } catch (error) {
@@ -1529,92 +1531,15 @@ export default function UserAgentGenerator() {
   // Removed unused generateUserAgent function
 
   // Added a beautiful header section
-  const headerStyle = {
-    background: "linear-gradient(to right, #6366F1, #8B5CFE, #3B82F6)",
-    color: "white",
-  }
+  // const headerStyle = {
+  //   background: "linear-gradient(to right, #6366F1, #8B5CFE, #3B82F6)",
+  //   color: "white",
+  // }
 
   return (
-    // Updated background gradient and removed overflow-hidden
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
-      <div className="fixed inset-0 -z-10">
-        {/* Light mode background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-50/50 via-transparent to-indigo-50/50 dark:hidden" />
-
-        {/* Dark mode enhanced background */}
-        <div className="hidden dark:block absolute inset-0">
-          {/* Multiple gradient layers for depth */}
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-indigo-900/25" />
-          <div className="absolute inset-0 bg-gradient-to-tr from-cyan-900/10 via-transparent to-pink-900/10" />
-          <div className="absolute inset-0 bg-gradient-to-bl from-emerald-900/8 via-transparent to-orange-900/8" />
-          <div className="absolute inset-0 bg-gradient-to-tl from-violet-900/5 via-transparent to-rose-900/5" />
-        </div>
-
-        {/* Animated orbs - Light mode */}
-        <div className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-200/30 dark:hidden rounded-full blur-3xl animate-pulse" />
-        <div
-          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-indigo-200/30 dark:hidden rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-
-        {/* Enhanced animated orbs - Dark mode */}
-        <div className="hidden dark:block absolute top-1/6 -left-48 w-80 h-80 bg-gradient-to-r from-blue-500/20 to-cyan-500/15 rounded-full blur-3xl animate-pulse" />
-        <div
-          className="hidden dark:block absolute top-1/3 right-1/4 w-64 h-64 bg-gradient-to-r from-purple-500/25 to-pink-500/20 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "2s" }}
-        />
-        <div
-          className="hidden dark:block absolute bottom-1/4 -right-32 w-72 h-72 bg-gradient-to-r from-indigo-500/20 to-blue-500/15 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "1s" }}
-        />
-        <div
-          className="hidden dark:block absolute bottom-1/6 left-1/3 w-56 h-56 bg-gradient-to-r from-emerald-500/15 to-teal-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "3s" }}
-        />
-        <div
-          className="hidden dark:block absolute top-1/2 left-1/2 w-48 h-48 bg-gradient-to-r from-violet-500/12 to-rose-500/10 rounded-full blur-3xl animate-pulse"
-          style={{ animationDelay: "4s" }}
-        />
-
-        {/* Floating particles - Dark mode only */}
-        <div
-          className="hidden dark:block absolute top-20 left-20 w-2 h-2 bg-blue-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "0.5s" }}
-        />
-        <div
-          className="hidden dark:block absolute top-40 right-32 w-1.5 h-1.5 bg-purple-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "1.5s" }}
-        />
-        <div
-          className="hidden dark:block absolute bottom-32 left-16 w-2.5 h-2.5 bg-cyan-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "2.5s" }}
-        />
-        <div
-          className="hidden dark:block absolute bottom-20 right-20 w-1 h-1 bg-pink-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "3s" }}
-        />
-        <div
-          className="hidden dark:block absolute top-1/2 left-1/2 w-1.5 h-1.5 bg-emerald-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "4s" }}
-        />
-        <div
-          className="hidden dark:block absolute top-1/3 left-1/4 w-1 h-1 bg-violet-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "5s" }}
-        />
-        <div
-          className="hidden dark:block absolute bottom-1/3 right-1/4 w-2 h-2 bg-rose-400/50 rounded-full animate-bounce"
-          style={{ animationDelay: "6s" }}
-        />
-      </div>
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
-          <Card className="bg-white/70 dark:bg-slate-800/70 backdrop-blur-sm border-slate-200/50 dark:border-slate-700/50 shadow-2xl">
-            <CardContent className="p-0">
-              <nav className="flex rounded-lg overflow-hidden" role="tablist"></nav>
-            </CardContent>
-          </Card>
-
           {activeTab === "generator" && (
             <div className="space-y-8">
               <GeneratorControls
@@ -1633,19 +1558,23 @@ export default function UserAgentGenerator() {
               />
 
               {userAgents.length > 0 && (
-                <Card className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-xl border-0 shadow-2xl">
-                  <CardHeader className="bg-gradient-to-r from-green-500/10 to-emerald-500/10 py-3">
+                <Card className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-lg">
+                  <CardHeader className="bg-slate-50 dark:bg-slate-800/50 py-3 border-b border-slate-200 dark:border-slate-700">
                     <CardTitle className="flex items-center justify-between text-lg">
                       <span className="text-slate-900 dark:text-slate-100">
                         Generated User Agents ({userAgents.length})
+                        {userAgents.length > 5 && (
+                          <span className="text-sm font-normal text-slate-500 dark:text-slate-400 ml-2">
+                            (Showing 5 of {userAgents.length})
+                          </span>
+                        )}
                       </span>
                       <div className="flex gap-2">
-                        {/* Changed button text and removed unused props */}
                         <Button
                           onClick={handleCopyAll}
                           variant="outline"
                           size="sm"
-                          className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm"
+                          className="bg-white dark:bg-slate-700"
                         >
                           <Copy className="w-4 h-4 mr-2" />
                           Copy All
@@ -1654,7 +1583,7 @@ export default function UserAgentGenerator() {
                           onClick={handleDownload}
                           variant="outline"
                           size="sm"
-                          className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm"
+                          className="bg-white dark:bg-slate-700"
                         >
                           <Download className="w-4 h-4 mr-2" />
                           Download
@@ -1664,26 +1593,23 @@ export default function UserAgentGenerator() {
                   </CardHeader>
                   <CardContent className="max-h-96 overflow-y-auto">
                     <div className="space-y-2">
-                      {userAgents.map((ua, index) => (
+                      {userAgents.slice(0, 5).map((ua, index) => (
                         <div
                           key={index}
                           className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                         >
-                          <div className="flex items-center justify-between gap-2">
-                            <code className="text-sm text-slate-700 dark:text-slate-300 flex-1 break-all">{ua}</code>
-                            {/* Removed unused props and changed onClick handler */}
-                            <Button
-                              onClick={() => copyToClipboard(ua, index)}
-                              variant="ghost"
-                              size="sm"
-                              className="shrink-0"
-                            >
-                              <Copy className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <code className="text-sm text-slate-700 dark:text-slate-300 break-all">{ua}</code>
                         </div>
                       ))}
                     </div>
+                    {userAgents.length > 5 && (
+                      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
+                        <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
+                          📋 {userAgents.length - 5} more user agents have been generated. Use "Copy All" or "Download"
+                          to view all.
+                        </p>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               )}

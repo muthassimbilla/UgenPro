@@ -73,8 +73,8 @@ export default function AdminLoginPage() {
             <div className="w-16 h-16 mx-auto mb-4 rounded-lg bg-primary/10 flex items-center justify-center">
               <Shield className="w-8 h-8 text-primary" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-1">অ্যাডমিন প্যানেল</h1>
-            <p className="text-sm text-muted-foreground">সুরক্ষিত অ্যাডমিন লগইন</p>
+            <h1 className="text-2xl font-bold text-foreground mb-1">Admin Panel</h1>
+            <p className="text-sm text-muted-foreground">Secure Admin Login</p>
           </div>
 
           {/* Login Form */}
@@ -87,7 +87,7 @@ export default function AdminLoginPage() {
             )}
 
             <div className="space-y-2">
-              <Label htmlFor="username">অ্যাডমিন ইউজারনেম</Label>
+              <Label htmlFor="username">Admin Username</Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -95,7 +95,7 @@ export default function AdminLoginPage() {
                   type="text"
                   value={credentials.username}
                   onChange={(e) => setCredentials((prev) => ({ ...prev, username: e.target.value }))}
-                  placeholder="অ্যাডমিন ইউজারনেম লিখুন"
+                  placeholder="Enter admin username"
                   className="pl-10"
                   required
                 />
@@ -103,7 +103,7 @@ export default function AdminLoginPage() {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="password">পাসওয়ার্ড</Label>
+              <Label htmlFor="password">Password</Label>
               <div className="relative">
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -111,7 +111,7 @@ export default function AdminLoginPage() {
                   type={showPassword ? "text" : "password"}
                   value={credentials.password}
                   onChange={(e) => setCredentials((prev) => ({ ...prev, password: e.target.value }))}
-                  placeholder="পাসওয়ার্ড লিখুন"
+                  placeholder="Enter password"
                   className="pl-10 pr-10"
                   required
                 />

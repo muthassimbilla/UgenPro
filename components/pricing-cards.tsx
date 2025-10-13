@@ -153,7 +153,8 @@ export function PricingCards({
         event_label: "email_click",
       })
     }
-    window.location.href = "mailto:admin@example.com?subject=Premium Tools Access&body=আমি Premium Tools এক্সেস করতে চাই।"
+    window.location.href =
+      "mailto:admin@example.com?subject=Premium Tools Access&body=I would like to access Premium Tools."
   }
 
   const handleButtonClick = (planId: string) => {

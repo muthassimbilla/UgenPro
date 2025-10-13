@@ -19,133 +19,150 @@ export interface AdminUser {
   user_agent?: string
   last_login?: string
   active_sessions_count: number
+  active_devices_count: number // Added device count field
 }
 
 export class AdminUserService {
-  static async getAllUsers(): Promise<AdminUser[]> {
-    const cacheKey = "admin:users:all"
+  static async getAllUsers(page = 1, pageSize = 50): Promise<{ users: AdminUser[]; total: number; hasMore: boolean }> {
+    const cacheKey = `admin:users:page:${page}:${pageSize}`
     try {
       // Try to get from cache first
-      const cachedData = apiCache.get<AdminUser[]>(cacheKey)
+      const cachedData = apiCache.get<{ users: AdminUser[]; total: number; hasMore: boolean }>(cacheKey)
       if (cachedData) {
-        console.log("[v0] Returning cached users data")
+        console.log("[v0] Returning cached users data for page:", page)
         return cachedData
       }
 
-      console.log("[v0] getAllUsers called")
+      console.log("[v0] getAllUsers called with pagination - page:", page, "pageSize:", pageSize)
       const supabase = this.getSupabaseClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
       }
 
+      // Get total count first
+      const { count, error: countError } = await supabase.from("profiles").select("*", { count: "exact", head: true })
+
+      if (countError) {
+        console.error("[v0] Count error:", countError)
+        throw new Error(`Failed to count users: ${countError.message}`)
+      }
+
+      const totalUsers = count || 0
+      const from = (page - 1) * pageSize
+      const to = from + pageSize - 1
+
+      // Get paginated profiles
       const { data: profiles, error } = await supabase
         .from("profiles")
         .select("*")
         .order("created_at", { ascending: false })
+        .range(from, to)
 
       if (error) {
         console.error("[v0] Supabase error:", error)
         throw new Error(`Failed to load user data: ${error.message}`)
       }
 
-      console.log("[v0] Profiles fetched:", profiles?.length || 0)
-      console.log("[v0] Profile data sample:", profiles?.[0]) // Debug log to see what data we're getting
+      console.log("[v0] Profiles fetched:", profiles?.length || 0, "Total:", totalUsers)
 
       if (!profiles || profiles.length === 0) {
         console.log("[v0] No profiles found in database")
-        const emptyResult: AdminUser[] = []
+        const emptyResult = { users: [], total: 0, hasMore: false }
         apiCache.set(cacheKey, emptyResult)
         return emptyResult
       }
 
-      // Get unique IP counts and user agent data
-      const usersWithDeviceCount = await Promise.all(
-        profiles.map(async (profile) => {
-          let uniqueIPCount = 0
-          let userAgent = "Unknown"
-          let lastLogin = null
-          let activeSessionsCount = 0
-          const userEmail = profile.email || "No email"
-          const telegramUsername = profile.telegram_username
+      // Get all user IDs for batch session query
+      const userIds = profiles.map((p) => p.id)
 
-          try {
-            // Count unique IP addresses for this user
-            const { data: ipHistory, error: ipError } = await supabase
-              .from("user_ip_history")
-              .select("ip_address")
-              .eq("user_id", profile.id)
-              .eq("is_current", true)
+      let sessionCountsMap = new Map<string, number>()
+      let deviceCountsMap = new Map<string, number>()
+      try {
+        const response = await fetch(`/api/admin/user-sessions/batch`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ userIds }),
+        })
 
-            if (!ipError && ipHistory) {
-              const uniqueIPs = new Set(ipHistory.map((ip) => ip.ip_address))
-              uniqueIPCount = uniqueIPs.size
+        if (response.ok) {
+          const data = await response.json()
+          if (data.success) {
+            if (data.sessionCounts) {
+              sessionCountsMap = new Map(Object.entries(data.sessionCounts))
             }
-
-            // Get active sessions count and latest session info using API
-            try {
-              const response = await fetch(`/api/admin/user-sessions?userId=${profile.id}`)
-              if (response.ok) {
-                const data = await response.json()
-                if (data.success && data.sessions) {
-                  activeSessionsCount = data.sessions.length
-                  if (data.sessions.length > 0) {
-                    const latestSession = data.sessions[0]
-                    userAgent = latestSession.user_agent || "Unknown"
-                    lastLogin = latestSession.last_accessed || latestSession.created_at
-                  }
-                }
-              } else {
-                console.warn("[v0] Failed to fetch sessions for user:", profile.id, response.status)
-              }
-            } catch (apiError) {
-              console.warn("[v0] API error fetching sessions for user:", profile.id, apiError)
+            if (data.deviceCounts) {
+              deviceCountsMap = new Map(Object.entries(data.deviceCounts))
             }
-          } catch (error) {
-            console.error("[v0] Error getting additional data for user:", profile.id, error)
           }
+        }
+      } catch (apiError) {
+        console.warn("[v0] Batch API error, falling back to 0 counts:", apiError)
+      }
 
-          return {
-            id: profile.id,
-            full_name: profile.full_name,
-            email: userEmail,
-            telegram_username: telegramUsername,
-            is_active: profile.is_active ?? true,
-            is_approved: profile.is_approved ?? false,
-            approved_at: profile.approved_at,
-            approved_by: profile.approved_by,
-            account_status: profile.account_status || "active",
-            expiration_date: profile.expiration_date,
-            current_status: this.calculateCurrentStatus(profile),
-            created_at: profile.created_at,
-            updated_at: profile.updated_at || profile.created_at,
-            device_count: uniqueIPCount,
-            user_agent: userAgent,
-            last_login: lastLogin,
-            active_sessions_count: activeSessionsCount,
-          }
-        }),
-      )
+      // Get unique IP counts in batch
+      const { data: ipHistory, error: ipError } = await supabase
+        .from("user_ip_history")
+        .select("user_id, ip_address")
+        .in("user_id", userIds)
+        .eq("is_current", true)
 
-      console.log("[v0] Returning users:", usersWithDeviceCount.length)
-      
-      // Cache the result
-      apiCache.set(cacheKey, usersWithDeviceCount)
-      
-      return usersWithDeviceCount
+      const ipCountsMap = new Map<string, number>()
+      if (!ipError && ipHistory) {
+        userIds.forEach((userId) => {
+          const userIPs = ipHistory.filter((ip) => ip.user_id === userId)
+          const uniqueIPs = new Set(userIPs.map((ip) => ip.ip_address))
+          ipCountsMap.set(userId, uniqueIPs.size)
+        })
+      }
+
+      // Map profiles to AdminUser format
+      const usersWithDeviceCount = profiles.map((profile) => {
+        const userEmail = profile.email || "No email"
+        const telegramUsername = profile.telegram_username
+        const activeSessionsCount = sessionCountsMap.get(profile.id) || 0
+        const activeDevicesCount = deviceCountsMap.get(profile.id) || 0 // Get device count from batch API
+        const uniqueIPCount = ipCountsMap.get(profile.id) || 0
+
+        return {
+          id: profile.id,
+          full_name: profile.full_name,
+          email: userEmail,
+          telegram_username: telegramUsername,
+          is_active: profile.is_active ?? true,
+          is_approved: profile.is_approved ?? false,
+          approved_at: profile.approved_at,
+          approved_by: profile.approved_by,
+          account_status: profile.account_status || "active",
+          expiration_date: profile.expiration_date,
+          current_status: this.calculateCurrentStatus(profile),
+          created_at: profile.created_at,
+          updated_at: profile.updated_at || profile.created_at,
+          device_count: uniqueIPCount,
+          user_agent: "Unknown",
+          last_login: null,
+          active_sessions_count: activeSessionsCount,
+          active_devices_count: activeDevicesCount, // Added device count
+        }
+      })
+
+      const hasMore = from + profiles.length < totalUsers
+      const result = {
+        users: usersWithDeviceCount,
+        total: totalUsers,
+        hasMore,
+      }
+
+      console.log("[v0] Returning users:", usersWithDeviceCount.length, "Total:", totalUsers, "Has more:", hasMore)
+
+      // Cache the result for 30 seconds
+      apiCache.set(cacheKey, result, 30000)
+
+      return result
     } catch (error: any) {
       console.error("[v0] Error getting users:", error)
       throw error
     }
-  }
-
-  private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
-    if (!user.is_approved) return "pending"
-    if (user.account_status === "suspended") return "suspended"
-    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
-    if (!user.is_active) return "inactive"
-    if (user.account_status === "active") return "active"
-    return "inactive"
   }
 
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
@@ -178,9 +195,8 @@ export class AdminUserService {
       }
 
       console.log("[v0] User approved successfully:", userId, "with expiration:", expirationDate)
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Error approving user:", error)
       throw error
@@ -214,9 +230,8 @@ export class AdminUserService {
       }
 
       console.log("[v0] User approval revoked successfully:", userId)
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Error rejecting user:", error)
       throw error
@@ -246,6 +261,7 @@ export class AdminUserService {
         id: profile.id,
         full_name: profile.full_name,
         email: profile.email || "No email",
+        telegram_username: profile.telegram_username,
         is_active: profile.is_active ?? true,
         is_approved: profile.is_approved ?? false,
         approved_at: profile.approved_at,
@@ -255,6 +271,7 @@ export class AdminUserService {
         current_status: this.calculateCurrentStatus(profile),
         created_at: profile.created_at,
         updated_at: profile.updated_at || profile.created_at,
+        active_sessions_count: 0,
       }))
 
       return usersWithEmail
@@ -265,7 +282,6 @@ export class AdminUserService {
   }
 
   static async updateUser(userId: string, userData: Partial<AdminUser>): Promise<AdminUser> {
-    const cacheKey = "admin:users:all"
     console.log("[v0] Updating user:", userId, userData)
 
     const supabase = this.getSupabaseClient()
@@ -279,7 +295,7 @@ export class AdminUserService {
         .from("profiles")
         .update({
           full_name: userData.full_name,
-          email: userData.email, // Update email in profiles table
+          email: userData.email,
           is_active: userData.is_active,
           updated_at: new Date().toISOString(),
         })
@@ -306,10 +322,11 @@ export class AdminUserService {
         current_status: this.calculateCurrentStatus(data),
         created_at: data.created_at,
         updated_at: data.updated_at,
+        active_sessions_count: 0,
+        active_devices_count: 0, // Added device count
       }
 
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+      apiCache.clear()
 
       return updatedUser
     } catch (error: any) {
@@ -319,7 +336,6 @@ export class AdminUserService {
   }
 
   static async updateUserExpiration(userId: string, expirationDate: string | null): Promise<void> {
-    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -341,9 +357,8 @@ export class AdminUserService {
       }
 
       console.log("[v0] User expiration updated successfully:", userId, expirationDate)
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Error updating user expiration:", error)
       throw error
@@ -351,7 +366,6 @@ export class AdminUserService {
   }
 
   static async updateUserStatus(userId: string, status: "active" | "suspended"): Promise<void> {
-    const cacheKey = "admin:users:all"
     try {
       const supabase = this.getSupabaseClient()
 
@@ -373,9 +387,8 @@ export class AdminUserService {
       }
 
       console.log("[v0] User status updated successfully:", userId, status)
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Error updating user status:", error)
       throw error
@@ -383,7 +396,6 @@ export class AdminUserService {
   }
 
   static async deleteUser(userId: string): Promise<void> {
-    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] Starting delete operation for user:", userId)
 
@@ -428,9 +440,8 @@ export class AdminUserService {
       }
 
       console.log("[v0] User successfully deleted:", userId, "Deleted rows:", deleteData.length)
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Delete user failed:", error)
       throw error
@@ -438,7 +449,6 @@ export class AdminUserService {
   }
 
   static async toggleUserStatus(userId: string, isActive: boolean): Promise<void> {
-    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
 
@@ -476,9 +486,8 @@ export class AdminUserService {
         accountStatus: updatedUser.account_status,
         fullName: updatedUser.full_name,
       })
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
 
       if (updatedUser.is_active !== isActive) {
         throw new Error("Database update failed - status not changed")
@@ -498,7 +507,6 @@ export class AdminUserService {
     account_status?: "active" | "suspended"
     expiration_date?: string | null
   }): Promise<AdminUser> {
-    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] Creating new user:", userData)
 
@@ -528,7 +536,7 @@ export class AdminUserService {
       const { data, error } = await supabase
         .from("profiles")
         .update({
-          email: userData.email, // Ensure email is stored in profile
+          email: userData.email,
           is_active: userData.is_active ?? true,
           is_approved: userData.is_approved ?? true,
           account_status: userData.account_status ?? "active",
@@ -560,10 +568,11 @@ export class AdminUserService {
         current_status: this.calculateCurrentStatus(data),
         created_at: data.created_at,
         updated_at: data.updated_at,
+        active_sessions_count: 0,
+        active_devices_count: 0, // Added device count
       }
 
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+      apiCache.clear()
 
       return newUser
     } catch (error: any) {
@@ -573,8 +582,6 @@ export class AdminUserService {
   }
 
   private static getSupabaseClient() {
-    // Use regular client for admin operations
-    // The RLS policies should allow admin access
     if (typeof window === "undefined") return null
 
     const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
@@ -595,7 +602,6 @@ export class AdminUserService {
       activateAccount?: boolean
     },
   ): Promise<void> {
-    const cacheKey = "admin:users:all"
     try {
       console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
 
@@ -654,12 +660,20 @@ export class AdminUserService {
         newExpirationDate: updatedUser.expiration_date,
         fullName: updatedUser.full_name,
       })
-      
-      // Invalidate cache
-      apiCache.remove(cacheKey)
+
+      apiCache.clear()
     } catch (error: any) {
       console.error("[v0] Security update failed:", error)
       throw error
     }
+  }
+
+  private static calculateCurrentStatus(user: any): "active" | "suspended" | "expired" | "inactive" | "pending" {
+    if (!user.is_approved) return "pending"
+    if (user.account_status === "suspended") return "suspended"
+    if (user.expiration_date && new Date(user.expiration_date) < new Date()) return "expired"
+    if (!user.is_active) return "inactive"
+    if (user.account_status === "active") return "active"
+    return "inactive"
   }
 }

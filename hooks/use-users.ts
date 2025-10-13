@@ -6,15 +6,28 @@ export const userKeys = {
   all: ["users"] as const,
   lists: () => [...userKeys.all, "list"] as const,
   list: (filters: string) => [...userKeys.lists(), { filters }] as const,
+  paginated: (page: number, pageSize: number) => [...userKeys.lists(), { page, pageSize }] as const,
   details: () => [...userKeys.all, "detail"] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
 }
 
-// Hooks
+export function useUsersPaginated(page = 1, pageSize = 50) {
+  return useQuery({
+    queryKey: userKeys.paginated(page, pageSize),
+    queryFn: () => AdminUserService.getAllUsers(page, pageSize),
+    staleTime: 30000, // Consider data fresh for 30 seconds
+    gcTime: 60000, // Keep in cache for 1 minute
+  })
+}
+
+// Legacy hook for backward compatibility
 export function useUsers() {
   return useQuery({
     queryKey: userKeys.lists(),
-    queryFn: () => AdminUserService.getAllUsers(),
+    queryFn: async () => {
+      const result = await AdminUserService.getAllUsers(1, 1000)
+      return result.users
+    },
   })
 }
 
@@ -25,7 +38,7 @@ export function useUpdateUser() {
     mutationFn: (data: { id: string; userData: Partial<AdminUser> }) =>
       AdminUserService.updateUser(data.id, data.userData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -36,7 +49,7 @@ export function useDeleteUser() {
   return useMutation({
     mutationFn: (userId: string) => AdminUserService.deleteUser(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -48,7 +61,7 @@ export function useToggleUserStatus() {
     mutationFn: (data: { userId: string; isActive: boolean }) =>
       AdminUserService.toggleUserStatus(data.userId, data.isActive),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -60,7 +73,7 @@ export function useApproveUser() {
     mutationFn: (data: { userId: string; expirationDate: string }) =>
       AdminUserService.approveUser(data.userId, undefined, data.expirationDate),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -71,7 +84,7 @@ export function useRejectUser() {
   return useMutation({
     mutationFn: (userId: string) => AdminUserService.rejectUser(userId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -88,7 +101,7 @@ export function useCreateUser() {
       expiration_date?: string | null
     }) => AdminUserService.createUser(userData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }
@@ -106,7 +119,7 @@ export function useUpdateUserSecurity() {
       }
     }) => AdminUserService.handleSecurityUpdate(data.userId, data.securityData),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.lists() })
+      queryClient.invalidateQueries({ queryKey: userKeys.all })
     },
   })
 }

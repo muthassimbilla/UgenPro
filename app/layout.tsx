@@ -43,13 +43,30 @@ export const metadata: Metadata = {
   referrer: "origin-when-cross-origin",
   icons: {
     icon: [
+      { url: "/icon", sizes: "32x32", type: "image/png" },
       { url: "/favicon.ico", sizes: "any" },
-      { url: "/favicon-16x16.ico", sizes: "16x16", type: "image/x-icon" },
-      { url: "/favicon-32x32.ico", sizes: "32x32", type: "image/x-icon" },
-      { url: "/ugenpro-logo.svg", type: "image/svg+xml" },
+      { url: "/favicon-16x16.png", sizes: "16x16", type: "image/png" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
     ],
     shortcut: "/favicon.ico",
-    apple: [{ url: "/ugenpro-logo.svg", sizes: "180x180", type: "image/svg+xml" }],
+    apple: [
+      { url: "/apple-icon", sizes: "180x180", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    other: [
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "192x192",
+        url: "/android-chrome-192x192.png",
+      },
+      {
+        rel: "icon",
+        type: "image/png",
+        sizes: "512x512",
+        url: "/android-chrome-512x512.png",
+      },
+    ],
   },
   manifest: "/manifest.json",
   openGraph: {
