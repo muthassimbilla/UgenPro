@@ -93,8 +93,8 @@ export default function AdminNotificationsPage() {
     } catch (error) {
       console.error("Error loading users:", error)
       toast({
-        title: "Error",
-        description: "Failed to load user list",
+        title: "ত্রুটি",
+        description: "ইউজার তালিকা লোড করতে সমস্যা হয়েছে",
         variant: "destructive",
       })
     } finally {
@@ -122,16 +122,16 @@ export default function AdminNotificationsPage() {
       } else {
         console.error("[v0] Failed to load notifications:", response.status, await response.text())
         toast({
-          title: "Error",
-          description: "Failed to load notifications",
+          title: "ত্রুটি",
+          description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error("[v0] Error loading notifications:", error)
       toast({
-        title: "Error",
-        description: "Failed to load notifications",
+        title: "ত্রুটি",
+        description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
         variant: "destructive",
       })
     } finally {
@@ -166,8 +166,8 @@ export default function AdminNotificationsPage() {
   const sendNotification = async () => {
     if (!formData.title || !formData.message) {
       toast({
-        title: "Error",
-        description: "Title and message are required",
+        title: "ত্রুটি",
+        description: "শিরোনাম এবং বার্তা প্রয়োজন",
         variant: "destructive",
       })
       return
@@ -175,8 +175,8 @@ export default function AdminNotificationsPage() {
 
     if (!sendToAll && selectedUsers.length === 0) {
       toast({
-        title: "Error",
-        description: "Please select at least one user",
+        title: "ত্রুটি",
+        description: "অন্তত একজন ইউজার নির্বাচন করুন",
         variant: "destructive",
       })
       return
@@ -214,8 +214,8 @@ export default function AdminNotificationsPage() {
         console.log("[v0] Successfully sent", successCount, "notifications")
 
         toast({
-          title: "Success",
-          description: `${successCount} notifications sent successfully`,
+          title: "সফল",
+          description: `${successCount}টি নোটিফিকেশন পাঠানো হয়েছে`,
         })
 
         setFormData({ title: "", message: "", type: "info", link: "" })
@@ -227,16 +227,16 @@ export default function AdminNotificationsPage() {
       } else {
         console.error("[v0] Failed to send notifications:", result.error)
         toast({
-          title: "Error",
-          description: result.error || "Failed to send notifications",
+          title: "ত্রুটি",
+          description: result.error || "নোটিফিকেশন পাঠাতে সমস্যা হয়েছে",
           variant: "destructive",
         })
       }
     } catch (error) {
       console.error("[v0] Error sending notifications:", error)
       toast({
-        title: "Error",
-        description: "Failed to send notifications",
+        title: "ত্রুটি",
+        description: "নোটিফিকেশন পাঠাতে সমস্যা হয়েছে",
         variant: "destructive",
       })
     } finally {
@@ -312,8 +312,8 @@ export default function AdminNotificationsPage() {
                 <Bell className="w-5 h-5 text-primary" />
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-foreground">Notification Management</h1>
-                <p className="text-sm text-muted-foreground">Send and manage user notifications</p>
+                <h1 className="text-2xl font-bold text-foreground">নোটিফিকেশন ম্যানেজমেন্ট</h1>
+                <p className="text-sm text-muted-foreground">ইউজারদের নোটিফিকেশন পাঠান এবং পরিচালনা করুন</p>
               </div>
             </div>
           </div>
@@ -321,22 +321,22 @@ export default function AdminNotificationsPage() {
             <DialogTrigger asChild>
               <Button>
                 <Plus className="w-4 h-4 mr-2" />
-                New Notification
+                নতুন নোটিফিকেশন
               </Button>
             </DialogTrigger>
             <DialogContent className="max-w-2xl">
               <DialogHeader>
-                <DialogTitle>Create New Notification</DialogTitle>
+                <DialogTitle>নতুন নোটিফিকেশন তৈরি করুন</DialogTitle>
               </DialogHeader>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="template">Template (Optional)</Label>
+                  <Label htmlFor="template">টেমপ্লেট (ঐচ্ছিক)</Label>
                   <Select value={selectedTemplate} onValueChange={handleTemplateSelect}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Select a predefined template" />
+                      <SelectValue placeholder="পূর্বনির্ধারিত টেমপ্লেট নির্বাচন করুন" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="custom">Custom Notification</SelectItem>
+                      <SelectItem value="custom">কাস্টম নোটিফিকেশন</SelectItem>
                       {templates.map((template) => (
                         <SelectItem key={template.id} value={template.id}>
                           {template.title}
@@ -348,38 +348,38 @@ export default function AdminNotificationsPage() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
-                    <Label htmlFor="title">Title *</Label>
+                    <Label htmlFor="title">শিরোনাম *</Label>
                     <Input
                       id="title"
-                      placeholder="Notification title"
+                      placeholder="নোটিফিকেশনের শিরোনাম"
                       value={formData.title}
                       onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     />
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="type">Type</Label>
+                    <Label htmlFor="type">ধরন</Label>
                     <Select
                       value={formData.type}
                       onValueChange={(value: any) => setFormData({ ...formData, type: value })}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select notification type" />
+                        <SelectValue placeholder="নোটিফিকেশনের ধরন নির্বাচন করুন" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="info">Info</SelectItem>
-                        <SelectItem value="success">Success</SelectItem>
-                        <SelectItem value="warning">Warning</SelectItem>
-                        <SelectItem value="error">Error</SelectItem>
+                        <SelectItem value="info">তথ্য</SelectItem>
+                        <SelectItem value="success">সফল</SelectItem>
+                        <SelectItem value="warning">সতর্কতা</SelectItem>
+                        <SelectItem value="error">ত্রুটি</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="message">Message *</Label>
+                  <Label htmlFor="message">বার্তা *</Label>
                   <Textarea
                     id="message"
-                    placeholder="Detailed notification message"
+                    placeholder="নোটিফিকেশনের বিস্তারিত বার্তা"
                     rows={4}
                     value={formData.message}
                     onChange={(e) => setFormData({ ...formData, message: e.target.value })}
@@ -387,7 +387,7 @@ export default function AdminNotificationsPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="link">Link (Optional)</Label>
+                  <Label htmlFor="link">লিংক (ঐচ্ছিক)</Label>
                   <Input
                     id="link"
                     placeholder="https://example.com"
@@ -401,14 +401,14 @@ export default function AdminNotificationsPage() {
                 <div className="space-y-4">
                   <div className="flex items-center space-x-2">
                     <Switch id="send-to-all" checked={sendToAll} onCheckedChange={setSendToAll} />
-                    <Label htmlFor="send-to-all">Send to all users</Label>
+                    <Label htmlFor="send-to-all">সকল ইউজারের কাছে পাঠান</Label>
                   </div>
 
                   {!sendToAll && (
                     <div className="space-y-2">
-                      <Label>Select Users</Label>
+                      <Label>ইউজার নির্বাচন করুন</Label>
                       <Input
-                        placeholder="Search users..."
+                        placeholder="ইউজার খুঁজুন..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
                       />
@@ -448,7 +448,7 @@ export default function AdminNotificationsPage() {
                         )}
                       </div>
                       {selectedUsers.length > 0 && (
-                        <p className="text-sm text-muted-foreground">{selectedUsers.length} users selected</p>
+                        <p className="text-sm text-muted-foreground">{selectedUsers.length}টি ইউজার নির্বাচিত</p>
                       )}
                     </div>
                   )}
@@ -456,18 +456,18 @@ export default function AdminNotificationsPage() {
 
                 <div className="flex justify-end space-x-2">
                   <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
-                    Cancel
+                    বাতিল
                   </Button>
                   <Button onClick={sendNotification} disabled={isSending}>
                     {isSending ? (
                       <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Sending...
+                        পাঠানো হচ্ছে...
                       </>
                     ) : (
                       <>
                         <Send className="w-4 h-4 mr-2" />
-                        Send
+                        পাঠান
                       </>
                     )}
                   </Button>
@@ -480,31 +480,31 @@ export default function AdminNotificationsPage() {
 
       <Tabs defaultValue="history" className="space-y-4">
         <TabsList>
-          <TabsTrigger value="history">Notification History</TabsTrigger>
-          <TabsTrigger value="stats">Statistics</TabsTrigger>
+          <TabsTrigger value="history">নোটিফিকেশন ইতিহাস</TabsTrigger>
+          <TabsTrigger value="stats">পরিসংখ্যান</TabsTrigger>
         </TabsList>
 
         <TabsContent value="history" className="space-y-4">
           <Card>
             <CardHeader>
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <CardTitle>All Notifications</CardTitle>
+                <CardTitle>সকল নোটিফিকেশন</CardTitle>
                 <div className="flex items-center space-x-2">
                   <Select value={filterType} onValueChange={setFilterType}>
                     <SelectTrigger className="w-40">
-                      <SelectValue placeholder="Filter" />
+                      <SelectValue placeholder="ফিল্টার" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="all">All</SelectItem>
-                      <SelectItem value="info">Info</SelectItem>
-                      <SelectItem value="success">Success</SelectItem>
-                      <SelectItem value="warning">Warning</SelectItem>
-                      <SelectItem value="error">Error</SelectItem>
+                      <SelectItem value="all">সকল</SelectItem>
+                      <SelectItem value="info">তথ্য</SelectItem>
+                      <SelectItem value="success">সফল</SelectItem>
+                      <SelectItem value="warning">সতর্কতা</SelectItem>
+                      <SelectItem value="error">ত্রুটি</SelectItem>
                     </SelectContent>
                   </Select>
                   <Button variant="outline" size="sm" onClick={loadNotifications}>
                     <Eye className="w-4 h-4 mr-2" />
-                    Refresh
+                    রিফ্রেশ
                   </Button>
                 </div>
               </div>
@@ -543,7 +543,7 @@ export default function AdminNotificationsPage() {
                               </div>
                               {notification.is_read && notification.read_at && (
                                 <Badge variant="secondary" className="text-xs">
-                                  Read
+                                  পড়া হয়েছে
                                 </Badge>
                               )}
                             </div>
@@ -554,8 +554,8 @@ export default function AdminNotificationsPage() {
                   ) : (
                     <div className="text-center py-12">
                       <MessageSquare className="w-12 h-12 text-muted-foreground/50 mx-auto mb-3" />
-                      <h3 className="font-semibold text-foreground mb-1">No Notifications</h3>
-                      <p className="text-sm text-muted-foreground">No notifications have been sent yet</p>
+                      <h3 className="font-semibold text-foreground mb-1">কোনো নোটিফিকেশন নেই</h3>
+                      <p className="text-sm text-muted-foreground">এখনো কোনো নোটিফিকেশন পাঠানো হয়নি</p>
                     </div>
                   )}
                 </div>
@@ -574,7 +574,7 @@ export default function AdminNotificationsPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-foreground mt-4">{notifications.length}</div>
-                <div className="text-sm text-muted-foreground">Total Notifications</div>
+                <div className="text-sm text-muted-foreground">মোট নোটিফিকেশন</div>
               </CardContent>
             </Card>
 
@@ -588,7 +588,7 @@ export default function AdminNotificationsPage() {
                 <div className="text-2xl font-bold text-foreground mt-4">
                   {notifications.filter((n) => n.is_read).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Read</div>
+                <div className="text-sm text-muted-foreground">পড়া হয়েছে</div>
               </CardContent>
             </Card>
 
@@ -602,7 +602,7 @@ export default function AdminNotificationsPage() {
                 <div className="text-2xl font-bold text-foreground mt-4">
                   {notifications.filter((n) => !n.is_read).length}
                 </div>
-                <div className="text-sm text-muted-foreground">Unread</div>
+                <div className="text-sm text-muted-foreground">অপঠিত</div>
               </CardContent>
             </Card>
 
@@ -614,7 +614,7 @@ export default function AdminNotificationsPage() {
                   </div>
                 </div>
                 <div className="text-2xl font-bold text-foreground mt-4">{users.length}</div>
-                <div className="text-sm text-muted-foreground">Total Users</div>
+                <div className="text-sm text-muted-foreground">মোট ইউজার</div>
               </CardContent>
             </Card>
           </div>

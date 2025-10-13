@@ -36,8 +36,8 @@ export default function AuthLayout({ children, variant = "login" }: AuthLayoutPr
         <Link
           href="/"
           className="group relative inline-flex items-center gap-2 sm:gap-3 px-3 sm:px-5 py-2.5 sm:py-3 rounded-xl sm:rounded-2xl bg-gradient-to-r from-white/15 to-white/5 dark:from-gray-800/25 dark:to-gray-800/10 backdrop-blur-xl border border-white/30 dark:border-gray-700/40 text-slate-700 dark:text-slate-200 hover:from-white/25 hover:to-white/10 dark:hover:from-gray-800/35 dark:hover:to-gray-800/20 hover:border-blue-400/60 dark:hover:border-blue-500/60 transition-all duration-500 hover:scale-105 hover:-translate-y-1 shadow-xl hover:shadow-2xl overflow-hidden focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:ring-offset-2 focus:ring-offset-transparent"
-          aria-label="Return to home page"
-          title="Return to home page"
+          aria-label="হোম পেজে ফিরুন"
+          title="হোম পেজে ফিরুন"
         >
           {/* Animated background gradient */}
           <div className="absolute inset-0 bg-gradient-to-r from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
