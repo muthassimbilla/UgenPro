@@ -106,7 +106,7 @@ Thank you!`
                       </h3>
 
                       <div className="flex items-baseline gap-2">
-                        <span className="text-5xl font-bold bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text text-transparent">
+                        <span className="text-5xl font-bold bg-gradient-to-br from-gray-900 to-gray-700 dark:from-gray-100 dark:to-gray-300 bg-clip-text text-transparent">
                           {plan.price}
                         </span>
                         <span className="text-muted-foreground font-medium">/ {plan.duration}</span>

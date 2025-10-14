@@ -2,7 +2,7 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   useUsersPaginated,
   useUpdateUser,
@@ -40,6 +40,7 @@ import {
   User,
   ChevronLeft,
   ChevronRight,
+  Loader2,
 } from "lucide-react"
 import type { AdminUser } from "@/lib/admin-user-service"
 import UserSessionsModal from "@/components/admin/user-sessions-modal"
@@ -61,12 +62,19 @@ export default function UserManagementPage() {
 
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(6) // Changed from 5 to 6 users per page
+  const [isInitialLoad, setIsInitialLoad] = useState(true)
 
-  const { data: paginatedData, isLoading, refetch } = useUsersPaginated(currentPage, pageSize)
+  const { data: paginatedData, isLoading, refetch } = useUsersPaginated(currentPage, pageSize, searchTerm, statusFilter)
   const users = paginatedData?.users || []
   const totalUsers = paginatedData?.total || 0
   const hasMore = paginatedData?.hasMore || false
   const totalPages = Math.ceil(totalUsers / pageSize)
+
+  useEffect(() => {
+    if (!isLoading && isInitialLoad) {
+      setIsInitialLoad(false)
+    }
+  }, [isLoading, isInitialLoad])
 
   const updateUser = useUpdateUser()
   const deleteUser = useDeleteUser()
@@ -80,22 +88,12 @@ export default function UserManagementPage() {
     refetch()
   }
 
-  const filteredUsers = users.filter((user) => {
-    const matchesSearch =
-      user.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.telegram_username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      false
+  const filteredUsers = users
 
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "active" && user.current_status === "active") ||
-      (statusFilter === "suspended" && user.current_status === "suspended") ||
-      (statusFilter === "expired" && user.current_status === "expired") ||
-      (statusFilter === "pending" && user.current_status === "pending")
-
-    return matchesSearch && matchesStatus
-  })
+  const activeUsers = users.filter((user) => user.current_status === "active").length
+  const suspendedUsers = users.filter((user) => user.current_status === "suspended").length
+  const expiredUsers = users.filter((user) => user.current_status === "expired").length
+  const pendingUsers = users.filter((user) => user.current_status === "pending").length
 
   const handleApproveUser = async (user: AdminUser) => {
     setSelectedUser(user)
@@ -264,11 +262,6 @@ export default function UserManagementPage() {
     }
   }
 
-  const activeUsers = users.filter((user) => user.current_status === "active").length
-  const suspendedUsers = users.filter((user) => user.current_status === "suspended").length
-  const expiredUsers = users.filter((user) => user.current_status === "expired").length
-  const pendingUsers = users.filter((user) => user.current_status === "pending").length
-
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "active":
@@ -284,11 +277,14 @@ export default function UserManagementPage() {
     }
   }
 
-  if (isLoading) {
+  if (isLoading && isInitialLoad) {
     return (
       <div className="flex items-center justify-center h-64">
         <div className="glass-card p-8 rounded-2xl">
-          <div className="text-lg text-foreground">Loading...</div>
+          <div className="flex items-center gap-3">
+            <Loader2 className="h-6 w-6 animate-spin text-primary" />
+            <div className="text-lg text-foreground">Loading users...</div>
+          </div>
         </div>
       </div>
     )
@@ -336,7 +332,7 @@ export default function UserManagementPage() {
         </div>
       </div>
 
-      {/* Stats Cards */}
+      {/* Stats Cards - Always visible, no loading effect */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-2 lg:gap-4">
         <div className="glass-card p-4 lg:p-6 rounded-2xl">
           <div className="flex items-center justify-between">
@@ -405,9 +401,12 @@ export default function UserManagementPage() {
           <div className="flex-1 relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search by name or email address..."
+              placeholder="নাম, ইমেইল বা টেলিগ্রাম ইউজারনেম দিয়ে সার্চ করুন..."
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage(1) // Reset to first page on search
+              }}
               className="pl-10 text-sm"
             />
           </div>
@@ -415,43 +414,54 @@ export default function UserManagementPage() {
             <Filter className="h-4 w-4 text-muted-foreground" />
             <select
               value={statusFilter}
-              onChange={(e) =>
+              onChange={(e) => {
                 setStatusFilter(e.target.value as "all" | "active" | "suspended" | "expired" | "pending")
-              }
+                setCurrentPage(1) // Reset to first page on filter change
+              }}
               className="px-3 py-2 rounded-lg border border-border bg-background text-foreground focus:outline-none focus:ring-2 focus:ring-primary text-sm min-w-0"
             >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="pending">Pending Approval</option>
-              <option value="suspended">Suspended</option>
-              <option value="expired">Expired</option>
+              <option value="all">সব স্ট্যাটাস</option>
+              <option value="active">সক্রিয়</option>
+              <option value="pending">অনুমোদনের অপেক্ষায়</option>
+              <option value="suspended">সাসপেন্ড</option>
+              <option value="expired">মেয়াদ উত্তীর্ণ</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Users Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
-        {filteredUsers.map((user) => (
-          <UserCard
-            key={user.id}
-            user={user}
-            onToggleStatus={handleToggleUserStatus}
-            onViewUser={handleViewUser}
-            onViewSessions={handleViewSessions}
-            onDeleteUser={handleDeleteUser}
-            onApproveUser={handleApproveUser}
-            onRejectUser={handleRejectUser}
-          />
-        ))}
-      </div>
-
-      {filteredUsers.length === 0 && (
-        <div className="glass-card p-12 rounded-2xl text-center">
-          <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
-          <h3 className="text-lg font-semibold text-foreground mb-2">No users found</h3>
-          <p className="text-muted-foreground">Try changing your search criteria.</p>
+      {isLoading && !isInitialLoad ? (
+        <div className="glass-card p-12 rounded-2xl">
+          <div className="flex flex-col items-center justify-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-muted-foreground">সার্চ করা হচ্ছে...</p>
+          </div>
         </div>
+      ) : (
+        <>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 lg:gap-4">
+            {filteredUsers.map((user) => (
+              <UserCard
+                key={user.id}
+                user={user}
+                onToggleStatus={handleToggleUserStatus}
+                onViewUser={handleViewUser}
+                onViewSessions={handleViewSessions}
+                onDeleteUser={handleDeleteUser}
+                onApproveUser={handleApproveUser}
+                onRejectUser={handleRejectUser}
+              />
+            ))}
+          </div>
+
+          {filteredUsers.length === 0 && (
+            <div className="glass-card p-12 rounded-2xl text-center">
+              <Users className="w-16 h-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">কোনো ইউজার পাওয়া যায়নি</h3>
+              <p className="text-muted-foreground">আপনার সার্চ বা ফিল্টার পরিবর্তন করে আবার চেষ্টা করুন।</p>
+            </div>
+          )}
+        </>
       )}
 
       {totalPages > 1 && (

@@ -19,6 +19,10 @@ export async function POST(request: NextRequest) {
     const body = await request.json()
     const { userIds, title, message, type = "info", link, sendToAll } = body
 
+    console.log("[v0] Request body:", { userIds, title, message, type, link, sendToAll })
+    console.log("[v0] userIds type:", typeof userIds, "isArray:", Array.isArray(userIds))
+    console.log("[v0] userIds length:", userIds?.length)
+
     if (!title || !message) {
       return NextResponse.json({ error: "Title and message are required" }, { status: 400 })
     }
@@ -27,6 +31,7 @@ export async function POST(request: NextRequest) {
 
     // If sendToAll is true, get all user IDs
     if (sendToAll) {
+      console.log("[v0] sendToAll is true, fetching all users from database")
       const { data: allUsers, error: usersError } = await supabase.from("profiles").select("id").not("id", "is", null)
 
       if (usersError) {
@@ -35,9 +40,13 @@ export async function POST(request: NextRequest) {
       }
 
       targetUserIds = allUsers?.map((user) => user.id) || []
+      console.log("[v0] Fetched", targetUserIds.length, "users from database")
+    } else {
+      console.log("[v0] sendToAll is false, using provided userIds:", targetUserIds)
     }
 
     if (targetUserIds.length === 0) {
+      console.log("[v0] No target users found")
       return NextResponse.json({ error: "No users specified" }, { status: 400 })
     }
 
@@ -51,6 +60,8 @@ export async function POST(request: NextRequest) {
       type,
       link: link || null,
     }))
+
+    console.log("[v0] Inserting", notifications.length, "notifications into database")
 
     const { data: createdNotifications, error } = await supabase.from("notifications").insert(notifications).select()
 

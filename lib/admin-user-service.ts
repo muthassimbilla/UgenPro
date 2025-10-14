@@ -1,4 +1,4 @@
-import { createBrowserClient } from "@supabase/ssr"
+import { createClient } from "@/lib/supabase/client"
 import { apiCache } from "./api-cache"
 
 export interface AdminUser {
@@ -23,8 +23,13 @@ export interface AdminUser {
 }
 
 export class AdminUserService {
-  static async getAllUsers(page = 1, pageSize = 50): Promise<{ users: AdminUser[]; total: number; hasMore: boolean }> {
-    const cacheKey = `admin:users:page:${page}:${pageSize}`
+  static async getAllUsers(
+    page = 1,
+    pageSize = 50,
+    searchTerm = "",
+    statusFilter: "all" | "active" | "suspended" | "expired" | "pending" = "all",
+  ): Promise<{ users: AdminUser[]; total: number; hasMore: boolean }> {
+    const cacheKey = `admin:users:page:${page}:${pageSize}:${searchTerm}:${statusFilter}`
     try {
       // Try to get from cache first
       const cachedData = apiCache.get<{ users: AdminUser[]; total: number; hasMore: boolean }>(cacheKey)
@@ -33,15 +38,55 @@ export class AdminUserService {
         return cachedData
       }
 
-      console.log("[v0] getAllUsers called with pagination - page:", page, "pageSize:", pageSize)
-      const supabase = this.getSupabaseClient()
+      console.log(
+        "[v0] getAllUsers called with pagination - page:",
+        page,
+        "pageSize:",
+        pageSize,
+        "search:",
+        searchTerm,
+        "status:",
+        statusFilter,
+      )
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required. Please add Supabase integration from project settings.")
       }
 
-      // Get total count first
-      const { count, error: countError } = await supabase.from("profiles").select("*", { count: "exact", head: true })
+      let countQuery = supabase.from("profiles").select("*", { count: "exact", head: true })
+      let dataQuery = supabase.from("profiles").select("*")
+
+      // Apply search filter
+      if (searchTerm && searchTerm.trim()) {
+        const searchPattern = `%${searchTerm.trim()}%`
+        countQuery = countQuery.or(
+          `full_name.ilike.${searchPattern},email.ilike.${searchPattern},telegram_username.ilike.${searchPattern}`,
+        )
+        dataQuery = dataQuery.or(
+          `full_name.ilike.${searchPattern},email.ilike.${searchPattern},telegram_username.ilike.${searchPattern}`,
+        )
+      }
+
+      // Apply status filter
+      if (statusFilter !== "all") {
+        if (statusFilter === "pending") {
+          countQuery = countQuery.eq("is_approved", false)
+          dataQuery = dataQuery.eq("is_approved", false)
+        } else if (statusFilter === "active") {
+          countQuery = countQuery.eq("account_status", "active").eq("is_active", true).eq("is_approved", true)
+          dataQuery = dataQuery.eq("account_status", "active").eq("is_active", true).eq("is_approved", true)
+        } else if (statusFilter === "suspended") {
+          countQuery = countQuery.eq("account_status", "suspended")
+          dataQuery = dataQuery.eq("account_status", "suspended")
+        } else if (statusFilter === "expired") {
+          countQuery = countQuery.not("expiration_date", "is", null).lt("expiration_date", new Date().toISOString())
+          dataQuery = dataQuery.not("expiration_date", "is", null).lt("expiration_date", new Date().toISOString())
+        }
+      }
+
+      // Get total count with filters
+      const { count, error: countError } = await countQuery
 
       if (countError) {
         console.error("[v0] Count error:", countError)
@@ -52,12 +97,8 @@ export class AdminUserService {
       const from = (page - 1) * pageSize
       const to = from + pageSize - 1
 
-      // Get paginated profiles
-      const { data: profiles, error } = await supabase
-        .from("profiles")
-        .select("*")
-        .order("created_at", { ascending: false })
-        .range(from, to)
+      // Get paginated profiles with filters
+      const { data: profiles, error } = await dataQuery.order("created_at", { ascending: false }).range(from, to)
 
       if (error) {
         console.error("[v0] Supabase error:", error)
@@ -168,7 +209,7 @@ export class AdminUserService {
   static async approveUser(userId: string, adminUserId?: string, expirationDate?: string): Promise<void> {
     const cacheKey = "admin:users:all"
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -206,7 +247,7 @@ export class AdminUserService {
   static async rejectUser(userId: string, adminUserId?: string): Promise<void> {
     const cacheKey = "admin:users:all"
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -240,7 +281,7 @@ export class AdminUserService {
 
   static async getPendingUsers(): Promise<AdminUser[]> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -284,7 +325,7 @@ export class AdminUserService {
   static async updateUser(userId: string, userData: Partial<AdminUser>): Promise<AdminUser> {
     console.log("[v0] Updating user:", userId, userData)
 
-    const supabase = this.getSupabaseClient()
+    const supabase = createClient()
 
     if (!supabase) {
       throw new Error("Supabase integration required")
@@ -337,7 +378,7 @@ export class AdminUserService {
 
   static async updateUserExpiration(userId: string, expirationDate: string | null): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -367,7 +408,7 @@ export class AdminUserService {
 
   static async updateUserStatus(userId: string, status: "active" | "suspended"): Promise<void> {
     try {
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -399,7 +440,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Starting delete operation for user:", userId)
 
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -452,7 +493,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.toggleUserStatus called with:", { userId, isActive })
 
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -510,7 +551,7 @@ export class AdminUserService {
     try {
       console.log("[v0] Creating new user:", userData)
 
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")
@@ -581,19 +622,6 @@ export class AdminUserService {
     }
   }
 
-  private static getSupabaseClient() {
-    if (typeof window === "undefined") return null
-
-    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-    const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-    if (supabaseUrl && supabaseAnonKey) {
-      return createBrowserClient(supabaseUrl, supabaseAnonKey)
-    }
-
-    return null
-  }
-
   static async handleSecurityUpdate(
     userId: string,
     data: {
@@ -605,7 +633,7 @@ export class AdminUserService {
     try {
       console.log("[v0] AdminUserService.handleSecurityUpdate called with:", { userId, data })
 
-      const supabase = this.getSupabaseClient()
+      const supabase = createClient()
 
       if (!supabase) {
         throw new Error("Supabase integration required")

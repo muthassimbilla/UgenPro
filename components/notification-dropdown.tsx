@@ -138,17 +138,17 @@ export function NotificationDropdown() {
   }
 
   const getNotificationBgColor = (type: string, isRead: boolean) => {
-    if (isRead) return "bg-slate-50 dark:bg-slate-800/50"
+    if (isRead) return "bg-white dark:bg-slate-800/50"
 
     switch (type) {
       case "success":
-        return "bg-green-50 dark:bg-green-900/20"
+        return "bg-gradient-to-br from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30"
       case "warning":
-        return "bg-yellow-50 dark:bg-yellow-900/20"
+        return "bg-gradient-to-br from-amber-50 to-orange-50 dark:from-amber-900/30 dark:to-orange-900/30"
       case "error":
-        return "bg-red-50 dark:bg-red-900/20"
+        return "bg-gradient-to-br from-rose-50 to-red-50 dark:from-rose-900/30 dark:to-red-900/30"
       default:
-        return "bg-blue-50 dark:bg-blue-900/20"
+        return "bg-gradient-to-br from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30"
     }
   }
 
@@ -193,11 +193,11 @@ export function NotificationDropdown() {
               <p className="text-sm text-slate-500 dark:text-slate-400">No notifications yet</p>
             </div>
           ) : (
-            <div className="space-y-1 p-1">
+            <div className="space-y-2 p-2">
               {notifications.map((notification) => (
                 <div
                   key={notification.id}
-                  className={`group relative rounded-lg p-3 transition-all duration-200 hover:shadow-md cursor-pointer ${getNotificationBgColor(notification.type, notification.is_read)}`}
+                  className={`group relative rounded-xl p-3 transition-all duration-200 shadow-sm hover:shadow-lg cursor-pointer ${getNotificationBgColor(notification.type, notification.is_read)}`}
                   onClick={() => handleNotificationClick(notification)}
                 >
                   <div className="flex items-start gap-3">
@@ -209,7 +209,7 @@ export function NotificationDropdown() {
                           {notification.title}
                         </h4>
                         {!notification.is_read && (
-                          <div className="flex-shrink-0 h-2 w-2 rounded-full bg-blue-500"></div>
+                          <div className="flex-shrink-0 h-2 w-2 rounded-full bg-gradient-to-r from-blue-500 to-indigo-500 shadow-sm"></div>
                         )}
                       </div>
 
@@ -227,25 +227,27 @@ export function NotificationDropdown() {
                             <Button
                               variant="ghost"
                               size="icon"
-                              className="h-6 w-6"
+                              className="h-7 w-7 rounded-lg hover:bg-emerald-100 dark:hover:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all duration-200"
                               onClick={(e) => {
                                 e.stopPropagation()
                                 markAsRead(notification.id)
                               }}
+                              title="Mark as read"
                             >
-                              <Check className="h-3 w-3" />
+                              <Check className="h-4 w-4" />
                             </Button>
                           )}
                           <Button
                             variant="ghost"
                             size="icon"
-                            className="h-6 w-6 text-red-500 hover:text-red-600"
+                            className="h-7 w-7 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/30 text-red-500 dark:text-red-400 hover:text-red-600 dark:hover:text-red-300 transition-all duration-200"
                             onClick={(e) => {
                               e.stopPropagation()
                               deleteNotification(notification.id)
                             }}
+                            title="Delete notification"
                           >
-                            <Trash2 className="h-3 w-3" />
+                            <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
                       </div>

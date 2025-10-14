@@ -89,7 +89,7 @@ export default function AdminNotificationsPage() {
     try {
       setIsLoadingUsers(true)
       const usersData = await AdminUserService.getAllUsers()
-      setUsers(usersData)
+      setUsers(Array.isArray(usersData) ? usersData : usersData.users || [])
     } catch (error) {
       console.error("Error loading users:", error)
       toast({
@@ -97,6 +97,7 @@ export default function AdminNotificationsPage() {
         description: "ইউজার তালিকা লোড করতে সমস্যা হয়েছে",
         variant: "destructive",
       })
+      setUsers([])
     } finally {
       setIsLoadingUsers(false)
     }
@@ -107,8 +108,6 @@ export default function AdminNotificationsPage() {
       setIsLoadingNotifications(true)
       const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
 
-      console.log("[v0] Loading notifications with session token:", sessionToken ? "present" : "missing")
-
       const response = await fetch("/api/admin/notifications-history", {
         headers: {
           Authorization: `Bearer ${sessionToken || ""}`,
@@ -117,10 +116,9 @@ export default function AdminNotificationsPage() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] Loaded", data.notifications?.length || 0, "notifications")
         setNotifications(data.notifications || [])
       } else {
-        console.error("[v0] Failed to load notifications:", response.status, await response.text())
+        console.error("Failed to load notifications:", response.status, await response.text())
         toast({
           title: "ত্রুটি",
           description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
@@ -128,7 +126,7 @@ export default function AdminNotificationsPage() {
         })
       }
     } catch (error) {
-      console.error("[v0] Error loading notifications:", error)
+      console.error("Error loading notifications:", error)
       toast({
         title: "ত্রুটি",
         description: "নোটিফিকেশন লোড করতে সমস্যা হয়েছে",
@@ -143,8 +141,6 @@ export default function AdminNotificationsPage() {
     try {
       const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
 
-      console.log("[v0] Loading templates with session token:", sessionToken ? "present" : "missing")
-
       const response = await fetch("/api/admin/bulk-notifications", {
         headers: {
           Authorization: `Bearer ${sessionToken || ""}`,
@@ -153,13 +149,12 @@ export default function AdminNotificationsPage() {
 
       if (response.ok) {
         const data = await response.json()
-        console.log("[v0] Loaded", data.templates?.length || 0, "templates")
         setTemplates(data.templates || [])
       } else {
-        console.error("[v0] Failed to load templates:", response.status, await response.text())
+        console.error("Failed to load templates:", response.status, await response.text())
       }
     } catch (error) {
-      console.error("[v0] Error loading templates:", error)
+      console.error("Error loading templates:", error)
     }
   }
 
@@ -187,9 +182,23 @@ export default function AdminNotificationsPage() {
     try {
       const usersToNotify = sendToAll ? users.map((u) => u.id) : selectedUsers
 
+      console.log("[v0] sendToAll:", sendToAll)
+      console.log("[v0] selectedUsers:", selectedUsers)
+      console.log("[v0] usersToNotify:", usersToNotify)
+      console.log("[v0] Total users to notify:", usersToNotify.length)
+
       const sessionToken = typeof window !== "undefined" ? localStorage.getItem("admin_session_token") : null
 
-      console.log("[v0] Sending notification to", usersToNotify.length, "users")
+      const requestBody = {
+        userIds: usersToNotify,
+        title: formData.title,
+        message: formData.message,
+        type: formData.type,
+        link: formData.link || undefined,
+        sendToAll,
+      }
+
+      console.log("[v0] Request body:", JSON.stringify(requestBody, null, 2))
 
       const response = await fetch("/api/admin/bulk-notifications", {
         method: "POST",
@@ -197,21 +206,14 @@ export default function AdminNotificationsPage() {
           "Content-Type": "application/json",
           Authorization: `Bearer ${sessionToken || ""}`,
         },
-        body: JSON.stringify({
-          userIds: usersToNotify,
-          title: formData.title,
-          message: formData.message,
-          type: formData.type,
-          link: formData.link || undefined,
-          sendToAll,
-        }),
+        body: JSON.stringify(requestBody),
       })
 
       const result = await response.json()
+      console.log("[v0] Response:", result)
 
       if (response.ok) {
         const successCount = result.count || 0
-        console.log("[v0] Successfully sent", successCount, "notifications")
 
         toast({
           title: "সফল",
@@ -283,11 +285,13 @@ export default function AdminNotificationsPage() {
     }
   }
 
-  const filteredUsers = users.filter(
-    (user) =>
-      user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase()),
-  )
+  const filteredUsers = Array.isArray(users)
+    ? users.filter(
+        (user) =>
+          user.full_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (user.telegram_username && user.telegram_username.toLowerCase().includes(searchTerm.toLowerCase())),
+      )
+    : []
 
   const filteredNotifications = notifications.filter((notification) => {
     if (filterType === "all") return true
@@ -417,34 +421,40 @@ export default function AdminNotificationsPage() {
                           <div className="p-4 text-center">
                             <Loader2 className="w-4 h-4 animate-spin mx-auto" />
                           </div>
+                        ) : filteredUsers.length === 0 ? (
+                          <div className="p-4 text-center text-sm text-muted-foreground">কোনো ইউজার পাওয়া যায়নি</div>
                         ) : (
-                          filteredUsers.map((user) => (
-                            <div
-                              key={user.id}
-                              className="flex items-center space-x-2 p-3 hover:bg-muted cursor-pointer"
-                              onClick={() => {
-                                if (selectedUsers.includes(user.id)) {
-                                  setSelectedUsers(selectedUsers.filter((id) => id !== user.id))
-                                } else {
-                                  setSelectedUsers([...selectedUsers, user.id])
-                                }
-                              }}
-                            >
-                              <input
-                                type="checkbox"
-                                checked={selectedUsers.includes(user.id)}
-                                onChange={() => {}}
-                                className="rounded"
-                              />
-                              <div className="flex-1">
-                                <div className="font-medium">{user.full_name}</div>
-                                <div className="text-sm text-muted-foreground">@{user.telegram_username}</div>
+                          filteredUsers.map((user) => {
+                            const isSelected = selectedUsers.includes(user.id)
+                            return (
+                              <div
+                                key={user.id}
+                                className="flex items-center space-x-2 p-3 hover:bg-muted cursor-pointer"
+                                onClick={() => {
+                                  console.log("[v0] Clicking user:", user.id, user.full_name)
+                                  console.log("[v0] Current selectedUsers:", selectedUsers)
+                                  if (selectedUsers.includes(user.id)) {
+                                    const newSelected = selectedUsers.filter((id) => id !== user.id)
+                                    console.log("[v0] Removing user, new selection:", newSelected)
+                                    setSelectedUsers(newSelected)
+                                  } else {
+                                    const newSelected = [...selectedUsers, user.id]
+                                    console.log("[v0] Adding user, new selection:", newSelected)
+                                    setSelectedUsers(newSelected)
+                                  }
+                                }}
+                              >
+                                <input type="checkbox" checked={isSelected} onChange={() => {}} className="rounded" />
+                                <div className="flex-1">
+                                  <div className="font-medium">{user.full_name}</div>
+                                  <div className="text-sm text-muted-foreground">@{user.telegram_username}</div>
+                                </div>
+                                <Badge variant={user.current_status === "active" ? "default" : "secondary"}>
+                                  {user.current_status}
+                                </Badge>
                               </div>
-                              <Badge variant={user.current_status === "active" ? "default" : "secondary"}>
-                                {user.current_status}
-                              </Badge>
-                            </div>
-                          ))
+                            )
+                          })
                         )}
                       </div>
                       {selectedUsers.length > 0 && (

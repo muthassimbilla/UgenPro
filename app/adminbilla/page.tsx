@@ -3,21 +3,13 @@
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
-import {
-  Users,
-  Activity,
-  Clock,
-  CheckCircle,
-  RefreshCw,
-  Shield,
-  ChevronRight,
-} from "lucide-react"
+import { Users, Activity, Clock, CheckCircle, RefreshCw, Shield, ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { AdminUserService, type AdminUser } from "@/lib/admin-user-service"
 import { Button } from "@/components/ui/button"
 import { Switch } from "@/components/ui/switch"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
 
 export default function AdminDashboard() {
   const { admin, isLoading } = useAdminAuth()
@@ -33,15 +25,16 @@ export default function AdminDashboard() {
     }
   }, [admin, isLoading, router])
 
-
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        const userData = await AdminUserService.getAllUsers()
-        setUsers(userData)
+        const result = await AdminUserService.getAllUsers()
+        const userData = result?.users || []
+        setUsers(Array.isArray(userData) ? userData : [])
         setLastUpdated(new Date())
       } catch (error) {
         console.error("Error loading dashboard data:", error)
+        setUsers([])
       } finally {
         setIsLoadingData(false)
       }
@@ -59,11 +52,13 @@ export default function AdminDashboard() {
     const interval = setInterval(() => {
       const loadDashboardData = async () => {
         try {
-          const userData = await AdminUserService.getAllUsers()
-          setUsers(userData)
+          const result = await AdminUserService.getAllUsers()
+          const userData = result?.users || []
+          setUsers(Array.isArray(userData) ? userData : [])
           setLastUpdated(new Date())
         } catch (error) {
           console.error("Error loading dashboard data:", error)
+          setUsers([])
         }
       }
       loadDashboardData()
@@ -100,10 +95,10 @@ export default function AdminDashboard() {
     },
   ]
 
-  const totalUsers = users.length
-  const activeUsers = users.filter((user) => user.current_status === "active").length
-  const suspendedUsers = users.filter((user) => user.current_status === "suspended").length
-  const expiredUsers = users.filter((user) => user.current_status === "expired").length
+  const totalUsers = Array.isArray(users) ? users.length : 0
+  const activeUsers = Array.isArray(users) ? users.filter((user) => user.current_status === "active").length : 0
+  const suspendedUsers = Array.isArray(users) ? users.filter((user) => user.current_status === "suspended").length : 0
+  const expiredUsers = Array.isArray(users) ? users.filter((user) => user.current_status === "expired").length : 0
 
   const totalGrowth = totalUsers > 0 ? "+12%" : "0%"
   const activeGrowth = activeUsers > 0 ? "+8%" : "0%"
@@ -128,7 +123,6 @@ export default function AdminDashboard() {
       icon: CheckCircle,
     },
   ]
-
 
   return (
     <div className="space-y-6 pb-8">
@@ -167,11 +161,13 @@ export default function AdminDashboard() {
                 const loadDashboardData = async () => {
                   try {
                     setIsLoadingData(true)
-                    const userData = await AdminUserService.getAllUsers()
-                    setUsers(userData)
+                    const result = await AdminUserService.getAllUsers()
+                    const userData = result?.users || []
+                    setUsers(Array.isArray(userData) ? userData : [])
                     setLastUpdated(new Date())
                   } catch (error) {
                     console.error("Error loading dashboard data:", error)
+                    setUsers([])
                   } finally {
                     setIsLoadingData(false)
                   }
@@ -248,7 +244,6 @@ export default function AdminDashboard() {
           })}
         </div>
       </div>
-
     </div>
   )
 }

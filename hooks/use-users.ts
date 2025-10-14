@@ -6,15 +6,21 @@ export const userKeys = {
   all: ["users"] as const,
   lists: () => [...userKeys.all, "list"] as const,
   list: (filters: string) => [...userKeys.lists(), { filters }] as const,
-  paginated: (page: number, pageSize: number) => [...userKeys.lists(), { page, pageSize }] as const,
+  paginated: (page: number, pageSize: number, searchTerm: string, statusFilter: string) =>
+    [...userKeys.lists(), { page, pageSize, searchTerm, statusFilter }] as const,
   details: () => [...userKeys.all, "detail"] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
 }
 
-export function useUsersPaginated(page = 1, pageSize = 50) {
+export function useUsersPaginated(
+  page = 1,
+  pageSize = 50,
+  searchTerm = "",
+  statusFilter: "all" | "active" | "suspended" | "expired" | "pending" = "all",
+) {
   return useQuery({
-    queryKey: userKeys.paginated(page, pageSize),
-    queryFn: () => AdminUserService.getAllUsers(page, pageSize),
+    queryKey: userKeys.paginated(page, pageSize, searchTerm, statusFilter),
+    queryFn: () => AdminUserService.getAllUsers(page, pageSize, searchTerm, statusFilter),
     staleTime: 30000, // Consider data fresh for 30 seconds
     gcTime: 60000, // Keep in cache for 1 minute
   })

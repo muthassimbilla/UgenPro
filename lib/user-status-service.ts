@@ -1,4 +1,4 @@
-import { createBrowserClient } from "@supabase/ssr"
+import { createClient } from "@/lib/supabase/client"
 
 // User status interface
 export interface UserStatus {
@@ -8,21 +8,8 @@ export interface UserStatus {
   expiration_date?: string
 }
 
-let supabaseInstance: any = null
-
 const getSupabaseClient = () => {
-  if (typeof window === "undefined") return null // Server-side rendering guard
-
-  if (supabaseInstance) return supabaseInstance
-
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (supabaseUrl && supabaseAnonKey) {
-    supabaseInstance = createBrowserClient(supabaseUrl, supabaseAnonKey)
-  }
-
-  return supabaseInstance
+  return createClient()
 }
 
 // User status service class

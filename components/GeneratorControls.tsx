@@ -176,7 +176,7 @@ export default function GeneratorControls({
         <Button
           onClick={onGenerate}
           disabled={isGenerating || !platform || !appType || quantity < 1}
-          className="w-full bg-indigo-600 dark:bg-indigo-700 text-white h-12 text-base font-semibold rounded-lg shadow-lg"
+          className="w-full bg-[#1D6DFF] hover:bg-[#1557D9] text-white h-12 text-base font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
           aria-describedby="generate-help"
         >
           {isGenerating ? (
