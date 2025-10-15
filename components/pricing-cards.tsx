@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge"
 import { Check } from "lucide-react"
 import { pricingPlans } from "@/lib/pricing-data"
 import { memo, useState } from "react"
-import PurchaseModal from "@/components/purchase-modal"
+import EnhancedPurchaseModal from "@/components/enhanced-purchase-modal"
 
 interface PricingCardsProps {
   onSelectPlan?: (planId: string) => void
@@ -141,6 +141,7 @@ export function PricingCards({
 }: PricingCardsProps) {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [selectedPlan, setSelectedPlan] = useState<{
+    id: string
     name: string
     price: string
     duration: string
@@ -164,6 +165,7 @@ export function PricingCards({
       console.log("Found plan:", plan)
       if (plan) {
         setSelectedPlan({
+          id: plan.id,
           name: plan.name,
           price: plan.price,
           duration: plan.duration,
@@ -191,11 +193,12 @@ export function PricingCards({
         ))}
       </div>
 
-      {/* Purchase Modal */}
+      {/* Enhanced Purchase Modal */}
       {selectedPlan && (
-        <PurchaseModal
+        <EnhancedPurchaseModal
           isOpen={isModalOpen}
           onClose={handleCloseModal}
+          planId={selectedPlan.id}
           planName={selectedPlan.name}
           planPrice={selectedPlan.price}
           planDuration={selectedPlan.duration}

@@ -200,7 +200,7 @@ export default function ChangePasswordModal({ isOpen, onClose }: ChangePasswordM
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
       <div className="w-full max-w-md relative z-10">
         {/* Change Password Modal */}
-        <div className="glass-card p-6 rounded-3xl shadow-2xl border-0 backdrop-blur-xl bg-white/10 dark:bg-gray-900/10">
+        <div className="glass-card p-6 rounded-3xl shadow-2xl border backdrop-blur-xl bg-white dark:bg-slate-900">
           {/* Header */}
           <div className="text-center space-y-2 pb-4">
             <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#8e2de2] via-[#4a9fff] to-[#ff4b8a] flex items-center justify-center mx-auto mb-4 shadow-lg">

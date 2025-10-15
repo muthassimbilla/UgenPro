@@ -21,11 +21,11 @@ export const HeroSection = memo(function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-[80vh] sm:min-h-[80vh] flex items-center justify-center overflow-hidden pt-12 pb-4 sm:pt-16 sm:pb-6"
+      className="relative min-h-screen sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 pb-4 sm:pt-16 sm:pb-6"
     >
       <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-12">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="space-y-4 sm:space-y-8 opacity-0 animate-[fadeIn_0.7s_ease-in_forwards]">
+          <div className="space-y-4 sm:space-y-8">
             <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full glass shadow-glow text-xs sm:text-sm font-semibold hover:scale-105 transition-transform duration-300 border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30">
               <Sparkles className="h-4 w-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
               <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
@@ -99,26 +99,13 @@ export const HeroSection = memo(function HeroSection() {
             </div>
           </div>
 
-          <div className="mt-8 sm:mt-16 text-center opacity-0 animate-[fadeIn_0.7s_ease-in_1s_forwards]">
+          <div className="mt-8 sm:mt-16 text-center">
             <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
               Join thousands of developers building the future with AI-powered tools
             </p>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
     </section>
   )
 })

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { useAdminAuth } from "@/lib/admin-auth-context"
 import { Button } from "@/components/ui/button"
-import { Home, Users, LogOut, User, Menu, X, Shield, Activity, Bell, Settings } from "lucide-react"
+import { Home, Users, LogOut, User, Menu, X, Shield, Activity, Bell, Settings, ShoppingCart } from "lucide-react"
 import ThemeToggle from "@/components/theme-toggle"
 
 export function AdminNavigation() {
@@ -16,6 +16,7 @@ export function AdminNavigation() {
   const navigationItems = [
     { name: "Dashboard", href: "/adminbilla", icon: Home },
     { name: "User Management", href: "/adminbilla/users", icon: Users },
+    { name: "Orders", href: "/adminbilla/orders", icon: ShoppingCart },
     { name: "Notifications", href: "/adminbilla/notifications", icon: Bell },
     { name: "API Monitoring", href: "/adminbilla/api-monitoring", icon: Activity },
     { name: "API Limits", href: "/adminbilla/api-limits", icon: Shield },

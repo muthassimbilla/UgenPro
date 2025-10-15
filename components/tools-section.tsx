@@ -5,7 +5,6 @@ import { ToolCard } from "@/components/tool-card"
 import { useState, useMemo } from "react"
 import dynamic from "next/dynamic"
 import type { Tool } from "@/lib/tools-config"
-import { useScrollAnimation } from "@/hooks/use-scroll-animation"
 
 const LazyToolModal = dynamic(() => import("@/components/tool-modal").then((mod) => mod.ToolModal), {
   loading: () => null,
@@ -15,7 +14,6 @@ const LazyToolModal = dynamic(() => import("@/components/tool-modal").then((mod)
 export function ToolsSection() {
   const [selectedTool, setSelectedTool] = useState<Tool | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
-  const { ref: sectionRef, isVisible } = useScrollAnimation({ threshold: 0.15 })
 
   const handleToolClick = (tool: Tool) => {
     setSelectedTool(tool)
@@ -31,7 +29,7 @@ export function ToolsSection() {
   const remainingTools = useMemo(() => toolsData.slice(3), [])
 
   return (
-    <section id="tools" ref={sectionRef} className="relative py-6 overflow-hidden">
+    <section id="tools" className="relative py-6 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-blue-50/30 via-blue-50/20 to-background dark:via-blue-950/10 dark:via-blue-950/10" />
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10 rounded-full blur-3xl" />
@@ -39,11 +37,7 @@ export function ToolsSection() {
       </div>
 
       <div className="container relative z-10 mx-auto px-4 sm:px-6">
-        <div
-          className={`max-w-4xl mb-4 text-center mx-auto px-4 sm:px-0 transition-all duration-600 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-          }`}
-        >
+        <div className="max-w-4xl mb-4 text-center mx-auto px-4 sm:px-0">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
             <span className="text-shadow-lg">Our Tools</span>
           </h2>
@@ -54,40 +48,18 @@ export function ToolsSection() {
           </p>
         </div>
 
-        {/* All tools in same size - 3 cards in one row */}
-        <div
-          className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto transition-all duration-600 delay-200 ${
-            isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-          }`}
-        >
-          {firstThreeTools.map((tool, index) => (
-            <div
-              key={tool.id}
-              className={`transition-all duration-600 ${
-                isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-              }`}
-              style={{ transitionDelay: `${100 * index}ms` }}
-            >
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
+          {firstThreeTools.map((tool) => (
+            <div key={tool.id}>
               <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
             </div>
           ))}
         </div>
 
-        {/* Additional tools if more than 3 */}
         {remainingTools.length > 0 && (
-          <div
-            className={`grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8 transition-all duration-600 delay-400 ${
-              isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-            }`}
-          >
-            {remainingTools.map((tool, index) => (
-              <div
-                key={tool.id}
-                className={`transition-all duration-600 ${
-                  isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-5"
-                }`}
-                style={{ transitionDelay: `${100 * index}ms` }}
-              >
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8">
+            {remainingTools.map((tool) => (
+              <div key={tool.id}>
                 <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
               </div>
             ))}

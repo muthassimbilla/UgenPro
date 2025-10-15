@@ -30,13 +30,11 @@ export function ContactSection() {
     <section id="contact" className="relative py-6 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-[#2B7FFF]/5 via-[#4a9fff]/3 to-background dark:via-[#2B7FFF]/10 dark:via-[#4a9fff]/8" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 rounded-full blur-3xl animate-pulse opacity-70" />
-        <div className="absolute top-3/4 right-1/4 w-64 h-64 bg-gradient-to-r from-[#4a9fff]/18 via-[#2B7FFF]/18 to-[#4a9fff]/18 rounded-full blur-2xl animate-pulse opacity-60" />
-        <div className="absolute bottom-1/4 left-1/3 w-48 h-48 bg-gradient-to-r from-[#2B7FFF]/20 via-[#4a9fff]/20 to-[#2B7FFF]/20 rounded-full blur-xl animate-pulse opacity-50" />
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/15 via-[#4a9fff]/15 to-[#2B7FFF]/15 rounded-full blur-3xl opacity-50" />
       </div>
 
       <div className="container mx-auto px-4">
-        <div className="text-center mb-6 animate-in fade-in duration-700">
+        <div className="text-center mb-6">
           <div className="inline-flex items-center gap-2 px-6 py-3 rounded-full glass shadow-glow border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF]/80 text-sm font-bold mb-3 transition-all duration-300 hover:scale-105 bg-gradient-to-r from-[#2B7FFF]/10 to-[#4a9fff]/10 dark:from-[#2B7FFF]/20 dark:to-[#4a9fff]/20">
             <MessageCircle className="w-4 h-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
             <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
@@ -61,12 +59,11 @@ export function ContactSection() {
             const IconComponent = contact.icon
             const isChannel = index === 0
             return (
-              <div
-                key={index}
-                className="group relative w-full sm:w-80 lg:w-96 xl:w-[28rem] animate-in fade-in slide-in-from-bottom duration-700"
-                style={{ animationDelay: `${index * 150}ms` }}
-              >
-                <div className="group relative overflow-hidden cursor-pointer transition-all duration-500 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl border-2 border-[#2B7FFF]/40 hover:border-[#2B7FFF]/60 dark:border-[#2B7FFF]/50 dark:hover:border-[#2B7FFF]/70 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3 h-full">
+              <div key={index} className="group relative w-full sm:w-80 lg:w-96 xl:w-[28rem]">
+                <div
+                  className="group relative overflow-hidden cursor-pointer transition-all duration-500 rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/90 to-white/95 dark:from-gray-900/95 dark:via-blue-950/90 dark:to-gray-900/95 shadow-xl border-2 border-[#2B7FFF]/40 hover:border-[#2B7FFF]/60 dark:border-[#2B7FFF]/50 dark:hover:border-[#2B7FFF]/70 hover:shadow-2xl hover:shadow-[#2B7FFF]/25 hover:-translate-y-3 h-full"
+                  style={{ willChange: "transform", transform: "translateZ(0)" }}
+                >
                   {/* Gradient overlay */}
                   <div
                     className={`absolute inset-0 bg-gradient-to-br ${isChannel ? "from-[#4a9fff]/10 via-[#2B7FFF]/10 to-[#4a9fff]/10" : "from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10"} opacity-0 group-hover:opacity-100 transition-opacity duration-500`}

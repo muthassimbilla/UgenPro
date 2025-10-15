@@ -2,7 +2,6 @@
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import type { Tool } from "@/lib/tools-config"
-import { Loader2 } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 
@@ -14,7 +13,7 @@ interface ToolModalProps {
 
 export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
   const [videoError, setVideoError] = useState(false)
-  const [videoLoading, setVideoLoading] = useState(true)
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -39,42 +38,18 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
         tool_name: tool.name,
       })
     }
-    // Reset video error state when modal opens
     if (isOpen) {
       setVideoError(false)
-      setVideoLoading(true)
     }
   }, [isOpen, tool])
 
   if (!tool) return null
-
-  const handleCtaClick = () => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      ;(window as any).gtag("event", "cta_click", {
-        tool_id: tool.id,
-        tool_name: tool.name,
-        cta_text: tool.ctaText,
-      })
-    }
-  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="w-[90vw] max-w-[800px] h-[56.25vw] max-h-[450px] p-0 border-0 bg-transparent shadow-none [&>button]:hidden mx-auto">
         <DialogTitle className="sr-only">{tool.name} Demo Video</DialogTitle>
         <div className="relative w-full h-full rounded-lg overflow-hidden bg-black">
-          {/* Video Loading Animation */}
-          {videoLoading && tool.demoVideo && !videoError && (
-            <div className="absolute inset-0 bg-black/90 flex items-center justify-center z-10">
-              <div className="text-center text-white">
-                <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-[#2B7FFF]" />
-                <p className="text-lg font-semibold mb-2">Loading Demo Video</p>
-                <p className="text-sm text-gray-300">Please wait while we prepare the video...</p>
-              </div>
-            </div>
-          )}
-
-          {/* Video Section */}
           {tool.demoVideo && !videoError && (
             <iframe
               src={tool.demoVideo}
@@ -84,14 +59,9 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
               referrerPolicy="strict-origin-when-cross-origin"
-              loading="lazy"
-              sandbox="allow-scripts allow-same-origin allow-presentation"
-              onLoad={() => {
-                setVideoLoading(false)
-              }}
+              loading="eager"
               onError={() => {
                 setVideoError(true)
-                setVideoLoading(false)
               }}
             />
           )}
@@ -104,7 +74,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
                 alt={tool.name}
                 fill
                 className="object-cover"
-                loading="lazy"
+                loading="eager"
                 sizes="(max-width: 768px) 100vw, 800px"
               />
               {videoError && (

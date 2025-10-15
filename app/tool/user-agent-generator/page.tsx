@@ -963,13 +963,27 @@ export default function UserAgentGenerator() {
       const version = pixelInstagramVersions[Math.floor(Math.random() * pixelInstagramVersions.length)]
       const chromeVersion =
         pixelInstagramChromeVersions[Math.floor(Math.random() * pixelInstagramChromeVersions.length)]
-      const resolutionDpi =
-        pixelInstagramResolutionDpis[Math.floor(Math.random() * pixelInstagramResolutionDpis.length)]
+
+      // Get device's supported resolutions
+      const resolutions = Array.isArray(device.resolutions)
+        ? device.resolutions
+        : device.resolutions.split(",").map((r) => r.trim())
+
+      // Pick a random resolution from device's capabilities
+      const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
+
+      // Match the selected resolution to get appropriate DPIs
+      const matchingDpis = pixelInstagramResolutionDpis.filter((rd) => rd.resolution === resolution)
+      const dpiOptions = matchingDpis.length > 0 ? matchingDpis[0].dpis.map((d) => `${d}dpi`) : ["420dpi"]
+      const dpi = dpiOptions[Math.floor(Math.random() * dpiOptions.length)]
 
       console.log("[v0] Selected device:", device)
+      console.log("[v0] Device resolutions:", resolutions)
+      console.log("[v0] Selected resolution:", resolution)
+      console.log("[v0] Matching DPIs:", dpiOptions)
+      console.log("[v0] Selected DPI:", dpi)
       console.log("[v0] Selected version:", version)
       console.log("[v0] Selected chrome version:", chromeVersion)
-      console.log("[v0] Selected resolution DPI:", resolutionDpi)
 
       const modelIdentifier = device.model || device.model_name || device.device_model || "Pixel"
 
@@ -990,8 +1004,8 @@ export default function UserAgentGenerator() {
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${modelIdentifier} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
         `Chrome/${chromeVersion.version || "136.0.7195.102"} Mobile Safari/537.36 ` +
-        `Instagram ${version.version || "312.0.0.37.103"} Android (${apiLevel}/${androidVersion}; ${resolutionDpi.dpi || "420"}dpi; ` +
-        `${resolutionDpi.resolution || "1440x3040"}; ${manufacturer}; ${modelIdentifier}; ${doubleCodename}; ${device.locale || "en_US"}; ${version.version_code || version.unique_id || "312001103"})`
+        `Instagram ${version.version || "312.0.0.37.103"} Android (${apiLevel}/${androidVersion}; ${dpi}; ` +
+        `${resolution}; ${manufacturer}; ${modelIdentifier}; ${doubleCodename}; ${device.locale || "en_US"}; ${version.version_code || version.unique_id || "312001103"})`
 
       console.log("[v0] Generated Pixel Instagram user agent:", userAgent)
       return userAgent

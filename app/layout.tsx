@@ -133,6 +133,10 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <link rel="preconnect" href="https://www.youtube.com" />
+        <link rel="preconnect" href="https://i.ytimg.com" />
+        <link rel="dns-prefetch" href="https://www.youtube.com" />
+        <link rel="dns-prefetch" href="https://i.ytimg.com" />
         <link rel="canonical" href="https://ugenpro.site" />
         <link rel="alternate" hrefLang="en" href="https://ugenpro.site" />
         <link rel="alternate" hrefLang="bn" href="https://ugenpro.site/bn" />
