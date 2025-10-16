@@ -168,7 +168,7 @@ export default function GeneratorControls({
             <Input
               id="quantity"
               type="number"
-              max="10000"
+              max="1000"
               value={quantity === 0 ? "" : quantity}
               onChange={(e) => {
                 const value = e.target.value
@@ -179,12 +179,12 @@ export default function GeneratorControls({
                 }
               }}
               className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border border-white/40 dark:border-slate-600/40 shadow-lg"
-              placeholder="Enter quantity (0-10,000)"
+              placeholder="Enter quantity (0-1,000)"
               disabled={isGenerating}
               aria-describedby="quantity-help"
             />
             <p id="quantity-help" className="sr-only">
-              Enter quantity between 0 and 10,000
+              Enter quantity between 0 and 1,000
             </p>
           </div>
         </div>
