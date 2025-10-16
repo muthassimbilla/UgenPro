@@ -45,8 +45,8 @@ export const HeroSection = memo(function HeroSection() {
 
             <div className="space-y-4 sm:space-y-6">
               <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
-                <span className="block text-balance">Advanced Generator</span>
-                <span className="block text-balance gradient-text">Tools Platform</span>
+                <span className="block text-balance">Advanced Generator Tools For</span>
+                <span className="block text-balance gradient-text">CPA Self Signup</span>
               </h1>
 
               <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto text-balance px-4 sm:px-0">
