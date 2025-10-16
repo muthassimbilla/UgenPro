@@ -82,19 +82,19 @@ export async function POST(request: NextRequest) {
       ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
     })
 
-    // Check if LONGCAT_API_KEY is available
-    const apiKey = process.env.LONGCAT_API_KEY
+    // Check if GROQ_API_KEY is available
+    const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
-      addApiRequest(false, Date.now() - startTime, "LONGCAT_API_KEY not configured", email, requestId)
+      addApiRequest(false, Date.now() - startTime, "GROQ_API_KEY not configured", email, requestId)
       return NextResponse.json(
-        { success: false, error: "LONGCAT_API_KEY not configured. Please add it to your environment variables." },
+        { success: false, error: "GROQ_API_KEY not configured. Please add it to your environment variables." },
         { status: 500 },
       )
     }
 
-    // Call Longcat Chat Completions API (OpenAI-compatible)
+    // Call Groq API (OpenAI-compatible)
     const response = await fetch(
-      "https://api.longcat.chat/openai/v1/chat/completions",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
           Authorization: `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "LongCat-Flash-Chat",
+          model: "llama-3.1-8b-instant",
           messages: [
             { role: "system", content: SYSTEM_PROMPT },
             { role: "user", content: `Email: ${email}` },
@@ -115,7 +115,7 @@ export async function POST(request: NextRequest) {
 
     if (!response.ok) {
       const errorData = await response.json()
-      console.error(`[${requestId}] Longcat API error:`, {
+      console.error(`[${requestId}] Groq API error:`, {
         status: response.status,
         statusText: response.statusText,
         error: errorData,
@@ -125,12 +125,12 @@ export async function POST(request: NextRequest) {
       
       // Check for quota exceeded error
       if (errorData.error?.message?.includes("quota") || errorData.error?.message?.includes("limit")) {
-        console.error(`[${requestId}] LONGCAT QUOTA EXCEEDED for email: ${email}`)
+        console.error(`[${requestId}] GROQ QUOTA EXCEEDED for email: ${email}`)
         addApiRequest(false, Date.now() - startTime, "API quota exceeded", email, requestId)
         return NextResponse.json(
           { 
             success: false, 
-            error: "Longcat API quota exceeded. Please check your API key limits or upgrade your plan.",
+            error: "Groq API quota exceeded. Please check your API key limits or upgrade your plan.",
             requestId: requestId,
             timestamp: new Date().toISOString()
           },
@@ -142,7 +142,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { 
           success: false, 
-          error: `Failed to generate name from email using Longcat: ${errorData.error?.message || "Unknown error"}`,
+          error: `Failed to generate name from email using Groq: ${errorData.error?.message || "Unknown error"}`,
           requestId: requestId,
           timestamp: new Date().toISOString()
         },

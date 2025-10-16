@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
     console.log(`[DEBUG] Testing Email2Name API with email: ${testEmail}`)
     
     // Check environment variables
-    const apiKey = process.env.LONGCAT_API_KEY
+    const apiKey = process.env.GROQ_API_KEY
     const hasApiKey = !!apiKey
     const apiKeyPreview = apiKey ? `${apiKey.substring(0, 8)}...` : 'Not set'
     
@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
     if (hasApiKey) {
       try {
         const response = await fetch(
-          "https://api.longcat.chat/openai/v1/chat/completions",
+          "https://api.groq.com/openai/v1/chat/completions",
           {
             method: "POST",
             headers: {
@@ -30,7 +30,7 @@ export async function GET(request: NextRequest) {
               "Authorization": `Bearer ${apiKey}`,
             },
             body: JSON.stringify({
-              model: "LongCat-Flash-Chat",
+              model: "llama-3.1-8b-instant",
               messages: [
                 {
                   role: "user",

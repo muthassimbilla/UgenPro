@@ -107,6 +107,14 @@ export default function GeneratorControls({
                         Facebook
                       </div>
                     </SelectItem>
+                    <SelectItem value="chrome">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg" aria-hidden="true">
+                          🌐
+                        </span>
+                        Chrome
+                      </div>
+                    </SelectItem>
                   </>
                 )}
                 {platform === "pixel" && (
@@ -121,6 +129,14 @@ export default function GeneratorControls({
                       <div className="flex items-center gap-2">
                         <Facebook className="w-4 h-4" aria-hidden="true" />
                         Facebook
+                      </div>
+                    </SelectItem>
+                    <SelectItem value="chrome">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg" aria-hidden="true">
+                          🌐
+                        </span>
+                        Chrome
                       </div>
                     </SelectItem>
                   </>

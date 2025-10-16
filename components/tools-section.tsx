@@ -29,7 +29,7 @@ export function ToolsSection() {
   const firstThreeTools = useMemo(() => toolsData.slice(0, 3), [])
 
   return (
-    <section id="tools" className="relative py-16 sm:py-24 overflow-hidden">
+    <section id="tools" className="relative pt-8 sm:pt-12 pb-16 sm:pb-24 overflow-hidden">
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/[0.02] to-background" />
       </div>

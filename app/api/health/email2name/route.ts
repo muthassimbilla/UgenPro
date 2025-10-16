@@ -4,12 +4,12 @@ export async function GET(request: NextRequest) {
   try {
     const startTime = Date.now()
     
-    // Check if LONGCAT_API_KEY is available
-    const apiKey = process.env.LONGCAT_API_KEY
+    // Check if GROQ_API_KEY is available
+    const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
       return NextResponse.json({
         status: "error",
-        message: "LONGCAT_API_KEY not configured",
+        message: "GROQ_API_KEY not configured",
         timestamp: new Date().toISOString(),
         responseTime: Date.now() - startTime
       }, { status: 500 })
@@ -17,7 +17,7 @@ export async function GET(request: NextRequest) {
 
     // Test API with a simple request
     const testResponse = await fetch(
-      "https://api.longcat.chat/openai/v1/chat/completions",
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
           "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          model: "LongCat-Flash-Chat",
+          model: "llama-3.1-8b-instant",
           messages: [
             {
               role: "user",
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
       const errorData = await testResponse.json()
       return NextResponse.json({
         status: "error",
-        message: "Longcat API error",
+        message: "Groq API error",
         error: errorData,
         responseTime,
         timestamp: new Date().toISOString()

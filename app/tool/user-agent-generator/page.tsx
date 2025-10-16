@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback } from "react"
+import { useCallback, useRef } from "react"
 
 import { useState, useEffect, startTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -88,6 +88,8 @@ export default function UserAgentGenerator() {
 
   const [isDataLoaded, setIsDataLoaded] = useState(false)
 
+  const abortControllerRef = useRef<AbortController | null>(null)
+
   // Modal states
   const [modal, setModal] = useState({
     isOpen: false,
@@ -138,6 +140,14 @@ export default function UserAgentGenerator() {
   const [deviceType, setDeviceType] = useState("")
 
   const [selectedModel, setSelectedModel] = useState("random")
+  const [cachedData, setCachedData] = useState({
+    instagramBuildNumbers: null,
+    facebookBuildNumbers: null,
+    samsungDevices: null,
+    pixelDevices: null,
+    allDevices: null,
+  })
+
   const [availableModels, setAvailableModels] = useState([])
   const [selectedModelInfo, setSelectedModelInfo] = useState(null)
 
@@ -208,6 +218,15 @@ export default function UserAgentGenerator() {
   const hideProgressModal = useCallback(() => {
     setProgressModal((prev) => ({ ...prev, isOpen: false }))
   }, [])
+
+  const handleCancelGeneration = useCallback(() => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      setIsGenerating(false)
+      hideProgressModal()
+      showModal("⚠️ Generation Cancelled", "User agent generation has been cancelled.", "warning")
+    }
+  }, [hideProgressModal, showModal])
 
   const loadData = useCallback(async () => {
     if (!supabaseModules || isDataLoaded) return
@@ -515,7 +534,11 @@ export default function UserAgentGenerator() {
     return apiLevels[version] || "35" // Latest API level as fallback
   }
 
-  const generateAndroidInstagramUserAgent = async (cachedBuildNumbers = null, specificModel = null) => {
+  const generateAndroidInstagramUserAgent = async (
+    cachedBuildNumbers = null,
+    specificModel = null,
+    cachedDevices = null,
+  ) => {
     try {
       if (!instagramDeviceModels.length || !instagramVersions.length || !chromeVersions.length) {
         console.error("Missing Instagram configuration data")
@@ -548,13 +571,12 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      const samsungDevices = instagramDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+      const devicePool =
+        cachedDevices || instagramDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
-      if (samsungDevices.length === 0) {
+      if (devicePool.length === 0) {
         console.log("[v0] No Samsung devices found, using all devices")
       }
-
-      const devicePool = samsungDevices.length > 0 ? samsungDevices : instagramDeviceModels
 
       let device
       if (specificModel && specificModel !== "random") {
@@ -640,7 +662,7 @@ export default function UserAgentGenerator() {
       const userAgent =
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; ${instagramUniqueId})`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${deviceCode}; ${language}; ${instagramUniqueId})`
 
       return userAgent
     } catch (error) {
@@ -649,7 +671,11 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generateSamsungFacebookUserAgent = async (specificModel = null) => {
+  const generateSamsungFacebookUserAgent = async (
+    specificModel = null,
+    cachedBuildNumbers = null,
+    cachedDevices = null,
+  ) => {
     try {
       if (!androidDeviceModels.length || !androidAppVersions.length) {
         console.error("Missing Facebook configuration data")
@@ -668,17 +694,12 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      // Filter Samsung devices
-      const samsungDevices = androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+      const devicePool =
+        cachedDevices || androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
-      console.log("[v0] Total Facebook devices:", androidDeviceModels.length)
-      console.log("[v0] Samsung Facebook devices:", samsungDevices.length)
-
-      if (samsungDevices.length === 0) {
+      if (devicePool.length === 0) {
         console.log("[v0] No Samsung devices found, using all devices")
       }
-
-      const devicePool = samsungDevices.length > 0 ? samsungDevices : androidDeviceModels
 
       let device
       if (specificModel && specificModel !== "random") {
@@ -695,9 +716,11 @@ export default function UserAgentGenerator() {
 
       console.log("[v0] Selected Samsung device:", device.model_name, "Android version:", androidVersion)
 
-      // Get Facebook build numbers from facebook_build_numbers table
-      const { FacebookBuildNumber } = supabaseModules
-      const facebookBuildNumbers = (await FacebookBuildNumber?.list()) || []
+      let facebookBuildNumbers = cachedBuildNumbers
+      if (!facebookBuildNumbers) {
+        const { FacebookBuildNumber } = supabaseModules
+        facebookBuildNumbers = (await FacebookBuildNumber?.list()) || []
+      }
 
       console.log("[v0] Total Facebook build numbers available:", facebookBuildNumbers.length)
       console.log(
@@ -786,10 +809,120 @@ export default function UserAgentGenerator() {
     }
   }
 
+  const generateChromeUserAgent = async (specificModel = null) => {
+    try {
+      console.log("[v0] Generating Chrome user agent, platform:", platform)
+
+      let device
+      let chromeVersions
+      let buildNumbers
+
+      if (platform === "android") {
+        // Samsung এর জন্য Chrome User Agent
+        if (!androidDeviceModels.length || !androidAppVersions.length) {
+          console.error("Missing Android configuration data for Chrome")
+          return null
+        }
+
+        const samsungDevices = androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+        const devicePool = samsungDevices.length > 0 ? samsungDevices : androidDeviceModels
+
+        if (specificModel && specificModel !== "random") {
+          device = devicePool.find((d) => (d.model_name || d.model) === specificModel)
+          if (!device) {
+            device = devicePool[Math.floor(Math.random() * devicePool.length)]
+          }
+        } else {
+          device = devicePool[Math.floor(Math.random() * devicePool.length)]
+        }
+
+        chromeVersions = androidAppVersions.filter((a) => a.app_type === "chrome")
+        buildNumbers = androidBuildNumbers
+
+        if (chromeVersions.length === 0) {
+          throw new Error("No Chrome versions available for Samsung")
+        }
+
+        const androidVersion = device.android_version.toString()
+        let matchingBuildNumbers = buildNumbers.filter((b) => b.android_version === androidVersion)
+
+        if (matchingBuildNumbers.length === 0) {
+          const androidVersionNum = Number.parseFloat(androidVersion)
+          matchingBuildNumbers = buildNumbers.filter((bn) => {
+            const bnVersion = Number.parseFloat(bn.android_version)
+            return Math.abs(bnVersion - androidVersionNum) <= 2
+          })
+        }
+
+        if (matchingBuildNumbers.length === 0) {
+          matchingBuildNumbers = buildNumbers
+        }
+
+        const selectedBuildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
+        const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)]
+        const modelIdentifier = extractModelIdentifier(device.model_name)
+
+        const userAgent =
+          `Mozilla/5.0 (Linux; Android ${androidVersion}; ${modelIdentifier} Build/${selectedBuildNumber.build_number}) ` +
+          `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
+          `Chrome/${chromeVersion.version} Mobile Safari/537.36`
+
+        console.log("[v0] Generated Samsung Chrome user agent successfully")
+        return userAgent
+      } else if (platform === "pixel") {
+        // Mix (Pixel) এর জন্য Chrome User Agent
+        if (!pixelFacebookDeviceModels || pixelFacebookDeviceModels.length === 0) {
+          console.log("[v0] No Pixel device models available for Chrome")
+          throw new Error("No Pixel device models available")
+        }
+
+        if (!pixelFacebookAppVersions || pixelFacebookAppVersions.length === 0) {
+          console.log("[v0] No Pixel app versions available for Chrome")
+          throw new Error("No Pixel app versions available")
+        }
+
+        if (specificModel && specificModel !== "random") {
+          device = pixelFacebookDeviceModels.find((d) => (d.model_name || d.device_model || d.model) === specificModel)
+          if (!device) {
+            device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+          }
+        } else {
+          device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+        }
+
+        chromeVersions = pixelFacebookAppVersions.filter((a) => a.app_type === "chrome")
+
+        if (chromeVersions.length === 0) {
+          throw new Error("No Chrome versions available for Pixel")
+        }
+
+        const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)]
+        const modelIdentifier = device.model_name || device.device_model || "Pixel"
+
+        const userAgent =
+          `Mozilla/5.0 (Linux; Android ${device.android_version || "13"}; ${modelIdentifier} Build/${device.build_number || "TQ3A.230901.001"}) ` +
+          `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
+          `Chrome/${chromeVersion.version || "136.0.7195.102"} Mobile Safari/537.36`
+
+        console.log("[v0] Generated Pixel Chrome user agent successfully")
+        return userAgent
+      }
+
+      return null
+    } catch (error) {
+      console.error("Error generating Chrome user agent:", error)
+      return null
+    }
+  }
+
   const generateAndroidUserAgent = async (specificModel = null) => {
     try {
       if (appType === "instagram") {
         return await generateAndroidInstagramUserAgent(null, specificModel)
+      }
+
+      if (appType === "chrome") {
+        return await generateChromeUserAgent(specificModel)
       }
 
       if (deviceType === "samsung") {
@@ -859,46 +992,43 @@ export default function UserAgentGenerator() {
     return normalizedLanguages[0][0]
   }
 
-  const generatePixelUserAgent = async (specificModel = null) => {
+  const generatePixelUserAgent = async (specificModel = null, cachedDevices = null) => {
     try {
       console.log("[v0] Generating Pixel user agent, appType:", appType)
-      console.log("[v0] Available Pixel Facebook devices:", pixelFacebookDeviceModels?.length || 0)
-      console.log("[v0] Available Pixel Instagram devices:", pixelInstagramDeviceModels?.length || 0)
 
-      if (appType === "instagram") {
-        return await generatePixelInstagramUserAgent(specificModel)
+      if (appType === "chrome") {
+        return await generateChromeUserAgent(specificModel)
       }
 
-      if (!pixelFacebookDeviceModels || pixelFacebookDeviceModels.length === 0) {
+      if (appType === "instagram") {
+        return await generatePixelInstagramUserAgent(specificModel, cachedDevices)
+      }
+
+      const deviceModels = cachedDevices || pixelFacebookDeviceModels
+
+      if (!deviceModels || deviceModels.length === 0) {
         console.log("[v0] No Pixel Facebook device models available")
         throw new Error("No Pixel device models available")
       }
 
       if (!pixelFacebookAppVersions || pixelFacebookAppVersions.length === 0) {
         console.log("[v0] No Pixel Facebook app versions available")
-        throw new Error("No Pixel app versions available")
+        throw new Error("No Pixel Facebook app versions available")
       }
 
       let device
       if (specificModel && specificModel !== "random") {
-        device = pixelFacebookDeviceModels.find((d) => (d.model_name || d.device_model || d.model) === specificModel)
+        device = deviceModels.find((d) => (d.model_name || d.device_model || d.model) === specificModel)
         if (!device) {
           console.log(`[v0] Specific model ${specificModel} not found, using random`)
-          device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+          device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
         }
       } else {
-        device = pixelFacebookDeviceModels[Math.floor(Math.random() * pixelFacebookDeviceModels.length)]
+        device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
       }
-
-      console.log("[v0] Selected Pixel device:", device)
-
-      console.log("[v0] Using device build number:", device.build_number)
 
       const fbVersions = pixelFacebookAppVersions.filter((a) => a.app_type === "facebook")
       const chromeVersions = pixelFacebookAppVersions.filter((a) => a.app_type === "chrome")
-
-      console.log("[v0] Facebook versions available:", fbVersions?.length || 0)
-      console.log("[v0] Chrome versions available:", chromeVersions?.length || 0)
 
       if (fbVersions.length === 0 || chromeVersions.length === 0) {
         throw new Error("No Facebook or Chrome versions available for Pixel")
@@ -915,7 +1045,6 @@ export default function UserAgentGenerator() {
         `Chrome/${chromeVersion.version || "136.0.7195.102"} Mobile Safari/537.36 ` +
         `[FB_IAB/FB4A;FBAV/${fbVersion.version || "445.0.0.33.118"};IABMV/${fbVersion.iabmv || "1"};]`
 
-      console.log("[v0] Generated Pixel Facebook user agent:", userAgent)
       return userAgent
     } catch (error) {
       console.error("Error generating Pixel user agent:", error)
@@ -923,13 +1052,13 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generatePixelInstagramUserAgent = async (specificModel = null) => {
+  const generatePixelInstagramUserAgent = async (specificModel = null, cachedDevices = null) => {
     try {
       console.log("[v0] Generating Pixel Instagram user agent")
-      console.log("[v0] Available devices:", pixelInstagramDeviceModels?.length || 0)
-      console.log("[v0] Available versions:", pixelInstagramVersions?.length || 0)
 
-      if (!pixelInstagramDeviceModels || pixelInstagramDeviceModels.length === 0) {
+      const deviceModels = cachedDevices || pixelInstagramDeviceModels
+
+      if (!deviceModels || deviceModels.length === 0) {
         console.log("[v0] No Pixel Instagram device models available")
         throw new Error("No Pixel Instagram device models available")
       }
@@ -951,13 +1080,13 @@ export default function UserAgentGenerator() {
 
       let device
       if (specificModel && specificModel !== "random") {
-        device = pixelInstagramDeviceModels.find((d) => (d.model || d.model_name || d.device_model) === specificModel)
+        device = deviceModels.find((d) => (d.model || d.model_name || d.device_model) === specificModel)
         if (!device) {
           console.log(`[v0] Specific model ${specificModel} not found, using random`)
-          device = pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+          device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
         }
       } else {
-        device = pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+        device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
       }
 
       const version = pixelInstagramVersions[Math.floor(Math.random() * pixelInstagramVersions.length)]
@@ -1149,12 +1278,66 @@ export default function UserAgentGenerator() {
     }
   }
 
+  const preloadCachedData = useCallback(async () => {
+    if (!supabaseModules) return null
+
+    try {
+      console.log("[v0] Pre-loading cached data for fast generation...")
+
+      const { InstagramBuildNumber, FacebookBuildNumber } = supabaseModules
+
+      // Load all build numbers in parallel
+      const [instaBuildNumbers, fbBuildNumbers] = await Promise.all([
+        InstagramBuildNumber?.list() || Promise.resolve([]),
+        FacebookBuildNumber?.list() || Promise.resolve([]),
+      ])
+
+      // Pre-filter Samsung devices for Instagram
+      const samsungInstaDevices = instagramDeviceModels.filter(
+        (device) => device.manufacturer?.toLowerCase() === "samsung",
+      )
+
+      // Pre-filter Samsung devices for Facebook
+      const samsungFbDevices = androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
+
+      const cached = {
+        instagramBuildNumbers: instaBuildNumbers,
+        facebookBuildNumbers: fbBuildNumbers,
+        samsungInstagramDevices: samsungInstaDevices.length > 0 ? samsungInstaDevices : instagramDeviceModels,
+        samsungFacebookDevices: samsungFbDevices.length > 0 ? samsungFbDevices : androidDeviceModels,
+        pixelFacebookDevices: pixelFacebookDeviceModels,
+        pixelInstagramDevices: pixelInstagramDeviceModels,
+      }
+
+      console.log("[v0] Cached Instagram build numbers:", cached.instagramBuildNumbers?.length || 0)
+      console.log("[v0] Cached Facebook build numbers:", cached.facebookBuildNumbers?.length || 0)
+      console.log("[v0] Cached Samsung Instagram devices:", cached.samsungInstagramDevices?.length || 0)
+      console.log("[v0] Cached Samsung Facebook devices:", cached.samsungFacebookDevices?.length || 0)
+      console.log("[v0] Cached Pixel Facebook devices:", cached.pixelFacebookDevices?.length || 0)
+      console.log("[v0] Cached Pixel Instagram devices:", cached.pixelInstagramDevices?.length || 0)
+
+      setCachedData(cached)
+      return cached
+    } catch (error) {
+      console.error("[v0] Error pre-loading cached data:", error)
+      return null
+    }
+  }, [
+    supabaseModules,
+    instagramDeviceModels,
+    androidDeviceModels,
+    pixelFacebookDeviceModels,
+    pixelInstagramDeviceModels,
+  ])
+
   // Renamed generateUserAgents to handleGenerate and adjusted parameters
   const handleGenerate = useCallback(async () => {
     if (!supabaseModules || connectionError) {
       showModal("❌ Database Connection Error!", "No database connection. Please refresh the page.", "error")
       return
     }
+
+    abortControllerRef.current = new AbortController()
 
     setIsGenerating(true)
     setGenerationProgress(0)
@@ -1172,12 +1355,7 @@ export default function UserAgentGenerator() {
       const maxConsecutiveFailures = 500
       let lastProgressUpdate = 0
 
-      let cachedInstagramBuildNumbers = null
-      if (platform === "android" && appType === "instagram") {
-        const { InstagramBuildNumber } = supabaseModules
-        cachedInstagramBuildNumbers = (await InstagramBuildNumber?.list()) || []
-        console.log(`[v0] Cached ${cachedInstagramBuildNumbers.length} Instagram build numbers`)
-      }
+      const cached = await preloadCachedData()
 
       console.log(`[v0] Starting generation: ${quantity} requested`)
       console.log(`[v0] Blacklisted UAs: ${blacklistedUAs.size}`)
@@ -1188,6 +1366,11 @@ export default function UserAgentGenerator() {
         attempts < maxAttempts &&
         consecutiveFailures < maxConsecutiveFailures
       ) {
+        if (abortControllerRef.current?.signal.aborted) {
+          console.log("[v0] Generation cancelled by user")
+          break
+        }
+
         attempts++
 
         let userAgent = null
@@ -1197,13 +1380,23 @@ export default function UserAgentGenerator() {
 
           if (platform === "android") {
             if (appType === "instagram") {
-              userAgent = await generateAndroidInstagramUserAgent(cachedInstagramBuildNumbers, modelToUse)
+              userAgent = await generateAndroidInstagramUserAgent(
+                cached?.instagramBuildNumbers,
+                modelToUse,
+                cached?.samsungInstagramDevices,
+              )
             } else if (appType === "facebook") {
               if (deviceType === "samsung") {
-                userAgent = await generateSamsungFacebookUserAgent(modelToUse)
+                userAgent = await generateSamsungFacebookUserAgent(
+                  modelToUse,
+                  cached?.facebookBuildNumbers,
+                  cached?.samsungFacebookDevices,
+                )
               } else {
                 userAgent = await generateAndroidUserAgent(modelToUse)
               }
+            } else if (appType === "chrome") {
+              userAgent = await generateChromeUserAgent(modelToUse)
             } else {
               userAgent = await generateAndroidUserAgent(modelToUse)
             }
@@ -1225,7 +1418,11 @@ export default function UserAgentGenerator() {
               resolutionDpis,
             )
           } else if (platform === "pixel") {
-            userAgent = await generatePixelUserAgent(modelToUse)
+            if (appType === "instagram") {
+              userAgent = await generatePixelInstagramUserAgent(modelToUse, cached?.pixelInstagramDevices)
+            } else {
+              userAgent = await generatePixelUserAgent(modelToUse, cached?.pixelFacebookDevices)
+            }
           }
 
           if (userAgent && !newUserAgents.includes(userAgent)) {
@@ -1257,17 +1454,13 @@ export default function UserAgentGenerator() {
           await new Promise((resolve) => setTimeout(resolve, 1))
         }
 
-        if (newUserAgents.length < quantity && attempts < maxAttempts && consecutiveFailures < maxConsecutiveFailures) {
-          if (platform === "android" && appType === "instagram") {
-            // No delay needed since we're using cached data
-          } else if (consecutiveFailures > 50) {
-            await new Promise((resolve) => setTimeout(resolve, 200))
-          } else if (consecutiveFailures > 20) {
-            await new Promise((resolve) => setTimeout(resolve, 50))
-          } else {
-            await new Promise((resolve) => setTimeout(resolve, 10))
-          }
-        }
+        // No delay needed for any platform now
+      }
+
+      if (abortControllerRef.current?.signal.aborted) {
+        setIsGenerating(false)
+        hideProgressModal()
+        return
       }
 
       const finalUserAgents = newUserAgents.slice(0, quantity)
@@ -1336,6 +1529,8 @@ export default function UserAgentGenerator() {
       }, 3000)
     } finally {
       setIsGenerating(false)
+      // Reset abort controller ref after generation is complete
+      abortControllerRef.current = null
     }
   }, [
     platform,
@@ -1365,6 +1560,7 @@ export default function UserAgentGenerator() {
     setIsGenerating,
     startTransition,
     setProgressModal,
+    preloadCachedData, // Added preloadCachedData to dependencies
   ])
 
   const addToBlacklist = async () => {
@@ -1698,7 +1894,7 @@ export default function UserAgentGenerator() {
               {progressModal.showCancel && (
                 <div className="flex justify-center">
                   <Button
-                    onClick={hideProgressModal}
+                    onClick={handleCancelGeneration}
                     variant="outline"
                     size="sm"
                     className="px-6 py-2 font-medium bg-transparent"

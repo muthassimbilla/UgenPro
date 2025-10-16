@@ -172,8 +172,8 @@ export default function EnhancedPurchaseModal({
   const finalPrice = originalPrice - discount
 
   const paymentNumbers = {
-    bkash: "01700000000",
-    nagad: "01800000000",
+    bkash: "01786859108",
+    nagad: "01786859108",
   }
 
   const copyToClipboard = async (text: string) => {
@@ -495,9 +495,15 @@ export default function EnhancedPurchaseModal({
                     <div className="space-y-2">
                       <div className="flex items-center gap-1.5">
                         <Smartphone
-                          className={`h-4 w-4 ${paymentMethod === "bkash" ? "text-pink-600" : "text-orange-600"}`}
+                          className={`h-5 w-5 animate-pulse ${paymentMethod === "bkash" ? "text-pink-600" : "text-orange-600"}`}
                         />
-                        <span className="font-medium text-xs">
+                        <span
+                          className={`font-bold text-base animate-pulse ${
+                            paymentMethod === "bkash"
+                              ? "text-pink-700 dark:text-pink-300"
+                              : "text-orange-700 dark:text-orange-300"
+                          }`}
+                        >
                           Send money to this {paymentMethod === "bkash" ? "bKash" : "Nagad"} number:
                         </span>
                       </div>

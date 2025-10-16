@@ -26,11 +26,11 @@ export async function GET(request: NextRequest) {
     // Perform actual health check
     const startTime = Date.now()
     
-    const apiKey = process.env.GOOGLE_API_KEY
+    const apiKey = process.env.GROQ_API_KEY
     if (!apiKey) {
       const errorResult = {
         status: "error",
-        message: "GOOGLE_API_KEY not configured",
+        message: "GROQ_API_KEY not configured",
         timestamp: new Date().toISOString(),
         responseTime: Date.now() - startTime
       }
@@ -47,26 +47,23 @@ export async function GET(request: NextRequest) {
 
     // Test API with minimal request
     const testResponse = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`,
+      "https://api.groq.com/openai/v1/chat/completions",
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
+          model: "llama-3.1-8b-instant",
+          messages: [
             {
-              parts: [
-                {
-                  text: "OK", // Minimal request
-                },
-              ],
+              role: "user",
+              content: "OK", // Minimal request
             },
           ],
-          generationConfig: {
-            temperature: 0.1,
-            maxOutputTokens: 1, // Just 1 token
-          },
+          temperature: 0.1,
+          max_tokens: 1, // Just 1 token
         }),
       },
     )
@@ -77,7 +74,7 @@ export async function GET(request: NextRequest) {
       const errorData = await testResponse.json()
       const errorResult = {
         status: "error",
-        message: "Google Gemini API error",
+        message: "Groq API error",
         error: errorData,
         responseTime,
         timestamp: new Date().toISOString()
@@ -94,7 +91,7 @@ export async function GET(request: NextRequest) {
     }
 
     const data = await testResponse.json()
-    const generatedText = data.candidates?.[0]?.content?.parts?.[0]?.text
+    const generatedText = data.choices?.[0]?.message?.content
 
     const successResult = {
       status: "healthy",

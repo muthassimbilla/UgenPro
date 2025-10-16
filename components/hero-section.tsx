@@ -25,7 +25,7 @@ export const HeroSection = memo(function HeroSection() {
   return (
     <section
       id="hero"
-      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-6 sm:pt-24 sm:pb-8"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-0 sm:pt-24 sm:pb-0"
     >
       <div className="absolute inset-0 -z-10">
         <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background" />
