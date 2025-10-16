@@ -60,7 +60,7 @@ export default function AddressGeneratorPage() {
     try {
       const response = await apiCall("/api/address-generator/ip", {
         method: "POST",
-        body: { ip: ipAddress.trim() }
+        body: { ip: ipAddress.trim() },
       })
 
       const data = await response.json()
@@ -72,10 +72,10 @@ export default function AddressGeneratorPage() {
           totalCount: data.addresses.length,
         })
         toast.success(`Found ${data.addresses.length} addresses`)
-        
+
         // Update usage counter
         if (data.rate_limit && usageCounterRef.current) {
-          console.log('Calling updateAfterApiCall with:', data.rate_limit)
+          console.log("Calling updateAfterApiCall with:", data.rate_limit)
           usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           // Also refresh to ensure we have latest data
           setTimeout(() => {
@@ -86,13 +86,13 @@ export default function AddressGeneratorPage() {
         }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
-        
+
         if (data.auth_required) {
           toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
-        } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
+        } else if (data.rate_limit && data.error && data.error.includes("লিমিট")) {
           toast.error(data.error)
           if (usageCounterRef.current) {
-            console.log('Calling updateAfterApiCall with rate limit error:', data.rate_limit)
+            console.log("Calling updateAfterApiCall with rate limit error:", data.rate_limit)
             usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           }
         } else {
@@ -123,7 +123,7 @@ export default function AddressGeneratorPage() {
     try {
       const response = await apiCall("/api/address-generator/zip", {
         method: "POST",
-        body: { zip: zipCode.trim() }
+        body: { zip: zipCode.trim() },
       })
 
       const data = await response.json()
@@ -135,10 +135,10 @@ export default function AddressGeneratorPage() {
           totalCount: data.addresses.length,
         })
         toast.success(`Found ${data.addresses.length} addresses`)
-        
+
         // Update usage counter
         if (data.rate_limit && usageCounterRef.current) {
-          console.log('Calling updateAfterApiCall with:', data.rate_limit)
+          console.log("Calling updateAfterApiCall with:", data.rate_limit)
           usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           // Also refresh to ensure we have latest data
           setTimeout(() => {
@@ -149,13 +149,13 @@ export default function AddressGeneratorPage() {
         }
       } else {
         setAddressData({ addresses: [], currentIndex: 0, totalCount: 0 })
-        
+
         if (data.auth_required) {
           toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
-        } else if (data.rate_limit && data.error && data.error.includes('লিমিট')) {
+        } else if (data.rate_limit && data.error && data.error.includes("লিমিট")) {
           toast.error(data.error)
           if (usageCounterRef.current) {
-            console.log('Calling updateAfterApiCall with rate limit error:', data.rate_limit)
+            console.log("Calling updateAfterApiCall with rate limit error:", data.rate_limit)
             usageCounterRef.current.updateAfterApiCall(data.rate_limit)
           }
         } else {
@@ -350,7 +350,7 @@ export default function AddressGeneratorPage() {
     addressData.addresses.length > 0 ? parseAddress(addressData.addresses[addressData.currentIndex]) : null
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Side - Input Section */}
@@ -415,9 +415,9 @@ export default function AddressGeneratorPage() {
 
                     {/* API Usage Counter - Inside card at bottom */}
                     <div className="mt-4 pt-3 border-t border-gray-200">
-                      <ApiUsageCounter 
+                      <ApiUsageCounter
                         ref={usageCounterRef}
-                        apiType="address_generator" 
+                        apiType="address_generator"
                         compact={true}
                         showProgressBar={false}
                       />
@@ -429,11 +429,18 @@ export default function AddressGeneratorPage() {
               <TabsContent value="zip" className="space-y-0">
                 <Card className="h-[500px] flex flex-col">
                   <CardHeader className="pb-4 flex-shrink-0">
-                    <CardTitle className="flex items-center gap-2">
-                      <MapPin className="h-5 w-5 text-green-500" />
-                      Generate from ZIP Code
-                    </CardTitle>
-                    <CardDescription>Enter a ZIP code and get random addresses from that area</CardDescription>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <CardTitle className="flex items-center gap-2">
+                          <MapPin className="h-6 w-6 text-green-500" />
+                          Generate from ZIP Code
+                        </CardTitle>
+                        <CardDescription>Enter a ZIP code and get random addresses from that area</CardDescription>
+                      </div>
+                      <Badge variant="secondary" className="text-sm">
+                        {activeTab === "ip" ? "From IP" : "From ZIP"}
+                      </Badge>
+                    </div>
                   </CardHeader>
                   <CardContent className="space-y-6 flex-1">
                     <div className="space-y-3">
@@ -476,9 +483,9 @@ export default function AddressGeneratorPage() {
 
                     {/* API Usage Counter - Inside card at bottom */}
                     <div className="mt-4 pt-3 border-t border-gray-200">
-                      <ApiUsageCounter 
+                      <ApiUsageCounter
                         ref={usageCounterRef}
-                        apiType="address_generator" 
+                        apiType="address_generator"
                         compact={true}
                         showProgressBar={false}
                       />
@@ -487,7 +494,6 @@ export default function AddressGeneratorPage() {
                 </Card>
               </TabsContent>
             </Tabs>
-
           </div>
 
           {/* Right Side - Output Section */}
@@ -578,7 +584,9 @@ export default function AddressGeneratorPage() {
                               : "bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
                           }`}
                         >
-                          <p className="text-blue-900 dark:text-blue-100 font-medium text-center text-sm">{currentAddress.street}</p>
+                          <p className="text-blue-900 dark:text-blue-100 font-medium text-center text-sm">
+                            {currentAddress.street}
+                          </p>
                         </div>
                       </div>
 
@@ -718,7 +726,6 @@ export default function AddressGeneratorPage() {
                         </div>
                       </div>
                     </div>
-
                   </div>
 
                   {/* Navigation - Fixed at bottom */}

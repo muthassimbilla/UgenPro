@@ -100,7 +100,7 @@ export default function AccountErrorPage() {
   const config = getErrorConfig()
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-slate-100 to-slate-200 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 p-4">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900 p-4">
       <Card className="max-w-md w-full shadow-2xl border-2">
         <CardHeader className="text-center space-y-4 pb-8">
           <div className="flex justify-center">{config.icon}</div>

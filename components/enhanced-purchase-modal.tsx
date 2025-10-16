@@ -21,6 +21,7 @@ import {
   Smartphone,
   Copy,
   Check,
+  Clipboard,
 } from "lucide-react"
 import { createBrowserClient } from "@supabase/ssr"
 import { useRouter } from "next/navigation"
@@ -159,6 +160,7 @@ export default function EnhancedPurchaseModal({
   const [paymentLast4Digits, setPaymentLast4Digits] = useState("")
   const [paymentTransactionId, setPaymentTransactionId] = useState("")
   const [isCopied, setIsCopied] = useState(false)
+  const [isTransactionIdCopied, setIsTransactionIdCopied] = useState(false)
 
   const [couponCode, setCouponCode] = useState("")
   const [isCouponApplied, setIsCouponApplied] = useState(false)
@@ -181,6 +183,17 @@ export default function EnhancedPurchaseModal({
       setTimeout(() => setIsCopied(false), 2000)
     } catch (err) {
       console.error("[v0] Failed to copy:", err)
+    }
+  }
+
+  const pasteTransactionId = async () => {
+    try {
+      const text = await navigator.clipboard.readText()
+      setPaymentTransactionId(text)
+      setIsTransactionIdCopied(true)
+      setTimeout(() => setIsTransactionIdCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to paste:", err)
     }
   }
 
@@ -305,15 +318,16 @@ export default function EnhancedPurchaseModal({
       setPaymentLast4Digits("")
       setPaymentTransactionId("")
       handleRemoveCoupon()
+      router.push("/premium-tools/orders")
     }, 2000)
   }
 
   if (isCheckingAuth) {
     return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="sm:max-w-[650px]">
+        <DialogContent className="sm:max-w-[600px]">
           <div className="flex items-center justify-center py-12">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
         </DialogContent>
       </Dialog>
@@ -322,37 +336,37 @@ export default function EnhancedPurchaseModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="space-y-3">
-          <DialogTitle className="flex items-center gap-3 text-2xl font-bold">
-            <div className="p-2 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
-              <Crown className="h-6 w-6 text-white" />
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="space-y-2">
+          <DialogTitle className="flex items-center gap-2 text-xl font-bold">
+            <div className="p-1.5 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-lg">
+              <Crown className="h-5 w-5 text-white" />
             </div>
             Purchase Premium Package
           </DialogTitle>
-          <DialogDescription className="text-base">
-            Complete your order by filling in the details below
+          <DialogDescription className="text-sm">
+            Complete your order by filling in the information below
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6 mt-4">
-          <Card className="bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 border-0 shadow-lg">
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
+        <div className="space-y-5 mt-3">
+          <Card className="bg-gradient-to-br from-blue-500 to-purple-600 border-0">
+            <CardContent className="p-4">
+              <div className="flex items-start justify-between mb-3">
                 <div className="text-white">
-                  <h3 className="font-bold text-2xl mb-1">{planName}</h3>
-                  <p className="text-blue-100 text-sm">{planDuration}</p>
+                  <h3 className="font-bold text-xl mb-0.5">{planName}</h3>
+                  <p className="text-blue-100 text-xs">{planDuration}</p>
                 </div>
-                <Badge className="bg-white/20 text-white border-white/30 backdrop-blur-sm">
+                <Badge className="bg-white/20 text-white border-white/30 text-xs">
                   <Sparkles className="h-3 w-3 mr-1" />
                   Premium
                 </Badge>
               </div>
 
-              <div className="space-y-2 bg-white/10 backdrop-blur-sm rounded-lg p-4 text-white">
+              <div className="space-y-1.5 bg-white/10 backdrop-blur-sm rounded-lg p-3 text-white">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm text-blue-100">Original Price:</span>
-                  <span className={`font-semibold ${discount > 0 ? "line-through text-blue-200" : "text-2xl"}`}>
+                  <span className="text-xs text-blue-100">Original Price:</span>
+                  <span className={`font-semibold ${discount > 0 ? "line-through text-blue-200 text-sm" : "text-xl"}`}>
                     ৳{originalPrice}
                   </span>
                 </div>
@@ -360,12 +374,12 @@ export default function EnhancedPurchaseModal({
                 {discount > 0 && (
                   <>
                     <div className="flex justify-between items-center text-green-300">
-                      <span className="text-sm">Discount:</span>
-                      <span className="font-semibold">-৳{discount}</span>
+                      <span className="text-xs">Discount:</span>
+                      <span className="font-semibold text-sm">-৳{discount}</span>
                     </div>
-                    <div className="flex justify-between items-center pt-2 border-t border-white/20">
-                      <span className="text-sm font-semibold">Final Price:</span>
-                      <span className="text-3xl font-bold">৳{finalPrice}</span>
+                    <div className="flex justify-between items-center pt-1.5 border-t border-white/20">
+                      <span className="text-xs font-semibold">Total:</span>
+                      <span className="text-2xl font-bold">৳{finalPrice}</span>
                     </div>
                   </>
                 )}
@@ -373,18 +387,16 @@ export default function EnhancedPurchaseModal({
             </CardContent>
           </Card>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b">
-              <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-lg">
-                <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-              </div>
-              <h4 className="font-bold text-lg">User Information</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-1.5 border-b">
+              <User className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <h4 className="font-semibold text-base">User Information</h4>
             </div>
 
-            <div className="grid gap-4">
+            <div className="grid gap-3">
               <div>
-                <Label htmlFor="userName" className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
+                <Label htmlFor="userName" className="text-xs font-medium mb-1.5 flex items-center gap-1.5">
+                  <User className="h-3 w-3 text-muted-foreground" />
                   Full Name
                 </Label>
                 <Input
@@ -392,14 +404,14 @@ export default function EnhancedPurchaseModal({
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   placeholder="Enter your full name"
-                  className="h-11"
+                  className="h-10"
                   disabled
                 />
               </div>
 
               <div>
-                <Label htmlFor="userEmail" className="text-sm font-medium mb-2 flex items-center gap-2">
-                  <Mail className="h-3.5 w-3.5 text-muted-foreground" />
+                <Label htmlFor="userEmail" className="text-xs font-medium mb-1.5 flex items-center gap-1.5">
+                  <Mail className="h-3 w-3 text-muted-foreground" />
                   Email Address
                 </Label>
                 <Input
@@ -408,66 +420,64 @@ export default function EnhancedPurchaseModal({
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   placeholder="Enter your email"
-                  className="h-11"
+                  className="h-10"
                   disabled
                 />
               </div>
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b">
-              <div className="p-2 bg-green-100 dark:bg-green-900 rounded-lg">
-                <CreditCard className="h-4 w-4 text-green-600 dark:text-green-400" />
-              </div>
-              <h4 className="font-bold text-lg">Payment Information</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-1.5 border-b">
+              <CreditCard className="h-4 w-4 text-green-600 dark:text-green-400" />
+              <h4 className="font-semibold text-base">Payment Information</h4>
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-3">
               <div>
-                <Label className="text-sm font-medium mb-3 block">Select Payment Method</Label>
-                <div className="grid grid-cols-2 gap-3">
+                <Label className="text-xs font-medium mb-2 block">Select Payment Method</Label>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("bkash")}
-                    className={`relative flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                    className={`relative flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
                       paymentMethod === "bkash"
-                        ? "border-pink-500 bg-pink-50 dark:bg-pink-950 shadow-md"
-                        : "border-gray-200 dark:border-gray-700 hover:border-pink-300 dark:hover:border-pink-700"
+                        ? "border-pink-500 bg-pink-50 dark:bg-pink-950"
+                        : "border-gray-200 dark:border-gray-700 hover:border-pink-300"
                     }`}
                   >
                     <Smartphone
-                      className={`h-5 w-5 ${paymentMethod === "bkash" ? "text-pink-600" : "text-gray-400"}`}
+                      className={`h-4 w-4 ${paymentMethod === "bkash" ? "text-pink-600" : "text-gray-400"}`}
                     />
                     <span
-                      className={`font-semibold ${paymentMethod === "bkash" ? "text-pink-600" : "text-gray-600 dark:text-gray-400"}`}
+                      className={`font-semibold text-sm ${paymentMethod === "bkash" ? "text-pink-600" : "text-gray-600 dark:text-gray-400"}`}
                     >
-                      Bkash
+                      bKash
                     </span>
                     {paymentMethod === "bkash" && (
-                      <CheckCircle2 className="absolute top-2 right-2 h-5 w-5 text-pink-600" />
+                      <CheckCircle2 className="absolute top-1.5 right-1.5 h-4 w-4 text-pink-600" />
                     )}
                   </button>
 
                   <button
                     type="button"
                     onClick={() => setPaymentMethod("nagad")}
-                    className={`relative flex items-center justify-center gap-3 p-4 rounded-xl border-2 transition-all duration-200 ${
+                    className={`relative flex items-center justify-center gap-2 p-3 rounded-lg border-2 transition-all ${
                       paymentMethod === "nagad"
-                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950 shadow-md"
-                        : "border-gray-200 dark:border-gray-700 hover:border-orange-300 dark:hover:border-orange-700"
+                        ? "border-orange-500 bg-orange-50 dark:bg-orange-950"
+                        : "border-gray-200 dark:border-gray-700 hover:border-orange-300"
                     }`}
                   >
                     <Smartphone
-                      className={`h-5 w-5 ${paymentMethod === "nagad" ? "text-orange-600" : "text-gray-400"}`}
+                      className={`h-4 w-4 ${paymentMethod === "nagad" ? "text-orange-600" : "text-gray-400"}`}
                     />
                     <span
-                      className={`font-semibold ${paymentMethod === "nagad" ? "text-orange-600" : "text-gray-600 dark:text-gray-400"}`}
+                      className={`font-semibold text-sm ${paymentMethod === "nagad" ? "text-orange-600" : "text-gray-600 dark:text-gray-400"}`}
                     >
                       Nagad
                     </span>
                     {paymentMethod === "nagad" && (
-                      <CheckCircle2 className="absolute top-2 right-2 h-5 w-5 text-orange-600" />
+                      <CheckCircle2 className="absolute top-1.5 right-1.5 h-4 w-4 text-orange-600" />
                     )}
                   </button>
                 </div>
@@ -475,25 +485,25 @@ export default function EnhancedPurchaseModal({
 
               {paymentMethod && (
                 <Card
-                  className={`border-2 ${
+                  className={`border ${
                     paymentMethod === "bkash"
                       ? "border-pink-200 bg-pink-50 dark:bg-pink-950 dark:border-pink-800"
                       : "border-orange-200 bg-orange-50 dark:bg-orange-950 dark:border-orange-800"
                   }`}
                 >
-                  <CardContent className="p-4">
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2">
+                  <CardContent className="p-3">
+                    <div className="space-y-2">
+                      <div className="flex items-center gap-1.5">
                         <Smartphone
-                          className={`h-5 w-5 ${paymentMethod === "bkash" ? "text-pink-600" : "text-orange-600"}`}
+                          className={`h-4 w-4 ${paymentMethod === "bkash" ? "text-pink-600" : "text-orange-600"}`}
                         />
-                        <span className="font-semibold text-sm">
-                          Send money to this {paymentMethod === "bkash" ? "Bkash" : "Nagad"} number:
+                        <span className="font-medium text-xs">
+                          Send money to this {paymentMethod === "bkash" ? "bKash" : "Nagad"} number:
                         </span>
                       </div>
                       <div className="flex items-center gap-2">
                         <div
-                          className={`flex-1 p-3 rounded-lg font-mono text-xl font-bold text-center ${
+                          className={`flex-1 p-2.5 rounded-lg font-mono text-lg font-bold text-center ${
                             paymentMethod === "bkash"
                               ? "bg-pink-100 dark:bg-pink-900 text-pink-700 dark:text-pink-300"
                               : "bg-orange-100 dark:bg-orange-900 text-orange-700 dark:text-orange-300"
@@ -504,16 +514,17 @@ export default function EnhancedPurchaseModal({
                         <Button
                           type="button"
                           onClick={() => copyToClipboard(paymentNumbers[paymentMethod as keyof typeof paymentNumbers])}
-                          className={`h-12 px-4 ${
+                          size="sm"
+                          className={`h-10 px-3 ${
                             paymentMethod === "bkash"
                               ? "bg-pink-600 hover:bg-pink-700"
                               : "bg-orange-600 hover:bg-orange-700"
                           }`}
                         >
-                          {isCopied ? <Check className="h-5 w-5" /> : <Copy className="h-5 w-5" />}
+                          {isCopied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
                         </Button>
                       </div>
-                      <p className="text-xs text-muted-foreground text-center">
+                      <p className="text-[10px] text-muted-foreground text-center">
                         After sending money, enter the last 4 digits and transaction ID below
                       </p>
                     </div>
@@ -522,11 +533,14 @@ export default function EnhancedPurchaseModal({
               )}
 
               {paymentMethod && (
-                <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+                <div className="space-y-3 animate-in fade-in slide-in-from-top-2 duration-300">
                   <div>
-                    <Label htmlFor="paymentLast4Digits" className="text-sm font-medium mb-2 flex items-center gap-2">
-                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
-                      Last 4 Digits of {paymentMethod === "bkash" ? "Bkash" : "Nagad"} Number
+                    <Label
+                      htmlFor="paymentLast4Digits"
+                      className="text-xs font-medium mb-1.5 flex items-center gap-1.5"
+                    >
+                      <Hash className="h-3 w-3 text-muted-foreground" />
+                      Last 4 Digits of {paymentMethod === "bkash" ? "bKash" : "Nagad"} Number
                     </Label>
                     <Input
                       id="paymentLast4Digits"
@@ -537,34 +551,51 @@ export default function EnhancedPurchaseModal({
                       }}
                       placeholder="1234"
                       maxLength={4}
-                      className="h-11 text-lg tracking-wider"
+                      className="h-10 text-base tracking-wider"
                     />
                   </div>
 
                   <div>
-                    <Label htmlFor="paymentTransactionId" className="text-sm font-medium mb-2 flex items-center gap-2">
-                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    <Label
+                      htmlFor="paymentTransactionId"
+                      className="text-xs font-medium mb-1.5 flex items-center gap-1.5"
+                    >
+                      <Hash className="h-3 w-3 text-muted-foreground" />
                       Transaction ID
                     </Label>
-                    <Input
-                      id="paymentTransactionId"
-                      value={paymentTransactionId}
-                      onChange={(e) => setPaymentTransactionId(e.target.value)}
-                      placeholder="Enter your transaction ID"
-                      className="h-11"
-                    />
+                    <div className="flex gap-2">
+                      <Input
+                        id="paymentTransactionId"
+                        value={paymentTransactionId}
+                        onChange={(e) => setPaymentTransactionId(e.target.value)}
+                        placeholder="Enter your transaction ID"
+                        className="h-10 flex-1"
+                      />
+                      <Button
+                        type="button"
+                        onClick={pasteTransactionId}
+                        size="sm"
+                        variant="outline"
+                        className="h-10 px-3 bg-transparent"
+                        title="Paste from clipboard"
+                      >
+                        {isTransactionIdCopied ? (
+                          <Check className="h-4 w-4 text-green-600" />
+                        ) : (
+                          <Clipboard className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
             </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 pb-2 border-b">
-              <div className="p-2 bg-purple-100 dark:bg-purple-900 rounded-lg">
-                <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-              </div>
-              <h4 className="font-bold text-lg">Have a Coupon Code?</h4>
+          <div className="space-y-3">
+            <div className="flex items-center gap-2 pb-1.5 border-b">
+              <Tag className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+              <h4 className="font-semibold text-base">Have a Coupon Code?</h4>
             </div>
 
             <div className="flex gap-2">
@@ -573,14 +604,14 @@ export default function EnhancedPurchaseModal({
                 onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                 placeholder="Enter coupon code"
                 disabled={isCouponApplied || isValidatingCoupon}
-                className="flex-1 h-11 uppercase"
+                className="flex-1 h-10 uppercase text-sm"
               />
               {!isCouponApplied ? (
                 <Button
                   onClick={handleApplyCoupon}
                   disabled={isValidatingCoupon || !couponCode.trim()}
-                  className="bg-purple-600 hover:bg-purple-700 px-6"
-                  size="lg"
+                  className="bg-purple-600 hover:bg-purple-700 px-5"
+                  size="sm"
                 >
                   {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                 </Button>
@@ -588,8 +619,8 @@ export default function EnhancedPurchaseModal({
                 <Button
                   onClick={handleRemoveCoupon}
                   variant="outline"
-                  className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 px-6 bg-transparent"
-                  size="lg"
+                  className="border-red-300 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 px-5 bg-transparent"
+                  size="sm"
                 >
                   Remove
                 </Button>
@@ -598,18 +629,18 @@ export default function EnhancedPurchaseModal({
 
             {couponMessage && (
               <div
-                className={`flex items-center gap-3 p-4 rounded-xl ${
+                className={`flex items-center gap-2 p-3 rounded-lg text-xs ${
                   isCouponApplied
-                    ? "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border-2 border-green-200 dark:border-green-800"
-                    : "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border-2 border-red-200 dark:border-red-800"
+                    ? "bg-green-50 dark:bg-green-950 text-green-700 dark:text-green-300 border border-green-200 dark:border-green-800"
+                    : "bg-red-50 dark:bg-red-950 text-red-700 dark:text-red-300 border border-red-200 dark:border-red-800"
                 }`}
               >
                 {isCouponApplied ? (
-                  <CheckCircle2 className="h-5 w-5 flex-shrink-0" />
+                  <CheckCircle2 className="h-4 w-4 flex-shrink-0" />
                 ) : (
-                  <AlertCircle className="h-5 w-5 flex-shrink-0" />
+                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
                 )}
-                <span className="text-sm font-medium">{couponMessage}</span>
+                <span className="font-medium">{couponMessage}</span>
               </div>
             )}
           </div>
@@ -624,27 +655,27 @@ export default function EnhancedPurchaseModal({
               !paymentLast4Digits ||
               !paymentTransactionId
             }
-            className="w-full h-14 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold text-lg shadow-lg hover:shadow-xl transition-all duration-300"
+            className="w-full h-12 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold text-base"
           >
             {isLoading ? (
               <>
-                <Loader2 className="h-5 w-5 mr-2 animate-spin" />
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
                 Processing Order...
               </>
             ) : (
               <>
-                <CheckCircle2 className="h-5 w-5 mr-2" />
+                <CheckCircle2 className="h-4 w-4 mr-2" />
                 Place Order - ৳{finalPrice}
               </>
             )}
           </Button>
 
-          <Card className="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-950 dark:to-orange-950 border-amber-200 dark:border-amber-800">
-            <CardContent className="p-4">
-              <p className="text-sm text-amber-900 dark:text-amber-100 leading-relaxed">
+          <Card className="bg-amber-50 dark:bg-amber-950 border-amber-200 dark:border-amber-800">
+            <CardContent className="p-3">
+              <p className="text-xs text-amber-900 dark:text-amber-100 leading-relaxed">
                 <strong className="font-semibold">Important:</strong> After placing your order, our admin team will
-                verify your payment details and activate your premium access within 24 hours. You'll receive a
-                confirmation email once activated.
+                verify your payment and activate premium access within 24 hours. You will receive a confirmation email
+                once activated.
               </p>
             </CardContent>
           </Card>

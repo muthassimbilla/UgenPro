@@ -60,14 +60,14 @@ const AuthForm = memo(function AuthForm({
     <div className="w-full">
       {/* Success Messages */}
       {flashMessage && (
-        <Alert className="mb-4 border-green-500/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+        <Alert className="mb-4 border-green-500/50 bg-green-500/10">
           <CheckCircle className="h-4 w-4 text-green-500" />
           <AlertDescription className="text-sm">{flashMessage.message}</AlertDescription>
         </Alert>
       )}
 
       {successMessage && !flashMessage && (
-        <Alert className="mb-4 border-green-500/50 bg-gradient-to-r from-green-500/10 to-emerald-500/10">
+        <Alert className="mb-4 border-green-500/50 bg-green-500/10">
           <CheckCircle className="h-4 w-4 text-green-500" />
           <AlertDescription className="text-sm">{successMessage}</AlertDescription>
         </Alert>
@@ -75,14 +75,14 @@ const AuthForm = memo(function AuthForm({
 
       {/* Session Messages */}
       {sessionInvalidReason && (
-        <Alert className="mb-4 border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+        <Alert className="mb-4 border-orange-500/50 bg-orange-500/10">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
           <AlertDescription className="text-sm">Your session has expired. Please log in again.</AlertDescription>
         </Alert>
       )}
 
       {ipChangeLogout && (
-        <Alert className="mb-4 border-orange-500/50 bg-gradient-to-r from-orange-500/10 to-amber-500/10">
+        <Alert className="mb-4 border-orange-500/50 bg-orange-500/10">
           <AlertTriangle className="h-4 w-4 text-orange-500" />
           <AlertDescription className="text-sm">
             Your session expired due to IP address change. Please log in again.
@@ -91,7 +91,7 @@ const AuthForm = memo(function AuthForm({
       )}
 
       {pendingApproval && (
-        <Alert className="mb-4 border-yellow-500/50 bg-gradient-to-r from-yellow-500/10 to-amber-500/10">
+        <Alert className="mb-4 border-yellow-500/50 bg-yellow-500/10">
           <AlertTriangle className="h-4 w-4 text-yellow-500" />
           <AlertDescription className="text-sm">
             Your account is pending approval. This usually takes 24 hours.
@@ -101,7 +101,7 @@ const AuthForm = memo(function AuthForm({
 
       {/* Error Messages */}
       {errors.length > 0 && !pendingApproval && (
-        <Alert variant="destructive" className="mb-4 bg-gradient-to-r from-red-500/10 to-rose-500/10">
+        <Alert variant="destructive" className="mb-4 bg-red-500/10">
           <XCircle className="h-4 w-4" />
           <AlertDescription className="text-sm">
             <ul className="list-disc list-inside space-y-1">
@@ -241,22 +241,15 @@ const AuthForm = memo(function AuthForm({
           className="w-full h-11 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           disabled={loading || isSubmitting}
         >
-          {(loading || isSubmitting) ? (
+          {loading || isSubmitting ? (
             <div className="flex items-center gap-2">
-              <svg 
-                className="animate-spin h-4 w-4 text-white" 
-                xmlns="http://www.w3.org/2000/svg" 
-                fill="none" 
+              <svg
+                className="animate-spin h-4 w-4 text-white"
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
                 viewBox="0 0 24 24"
               >
-                <circle 
-                  className="opacity-25" 
-                  cx="12" 
-                  cy="12" 
-                  r="10" 
-                  stroke="currentColor" 
-                  strokeWidth="4"
-                />
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                 <path
                   className="opacity-75"
                   fill="currentColor"
@@ -289,9 +282,7 @@ const AuthForm = memo(function AuthForm({
       {/* Legal Links */}
       {!isLogin && (
         <div className="text-center mt-4 pt-4 border-t border-border/50">
-          <p className="text-xs text-muted-foreground mb-2">
-            By creating an account, you agree to our
-          </p>
+          <p className="text-xs text-muted-foreground mb-2">By creating an account, you agree to our</p>
           <div className="flex justify-center gap-4 text-xs">
             <Link
               href="/terms-of-service"

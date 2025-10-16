@@ -4,13 +4,11 @@ import dynamic from "next/dynamic"
 import { HeroSection } from "@/components/hero-section"
 import { Navigation } from "@/components/navigation"
 import { useState, useEffect, useMemo, useCallback } from "react"
-// import { PerformanceMonitor } from "@/components/performance-monitor"
 
 const LoadingSkeleton = ({ height = "h-96" }: { height?: string }) => (
   <div className={`${height} bg-muted/10 rounded-lg`} />
 )
 
-// Lazy load heavy components with optimized loading states and better error handling
 const ToolsSection = dynamic(
   () => {
     return import("@/components/tools-section")
@@ -36,7 +34,7 @@ const ToolsSection = dynamic(
   },
   {
     loading: () => <LoadingSkeleton height="h-[400px] sm:h-[600px]" />,
-    ssr: true, // Enabled SSR
+    ssr: true,
   },
 )
 
@@ -65,7 +63,7 @@ const PricingSection = dynamic(
   },
   {
     loading: () => <LoadingSkeleton height="h-[300px] sm:h-[500px]" />,
-    ssr: true, // Enabled SSR
+    ssr: true,
   },
 )
 
@@ -94,7 +92,7 @@ const ContactSection = dynamic(
   },
   {
     loading: () => <LoadingSkeleton height="h-[250px] sm:h-[400px]" />,
-    ssr: true, // Enabled SSR
+    ssr: true,
   },
 )
 
@@ -123,17 +121,12 @@ const Footer = dynamic(
   },
   {
     loading: () => <LoadingSkeleton height="h-32 sm:h-64" />,
-    ssr: true, // Enabled SSR
+    ssr: true,
   },
 )
 
 export default function HomePage() {
   const [activeSection, setActiveSection] = useState("hero")
-
-  // Performance monitoring
-  // const { metrics, score, grade } = PerformanceMonitor({
-  //   enableLogging: process.env.NODE_ENV === 'development'
-  // })
 
   const sections = useMemo(() => ["hero", "tools", "pricing", "contact"], [])
 
@@ -165,7 +158,7 @@ export default function HomePage() {
         })
       },
       {
-        threshold: [0.3], // Single threshold for better performance
+        threshold: [0.3],
         rootMargin: "-80px 0px -30% 0px",
       },
     )
@@ -186,23 +179,8 @@ export default function HomePage() {
   }, [sections, handleSmoothScroll])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+    <div className="min-h-screen bg-background">
       <Navigation activeSection={activeSection} />
-
-      <div className="fixed inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-100/50 via-purple-100/30 to-pink-100/50 dark:hidden" />
-        <div className="hidden dark:block absolute inset-0">
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/25 via-purple-900/15 to-pink-900/25" />
-        </div>
-        <div
-          className="absolute top-1/4 -left-64 w-96 h-96 bg-blue-400/30 dark:bg-blue-500/15 rounded-full opacity-60"
-          style={{ willChange: "opacity" }}
-        />
-        <div
-          className="absolute bottom-1/4 -right-64 w-96 h-96 bg-purple-400/30 dark:bg-purple-500/15 rounded-full opacity-60"
-          style={{ willChange: "opacity" }}
-        />
-      </div>
 
       <main className="relative z-10">
         <HeroSection />

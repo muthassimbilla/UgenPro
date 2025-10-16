@@ -5,6 +5,7 @@ import { ToolCard } from "@/components/tool-card"
 import { useState, useMemo } from "react"
 import dynamic from "next/dynamic"
 import type { Tool } from "@/lib/tools-config"
+import { Wrench } from "lucide-react"
 
 const LazyToolModal = dynamic(() => import("@/components/tool-modal").then((mod) => mod.ToolModal), {
   loading: () => null,
@@ -26,45 +27,39 @@ export function ToolsSection() {
   }
 
   const firstThreeTools = useMemo(() => toolsData.slice(0, 3), [])
-  const remainingTools = useMemo(() => toolsData.slice(3), [])
 
   return (
-    <section id="tools" className="relative py-6 overflow-hidden">
+    <section id="tools" className="relative py-16 sm:py-24 overflow-hidden">
       <div className="absolute inset-0 -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-blue-50/30 via-blue-50/20 to-background dark:via-blue-950/10 dark:via-blue-950/10" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-gradient-to-r from-[#2B7FFF]/10 via-[#4a9fff]/10 to-[#2B7FFF]/10 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gradient-to-r from-[#4a9fff]/8 via-[#2B7FFF]/8 to-[#4a9fff]/8 rounded-full blur-3xl" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-accent/[0.02] to-background" />
       </div>
 
       <div className="container relative z-10 mx-auto px-4 sm:px-6">
-        <div className="max-w-4xl mb-4 text-center mx-auto px-4 sm:px-0">
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-            <span className="text-shadow-lg">Our Tools</span>
+        <div className="max-w-3xl mx-auto text-center mb-12 sm:mb-16 space-y-4 sm:space-y-6">
+          <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full glass shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105 border border-primary/10">
+            <Wrench className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+            <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
+              Our Tools
+            </span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight tracking-tight">
+            <span className="block text-balance">Professional Generator</span>
+            <span className="block text-balance gradient-text">Tools</span>
           </h2>
-          <p className="text-sm sm:text-lg text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium mt-4">
-            Professional generator tools for CPA self signup, user agent generation,
-            <br />
-            address generation, and email2name conversion. Fast, secure, and reliable online tools.
+
+          <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance">
+            Fast, secure, and reliable tools for CPA campaigns and lead generation
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 max-w-6xl mx-auto">
-          {firstThreeTools.map((tool) => (
-            <div key={tool.id}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 max-w-7xl mx-auto">
+          {firstThreeTools.map((tool, index) => (
+            <div key={tool.id} className="animate-slide-up" style={{ animationDelay: `${index * 0.1}s` }}>
               <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
             </div>
           ))}
         </div>
-
-        {remainingTools.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto mt-8">
-            {remainingTools.map((tool) => (
-              <div key={tool.id}>
-                <ToolCard tool={tool} onClick={() => handleToolClick(tool)} />
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
       <LazyToolModal tool={selectedTool} isOpen={isModalOpen} onClose={handleCloseModal} />

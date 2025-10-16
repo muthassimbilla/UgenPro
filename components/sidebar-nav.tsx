@@ -4,13 +4,14 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Layers, ChevronDown, Sparkles, Smartphone, MapPin, Mail, LogOut } from "lucide-react"
+import { Home, Layers, ChevronDown, Smartphone, MapPin, Mail, LogOut, ShoppingBag } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Home", href: "/tool", icon: Home, count: null },
+  { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag, count: null },
   { name: "Tools", href: "/tool", icon: Layers, count: 3, hasDropdown: true },
 ]
 
@@ -53,7 +54,10 @@ export function SidebarNav() {
       {/* Navigation */}
       <nav className="flex-1 space-y-1 px-3 py-4 overflow-y-auto">
         {navigation.map((item) => {
-          const isActive = pathname === item.href || (item.name === "Tools" && pathname.startsWith("/tool"))
+          const isActive =
+            pathname === item.href ||
+            (item.name === "Tools" && pathname.startsWith("/tool")) ||
+            (item.name === "Orders" && pathname.startsWith("/dashboard/orders"))
           const isExpanded = expandedItems.includes(item.name)
 
           return (

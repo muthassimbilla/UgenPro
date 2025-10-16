@@ -322,8 +322,8 @@ export default function LoginPage() {
         <AuthHero variant="login" />
 
         {showResendVerification && (
-          <Alert className="border-blue-500/50 bg-gradient-to-r from-blue-500/10 to-indigo-500/10">
-            <Mail className="h-4 w-4 text-blue-500" />
+          <Alert className="border-primary/50 bg-card">
+            <Mail className="h-4 w-4 text-primary" />
             <AlertDescription className="flex items-center justify-between">
               <span className="text-sm">Didn't receive the verification email?</span>
               <Button

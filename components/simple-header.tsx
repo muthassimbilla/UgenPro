@@ -2,7 +2,7 @@
 import ThemeToggle from "./theme-toggle"
 import Image from "next/image"
 import { useAuth } from "@/lib/auth-context"
-import { LogOut, User, ChevronDown } from "lucide-react"
+import { LogOut, User, ChevronDown, ShoppingBag } from "lucide-react"
 import { Button } from "./ui/button"
 import { useState, useEffect } from "react"
 
@@ -22,13 +22,13 @@ export default function SimpleHeader() {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       const target = event.target as Element
-      if (!target.closest('.profile-dropdown')) {
+      if (!target.closest(".profile-dropdown")) {
         setIsProfileDropdownOpen(false)
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => document.removeEventListener("mousedown", handleClickOutside)
   }, [])
 
   return (
@@ -62,6 +62,19 @@ export default function SimpleHeader() {
             </div>
           )}
 
+          {/* Desktop Orders link button */}
+          {user && (
+            <Button
+              onClick={() => (window.location.href = "/premium-tools/orders")}
+              variant="outline"
+              size="sm"
+              className="hidden md:flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950/30 dark:to-purple-950/30 border border-blue-200/50 dark:border-blue-800/50 hover:from-blue-100 hover:to-purple-100 dark:hover:from-blue-900/40 dark:hover:to-purple-900/40 text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-all duration-300 shadow-lg hover:shadow-xl"
+            >
+              <ShoppingBag className="w-4 h-4" />
+              <span className="font-semibold">My Orders</span>
+            </Button>
+          )}
+
           {/* Desktop Theme Toggle */}
           <div className="hidden md:block">
             <ThemeToggle />
@@ -92,27 +105,36 @@ export default function SimpleHeader() {
                   <User className="w-3 h-3 text-white" />
                 </div>
                 <span className="text-sm font-semibold">{user.full_name}</span>
-                <ChevronDown className={`w-4 h-4 transition-transform ${isProfileDropdownOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown className={`w-4 h-4 transition-transform ${isProfileDropdownOpen ? "rotate-180" : ""}`} />
               </Button>
 
               {/* Dropdown Menu */}
               {isProfileDropdownOpen && (
                 <div className="absolute right-0 top-full mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-200 dark:border-gray-700 py-2 z-50">
+                  <a
+                    href="/premium-tools/orders"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                    onClick={() => setIsProfileDropdownOpen(false)}
+                  >
+                    <ShoppingBag className="w-4 h-4" />
+                    <span className="font-semibold">My Orders</span>
+                  </a>
+
                   {/* Theme Toggle in Mobile Dropdown */}
-                  <div className="px-3 py-2 border-b border-gray-200 dark:border-gray-700">
+                  <div className="px-3 py-2 border-t border-gray-200 dark:border-gray-700">
                     <div className="flex items-center justify-between">
                       <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Theme</span>
                       <ThemeToggle />
                     </div>
                   </div>
-                  
+
                   {/* Logout Button in Mobile Dropdown */}
                   <button
                     onClick={() => {
                       handleLogout()
                       setIsProfileDropdownOpen(false)
                     }}
-                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+                    className="w-full flex items-center gap-3 px-3 py-2 text-left text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors border-t border-gray-200 dark:border-gray-700"
                   >
                     <LogOut className="w-4 h-4" />
                     <span className="font-semibold">Log out</span>

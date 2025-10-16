@@ -113,7 +113,7 @@ export default function PremiumToolsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <SimpleHeader />
 
       {/* Background Effects */}
@@ -206,7 +206,9 @@ export default function PremiumToolsPage() {
                 <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
                   Need Help?
                 </h3>
-                <p className="text-slate-600 dark:text-slate-400 mb-6">If you have any problems or questions, please contact us</p>
+                <p className="text-slate-600 dark:text-slate-400 mb-6">
+                  If you have any problems or questions, please contact us
+                </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                   <Button
                     onClick={handleContactAdmin}

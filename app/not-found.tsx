@@ -12,17 +12,13 @@ export default function NotFound() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen flex items-center justify-center bg-white dark:bg-slate-900">
       <div className="text-center">
         {/* 404 Number */}
-        <div className="text-9xl font-black text-slate-900 dark:text-slate-100 mb-4">
-          404
-        </div>
+        <div className="text-9xl font-black text-slate-900 dark:text-slate-100 mb-4">404</div>
 
         {/* Error Message */}
-        <h1 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-8">
-          Oops! Page Not Found
-        </h1>
+        <h1 className="text-2xl font-bold text-slate-700 dark:text-slate-300 mb-8">Oops! Page Not Found</h1>
 
         {/* Back Button */}
         <Button

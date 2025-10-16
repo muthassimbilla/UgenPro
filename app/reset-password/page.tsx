@@ -150,7 +150,7 @@ export default function ResetPasswordPage() {
 
   if (checkingSession) {
     return (
-      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-white dark:bg-slate-900">
         <div className="absolute top-6 right-6 z-20">
           <AuthThemeToggle />
         </div>
@@ -178,7 +178,7 @@ export default function ResetPasswordPage() {
 
   if (!hasValidSession) {
     return (
-      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+      <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-white dark:bg-slate-900">
         <div className="absolute top-6 right-6 z-20">
           <AuthThemeToggle />
         </div>
@@ -216,7 +216,7 @@ export default function ResetPasswordPage() {
   }
 
   return (
-    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="h-screen flex items-center justify-center p-4 relative overflow-hidden bg-white dark:bg-slate-900">
       {/* Theme Toggle */}
       <div className="absolute top-6 right-6 z-20">
         <AuthThemeToggle />

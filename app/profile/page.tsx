@@ -5,7 +5,21 @@ import { ProtectedRoute } from "@/components/protected-route"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { User, Calendar, Shield, LogOut, Clock, Key, Globe, CheckCircle, Crown, Heart, Lock, Mail } from "lucide-react"
+import {
+  User,
+  Calendar,
+  Shield,
+  LogOut,
+  Clock,
+  Key,
+  Globe,
+  CheckCircle,
+  Crown,
+  Heart,
+  Lock,
+  Mail,
+  ShoppingBag,
+} from "lucide-react"
 import { UserIPDisplay } from "@/components/user-ip-display"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -104,7 +118,7 @@ export default function ProfilePage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <div className="min-h-screen bg-white dark:bg-slate-900">
         <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8 max-w-6xl">
           <div className="space-y-4 sm:space-y-8">
             {/* Hero Section */}
@@ -192,15 +206,18 @@ export default function ProfilePage() {
                 </CardContent>
               </Card>
 
-              <Card className="glass-card border-0 hover:shadow-lg transition-all duration-300">
+              <Card
+                className="glass-card border-0 hover:shadow-lg transition-all duration-300 cursor-pointer group"
+                onClick={() => router.push("/dashboard/orders")}
+              >
                 <CardContent className="p-4 sm:p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-sm font-medium text-muted-foreground">Account Type</p>
-                      <p className="text-2xl font-bold text-orange-600">Premium</p>
+                      <p className="text-sm font-medium text-muted-foreground">My Orders</p>
+                      <p className="text-2xl font-bold text-blue-600 group-hover:text-blue-700">View All</p>
                     </div>
-                    <div className="w-12 h-12 rounded-xl bg-orange-500/20 flex items-center justify-center">
-                      <Crown className="w-6 h-6 text-orange-600" />
+                    <div className="w-12 h-12 rounded-xl bg-blue-500/20 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <ShoppingBag className="w-6 h-6 text-blue-600" />
                     </div>
                   </div>
                 </CardContent>

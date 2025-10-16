@@ -1109,11 +1109,15 @@ export default function UserAgentGenerator() {
           console.log("[v0] Selected resolution:", getRandomElement(deviceResolutions))
           console.log("[v0] Selected scaling:", getRandomElement(deviceScaling))
 
+          const languageCode = language.split("_")[0]
+          const selectedResolution = getRandomElement(deviceResolutions)
+          const selectedScaling = getRandomElement(deviceScaling)
+
           userAgent =
             `Mozilla/5.0 (iPhone; CPU iPhone OS ${iosVersion.version.replace(/\./g, "_")} like Mac OS X) ` +
             `AppleWebKit/${iosVersion.webkit_version} (KHTML, like Gecko) Mobile/${iosVersion.build_number} ` +
-            `Instagram ${appVersion.version} (${modelIdentifier}; iOS ${iosVersion.version.replace(/\./g, "_")}; ${language}; ` +
-            `scale=${getRandomElement(deviceScaling)}; ${getRandomElement(deviceResolutions)}; ${appVersion.build_number})`
+            `Instagram ${appVersion.version} (${modelIdentifier}; iOS ${iosVersion.version.replace(/\./g, "_")}; ${language}; ${languageCode}; ` +
+            `scale=${selectedScaling}; ${selectedResolution}; IABMV/1; ${appVersion.build_number})`
 
           console.log("[v0] Generated Instagram iOS user agent:", userAgent)
         } else {
@@ -1551,7 +1555,7 @@ export default function UserAgentGenerator() {
   // }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="space-y-8">
           {activeTab === "generator" && (

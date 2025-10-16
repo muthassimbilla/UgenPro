@@ -4,6 +4,7 @@ import type { Tool } from "@/lib/tools-config"
 import { Card } from "@/components/ui/card"
 import { useState } from "react"
 import { cn } from "@/lib/utils"
+import { Play } from "lucide-react"
 
 interface ToolCardProps {
   tool: Tool
@@ -28,57 +29,39 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
     <Card
       className={cn(
         "group relative overflow-hidden cursor-pointer transition-all duration-300",
-        "rounded-3xl bg-gradient-to-br from-white/95 via-blue-50/80 to-white/95 dark:from-gray-900/95 dark:via-blue-950/80 dark:to-gray-900/95 shadow-lg",
-        "hover:shadow-xl hover:shadow-[#2B7FFF]/15 hover:-translate-y-2 hover:scale-[1.01]",
-        featured ? "md:row-span-1" : "",
+        "rounded-2xl bg-card border border-border/50 shadow-soft",
+        "hover:shadow-glow hover:border-primary/30 hover:-translate-y-2",
         "h-full",
       )}
       onClick={handleClick}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      <div
-        className={cn(
-          "absolute inset-0 bg-gradient-to-br from-[#2B7FFF]/5 via-[#4a9fff]/5 to-[#2B7FFF]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300",
-        )}
-      />
+      <div className="absolute inset-0 bg-gradient-to-br from-primary/[0.02] via-transparent to-accent/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
-      <div className={cn("p-8 space-y-6 h-full flex flex-col relative z-10", featured && "md:p-10")}>
+      <div className="p-6 sm:p-8 space-y-5 sm:space-y-6 h-full flex flex-col relative z-10">
         <div className="flex items-center justify-start">
-          <div
-            className={cn(
-              "p-4 rounded-2xl bg-gradient-to-br from-[#2B7FFF]/15 via-[#4a9fff]/15 to-[#2B7FFF]/15 group-hover:scale-105 transition-all duration-300 shadow-md group-hover:shadow-lg group-hover:shadow-[#2B7FFF]/20",
-              featured && "p-5",
-            )}
-          >
-            <tool.icon className={cn("text-[#2B7FFF] dark:text-[#2B7FFF]", featured ? "h-8 w-8" : "h-6 w-6")} />
+          <div className="p-3 sm:p-4 rounded-2xl bg-primary/10 border border-primary/20 group-hover:scale-110 group-hover:bg-primary/15 transition-all duration-300 shadow-soft">
+            <tool.icon className="h-6 w-6 sm:h-7 sm:w-7 text-primary" />
           </div>
         </div>
 
-        <div className="space-y-4 flex-1">
-          <h3
-            className={cn(
-              "font-bold transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-[#2B7FFF] group-hover:via-[#4a9fff] group-hover:to-[#2B7FFF] group-hover:bg-clip-text group-hover:text-transparent",
-              featured ? "text-3xl" : "text-2xl",
-            )}
-          >
+        <div className="space-y-3 sm:space-y-4 flex-1">
+          <h3 className="text-xl sm:text-2xl font-bold transition-colors duration-300 group-hover:text-primary leading-tight">
             {tool.name}
           </h3>
-          <p className={cn("text-muted-foreground leading-relaxed", featured ? "text-lg" : "text-base")}>
-            {tool.description}
-          </p>
 
-          <div className="space-y-2">
-            <h4 className="text-sm font-semibold bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] bg-clip-text text-transparent">
-              Key Features:
-            </h4>
-            <ul className="space-y-1.5">
-              {tool.features.map((feature, index) => (
+          <p className="text-sm sm:text-base text-muted-foreground leading-relaxed">{tool.description}</p>
+
+          <div className="space-y-2 pt-2">
+            <h4 className="text-xs sm:text-sm font-semibold text-primary/80">Key Features:</h4>
+            <ul className="space-y-1.5 sm:space-y-2">
+              {tool.features.slice(0, 3).map((feature, index) => (
                 <li
                   key={index}
-                  className="flex items-start gap-2 text-xs text-muted-foreground group-hover:text-foreground transition-colors"
+                  className="flex items-start gap-2 text-xs sm:text-sm text-muted-foreground group-hover:text-foreground/80 transition-colors"
                 >
-                  <div className="w-1.5 h-1.5 rounded-full bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] mt-2 flex-shrink-0" />
+                  <div className="w-1.5 h-1.5 rounded-full bg-primary mt-1.5 flex-shrink-0" />
                   <span className="leading-relaxed">{feature}</span>
                 </li>
               ))}
@@ -87,8 +70,9 @@ export function ToolCard({ tool, onClick, featured = false }: ToolCardProps) {
         </div>
 
         <div className="flex items-center justify-center pt-4">
-          <div className="px-6 py-2.5 bg-gradient-to-r from-[#2B7FFF]/15 via-[#4a9fff]/15 to-[#2B7FFF]/15 rounded-xl text-sm font-bold text-[#2B7FFF] dark:text-[#2B7FFF] hover:text-[#4a9fff] dark:hover:text-[#4a9fff] hover:scale-[1.02] transition-all duration-300 cursor-pointer shadow-md hover:shadow-lg group-hover:shadow-[#2B7FFF]/20">
-            Demo
+          <div className="flex items-center gap-2 px-5 py-2.5 bg-primary/10 hover:bg-primary/15 border border-primary/20 hover:border-primary/30 rounded-xl text-sm font-semibold text-primary hover:scale-105 transition-all duration-300 cursor-pointer shadow-soft">
+            <Play className="h-4 w-4" />
+            <span>Watch Demo</span>
           </div>
         </div>
       </div>

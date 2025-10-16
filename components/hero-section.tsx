@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import { ArrowRight, Sparkles, Zap, TrendingUp } from "lucide-react"
+import { ArrowRight, Sparkles, Zap, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { memo, useCallback } from "react"
 
@@ -18,45 +18,48 @@ export const HeroSection = memo(function HeroSection() {
     router.push("/signup")
   }, [router])
 
+  const handleExploreTools = useCallback(() => {
+    document.getElementById("tools")?.scrollIntoView({ behavior: "smooth" })
+  }, [])
+
   return (
     <section
       id="hero"
-      className="relative min-h-screen sm:min-h-[90vh] flex items-center justify-center overflow-hidden pt-12 pb-4 sm:pt-16 sm:pb-6"
+      className="relative min-h-screen flex items-center justify-center overflow-hidden pt-20 pb-6 sm:pt-24 sm:pb-8"
     >
-      <div className="container mx-auto px-3 sm:px-6 py-4 sm:py-12">
-        <div className="max-w-4xl mx-auto text-center">
-          <div className="space-y-4 sm:space-y-8">
-            <div className="inline-flex items-center gap-2 px-4 sm:px-6 py-2.5 sm:py-3 rounded-full glass shadow-glow text-xs sm:text-sm font-semibold hover:scale-105 transition-transform duration-300 border-2 border-[#2B7FFF]/60 hover:border-[#2B7FFF] bg-gradient-to-r from-blue-50/80 to-blue-50/80 dark:from-blue-900/30 dark:to-blue-900/30">
-              <Sparkles className="h-4 w-4 text-[#2B7FFF] dark:text-[#2B7FFF]" />
-              <span className="bg-gradient-to-r from-[#2B7FFF] via-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent font-bold">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-primary/[0.02] to-background" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(43,127,255,0.05),transparent_50%)]" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_80%,rgba(43,127,255,0.03),transparent_50%)]" />
+      </div>
+
+      <div className="container mx-auto px-4 sm:px-6 py-8 sm:py-12">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="space-y-6 sm:space-y-10 animate-fade-in">
+            <div className="inline-flex items-center gap-2 px-4 sm:px-5 py-2 sm:py-2.5 rounded-full glass shadow-soft hover:shadow-medium transition-all duration-300 hover:scale-105 border border-primary/10">
+              <Sparkles className="h-3.5 w-3.5 sm:h-4 sm:w-4 text-primary" />
+              <span className="text-xs sm:text-sm font-semibold bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">
                 Next-Gen AI Tools
               </span>
             </div>
 
-            <div className="hidden sm:block">
-              <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-                <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
-                <span className="gradient-text-rainbow text-shadow-lg">CPA Self SignUp</span>
+            <div className="space-y-4 sm:space-y-6">
+              <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold leading-[1.1] tracking-tight">
+                <span className="block text-balance">Advanced Generator</span>
+                <span className="block text-balance gradient-text">Tools Platform</span>
               </h1>
-            </div>
-            <div className="block sm:hidden">
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold leading-tight text-balance">
-                <span className="text-shadow-lg">Advanced Generator Tools Platform</span>{" "}
-                <span className="gradient-text-rainbow text-shadow-lg">CPA Self SignUp</span>
-              </h1>
+
+              <p className="text-base sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-3xl mx-auto text-balance px-4 sm:px-0">
+                Professional generator tools for CPA self signup. Generate user agents, addresses, and transform emails
+                into names with AI-powered precision.
+              </p>
             </div>
 
-            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground leading-relaxed max-w-2xl mx-auto text-balance font-medium px-2 sm:px-0">
-              Professional generator tools platform for CPA self signup offering user agent generator, address
-              generator, email2name converter, and more. Fast, secure, and reliable online tools for CPA professionals
-              and marketers.
-            </p>
-
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 justify-center px-2 sm:px-0">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center px-4 sm:px-0 pt-2">
               <Button
                 size="lg"
                 onClick={handleGetStarted}
-                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 bg-[#2B7FFF] hover:bg-[#1a6bff] text-white rounded-xl font-bold shadow-lg hover:shadow-xl transition-all group hover:scale-105 w-full sm:w-auto"
+                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 bg-primary hover:bg-primary/90 text-primary-foreground rounded-xl font-semibold shadow-glow hover:shadow-glow-accent transition-all duration-300 group hover:scale-105"
               >
                 Get Started Now
                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
@@ -64,45 +67,34 @@ export const HeroSection = memo(function HeroSection() {
               <Button
                 size="lg"
                 variant="outline"
-                onClick={() => {
-                  document.getElementById("tools")?.scrollIntoView({ behavior: "smooth" })
-                }}
-                className="text-sm sm:text-base px-4 sm:px-8 py-3 sm:py-6 glass hover:glass-strong border-2 border-emerald-300/50 hover:border-emerald-500/60 dark:border-emerald-700/50 dark:hover:border-emerald-500/60 rounded-xl font-bold hover:scale-105 transition-all"
+                onClick={handleExploreTools}
+                className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 glass hover:glass-strong border-border/50 hover:border-primary/30 rounded-xl font-semibold hover:scale-105 transition-all duration-300 bg-transparent"
               >
                 Explore Tools
               </Button>
             </div>
 
-            <div className="flex flex-wrap gap-4 sm:gap-8 justify-center">
-              <div className="flex items-center gap-3 hover:scale-105 transition-transform">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-[#2B7FFF]/20 to-[#4a9fff]/20 shadow-glow">
-                  <Zap className="h-5 w-5 text-[#2B7FFF] dark:text-[#2B7FFF]" />
+            <div className="flex flex-wrap gap-4 sm:gap-6 justify-center pt-4 sm:pt-6">
+              <div className="group flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 rounded-2xl glass hover:glass-strong transition-all duration-300 hover:scale-105 hover:shadow-medium">
+                <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                  <Zap className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#2B7FFF] to-[#4a9fff] bg-clip-text text-transparent">
-                    10x
-                  </div>
-                  <div className="text-sm text-muted-foreground font-medium">Faster</div>
+                <div className="text-left">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">10x</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium">Faster</div>
                 </div>
               </div>
-              <div className="flex items-center gap-3 hover:scale-105 transition-transform">
-                <div className="p-2 rounded-xl bg-gradient-to-br from-[#4a9fff]/20 to-[#2B7FFF]/20 shadow-glow">
-                  <TrendingUp className="h-5 w-5 text-[#4a9fff] dark:text-[#4a9fff]" />
+
+              <div className="group flex items-center gap-3 px-4 sm:px-5 py-3 sm:py-4 rounded-2xl glass hover:glass-strong transition-all duration-300 hover:scale-105 hover:shadow-medium">
+                <div className="p-2 sm:p-2.5 rounded-xl bg-primary/10 group-hover:bg-primary/15 transition-colors">
+                  <Users className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
                 </div>
-                <div>
-                  <div className="text-2xl font-bold bg-gradient-to-r from-[#4a9fff] to-[#2B7FFF] bg-clip-text text-transparent">
-                    10K+
-                  </div>
-                  <div className="text-sm text-muted-foreground font-medium">Users</div>
+                <div className="text-left">
+                  <div className="text-xl sm:text-2xl font-bold text-foreground">10K+</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground font-medium">Users</div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <div className="mt-8 sm:mt-16 text-center">
-            <p className="text-sm sm:text-lg md:text-xl text-muted-foreground">
-              Join thousands of developers building the future with AI-powered tools
-            </p>
           </div>
         </div>
       </div>

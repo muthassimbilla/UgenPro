@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect, useRef } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -26,7 +28,7 @@ export default function Email2NamePage() {
   const [autoGenerate, setAutoGenerate] = useState(true)
   const [copiedField, setCopiedField] = useState<string | null>(null)
   const [isPasteEvent, setIsPasteEvent] = useState(false)
-  const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null)  
+  const pasteTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const usageCounterRef = useRef<{ updateAfterApiCall: (result: any) => void; refreshUsage: () => void }>(null)
   const { apiCall } = useApiClient()
 
@@ -37,7 +39,7 @@ export default function Email2NamePage() {
       if (pasteTimeoutRef.current) {
         clearTimeout(pasteTimeoutRef.current)
       }
-      
+
       // Set a timeout to generate name after paste
       pasteTimeoutRef.current = setTimeout(() => {
         generateName()
@@ -63,20 +65,20 @@ export default function Email2NamePage() {
 
     setIsLoading(true)
     try {
-    const response = await apiCall("/api/email2name", {
-      method: "POST",
-      body: { email: email.trim() }
-    })
+      const response = await apiCall("/api/email2name", {
+        method: "POST",
+        body: { email: email.trim() },
+      })
 
       const result = await response.json()
 
       if (result.success) {
         setNameData(result.data)
         toast.success("Name generated successfully")
-        
+
         // Update usage counter
         if (result.rate_limit && usageCounterRef.current) {
-          console.log('Email2Name: Calling updateAfterApiCall with:', result.rate_limit)
+          console.log("Email2Name: Calling updateAfterApiCall with:", result.rate_limit)
           usageCounterRef.current.updateAfterApiCall(result.rate_limit)
           // Also refresh to ensure we have latest data
           setTimeout(() => {
@@ -88,10 +90,10 @@ export default function Email2NamePage() {
       } else {
         if (result.auth_required) {
           toast.error("লগিন করুন প্রথমে। এই টুল ব্যবহার করতে লগিন প্রয়োজন।")
-        } else if (result.rate_limit && result.error && result.error.includes('লিমিট')) {
+        } else if (result.rate_limit && result.error && result.error.includes("লিমিট")) {
           toast.error(result.error)
           if (usageCounterRef.current) {
-            console.log('Email2Name: Calling updateAfterApiCall with rate limit error:', result.rate_limit)
+            console.log("Email2Name: Calling updateAfterApiCall with rate limit error:", result.rate_limit)
             usageCounterRef.current.updateAfterApiCall(result.rate_limit)
           }
         } else {
@@ -122,7 +124,7 @@ export default function Email2NamePage() {
   }
 
   const handlePaste = async (e: React.ClipboardEvent<HTMLInputElement>) => {
-    const pastedText = e.clipboardData.getData('text')
+    const pastedText = e.clipboardData.getData("text")
     if (pastedText.trim() && pastedText.includes("@")) {
       setIsPasteEvent(true) // Mark that this is a paste event
     }
@@ -141,7 +143,7 @@ export default function Email2NamePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-800">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="container mx-auto px-4 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           {/* Left Card - Input */}
@@ -198,12 +200,7 @@ export default function Email2NamePage() {
 
               {/* API Usage Counter - Inside card at bottom */}
               <div className="mt-4 pt-3 border-t border-gray-200">
-                <ApiUsageCounter 
-                  ref={usageCounterRef}
-                  apiType="email2name" 
-                  compact={true}
-                  showProgressBar={false}
-                />
+                <ApiUsageCounter ref={usageCounterRef} apiType="email2name" compact={true} showProgressBar={false} />
               </div>
             </CardContent>
           </Card>
@@ -341,8 +338,6 @@ export default function Email2NamePage() {
                         <p className="font-medium text-center">{nameData.country}</p>
                       </div>
                     </div>
-
-                    
                   </div>
                 </div>
               ) : (

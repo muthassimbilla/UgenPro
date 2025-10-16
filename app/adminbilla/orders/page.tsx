@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
 import {
   ShoppingCart,
   CheckCircle,
@@ -21,6 +22,10 @@ import {
   Mail,
   Tag,
   FileText,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Loader2,
 } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 
@@ -54,6 +59,11 @@ export default function AdminOrdersPage() {
   const [isDetailsOpen, setIsDetailsOpen] = useState(false)
   const [isUpdating, setIsUpdating] = useState(false)
 
+  const [searchTerm, setSearchTerm] = useState("")
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(10)
+  const [totalOrders, setTotalOrders] = useState(0)
+
   useEffect(() => {
     if (!isAuthLoading && !admin) {
       router.replace("/404")
@@ -64,7 +74,7 @@ export default function AdminOrdersPage() {
     if (admin) {
       loadOrders()
     }
-  }, [admin])
+  }, [admin, currentPage, searchTerm])
 
   const loadOrders = async () => {
     setIsLoading(true)
@@ -76,7 +86,13 @@ export default function AdminOrdersPage() {
         return
       }
 
-      const response = await fetch("/api/admin/orders", {
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        pageSize: pageSize.toString(),
+        search: searchTerm,
+      })
+
+      const response = await fetch(`/api/admin/orders?${params}`, {
         headers: {
           Authorization: `Bearer ${sessionToken}`,
         },
@@ -87,8 +103,9 @@ export default function AdminOrdersPage() {
         return
       }
 
-      const { orders: fetchedOrders } = await response.json()
+      const { orders: fetchedOrders, total } = await response.json()
       setOrders(fetchedOrders || [])
+      setTotalOrders(total || 0)
     } catch (error) {
       console.error("[v0] Error loading orders:", error)
     } finally {
@@ -124,7 +141,6 @@ export default function AdminOrdersPage() {
         return
       }
 
-      // Reload orders
       await loadOrders()
       setIsDetailsOpen(false)
     } catch (error) {
@@ -162,7 +178,6 @@ export default function AdminOrdersPage() {
         return
       }
 
-      // Reload orders
       await loadOrders()
       setIsDetailsOpen(false)
     } catch (error) {
@@ -200,6 +215,8 @@ export default function AdminOrdersPage() {
   const pendingOrders = orders.filter((o) => o.order_status === "pending")
   const confirmedOrders = orders.filter((o) => o.order_status === "confirmed")
   const completedOrders = orders.filter((o) => o.order_status === "completed")
+
+  const totalPages = Math.ceil(totalOrders / pageSize)
 
   return (
     <div className="space-y-6 pb-8">
@@ -248,13 +265,30 @@ export default function AdminOrdersPage() {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm text-muted-foreground">Total Orders</p>
-                <p className="text-3xl font-bold text-blue-600">{orders.length}</p>
+                <p className="text-3xl font-bold text-blue-600">{totalOrders}</p>
               </div>
               <Package className="h-10 w-10 text-blue-600 opacity-20" />
             </div>
           </CardContent>
         </Card>
       </div>
+
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              placeholder="নাম, ইমেইল বা Transaction ID দিয়ে সার্চ করুন..."
+              value={searchTerm}
+              onChange={(e) => {
+                setSearchTerm(e.target.value)
+                setCurrentPage(1)
+              }}
+              className="pl-10"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Orders Table */}
       <Card>
@@ -264,12 +298,12 @@ export default function AdminOrdersPage() {
         <CardContent>
           {isLoading ? (
             <div className="flex items-center justify-center py-8">
-              <RefreshCw className="h-8 w-8 animate-spin text-primary" />
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
             </div>
           ) : orders.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
               <ShoppingCart className="h-12 w-12 mx-auto mb-4 opacity-20" />
-              <p>No orders found</p>
+              <p>কোনো অর্ডার পাওয়া যায়নি</p>
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -340,6 +374,67 @@ export default function AdminOrdersPage() {
           )}
         </CardContent>
       </Card>
+
+      {totalPages > 1 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="text-sm text-muted-foreground">
+                Showing {(currentPage - 1) * pageSize + 1} to {Math.min(currentPage * pageSize, totalOrders)} of{" "}
+                {totalOrders} orders
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                    let pageNum
+                    if (totalPages <= 5) {
+                      pageNum = i + 1
+                    } else if (currentPage <= 3) {
+                      pageNum = i + 1
+                    } else if (currentPage >= totalPages - 2) {
+                      pageNum = totalPages - 4 + i
+                    } else {
+                      pageNum = currentPage - 2 + i
+                    }
+
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => setCurrentPage(pageNum)}
+                        className="w-8 h-8 p-0"
+                      >
+                        {pageNum}
+                      </Button>
+                    )
+                  })}
+                </div>
+
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Order Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>

@@ -146,7 +146,7 @@ export default function RootLayout({
             __html: `
               // Prevent theme transition flicker on page load
               (function() {
-                const theme = localStorage.getItem('ugenpro-theme') || 'dark';
+                const theme = localStorage.getItem('ugenpro-theme') || 'light';
                 document.documentElement.classList.add('theme-transitioning');
                 document.documentElement.setAttribute('data-theme', theme);
                 
@@ -199,7 +199,7 @@ export default function RootLayout({
         <ChunkLoadErrorHandler>
           <ThemeProvider
             attribute="class"
-            defaultTheme="dark"
+            defaultTheme="light"
             enableSystem={false}
             disableTransitionOnChange={true}
             storageKey="ugenpro-theme"

@@ -1,6 +1,4 @@
 "use client"
-
-import type React from "react"
 import { memo } from "react"
 import { FileText, Scale, AlertCircle, Shield, Users, Ban, CheckCircle, XCircle } from "lucide-react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -9,7 +7,7 @@ import { Separator } from "@/components/ui/separator"
 
 const TermsOfServicePage = memo(function TermsOfServicePage() {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-green-50 to-emerald-50 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900">
+    <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="container mx-auto px-4 py-8 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
@@ -20,7 +18,8 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
             </h1>
           </div>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            Please read these terms carefully before using UGen Pro. By using our services, you agree to be bound by these terms.
+            Please read these terms carefully before using UGen Pro. By using our services, you agree to be bound by
+            these terms.
           </p>
           <Badge variant="outline" className="mt-4">
             Last updated: {new Date().toLocaleDateString()}
@@ -37,8 +36,8 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground leading-relaxed">
-              These Terms of Service ("Terms") govern your use of UGen Pro's website and services. 
-              By accessing or using our platform, you agree to be bound by these Terms and our Privacy Policy.
+              These Terms of Service ("Terms") govern your use of UGen Pro's website and services. By accessing or using
+              our platform, you agree to be bound by these Terms and our Privacy Policy.
             </p>
           </CardContent>
         </Card>
@@ -50,16 +49,12 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
               <Users className="h-5 w-5 mr-2 text-blue-600" />
               Service Description
             </CardTitle>
-            <CardDescription>
-              What UGen Pro provides and how it works
-            </CardDescription>
+            <CardDescription>What UGen Pro provides and how it works</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">
-                  Our Services
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-blue-600 dark:text-blue-400">Our Services</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li className="flex items-start">
                     <CheckCircle className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
@@ -123,9 +118,7 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">
-                Account Security
-              </h3>
+              <h3 className="text-lg font-semibold mb-3 text-purple-600 dark:text-purple-400">Account Security</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start">
                   <span className="w-2 h-2 bg-purple-500 rounded-full mt-2 mr-3 flex-shrink-0"></span>
@@ -158,9 +151,7 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-emerald-600 dark:text-emerald-400">
-                Permitted Uses
-              </h3>
+              <h3 className="text-lg font-semibold mb-3 text-emerald-600 dark:text-emerald-400">Permitted Uses</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start">
                   <CheckCircle className="h-4 w-4 text-green-500 mt-1 mr-2 flex-shrink-0" />
@@ -184,9 +175,7 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
             <Separator />
 
             <div>
-              <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">
-                Prohibited Uses
-              </h3>
+              <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">Prohibited Uses</h3>
               <ul className="space-y-2 text-muted-foreground">
                 <li className="flex items-start">
                   <XCircle className="h-4 w-4 text-red-500 mt-1 mr-2 flex-shrink-0" />
@@ -228,21 +217,27 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">
-                  Account Status
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">Account Status</h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• <strong>Pending:</strong> Awaiting admin approval</li>
-                  <li>• <strong>Active:</strong> Full access granted</li>
-                  <li>• <strong>Suspended:</strong> Temporary restriction</li>
-                  <li>• <strong>Expired:</strong> Account has expired</li>
-                  <li>• <strong>Inactive:</strong> Account deactivated</li>
+                  <li>
+                    • <strong>Pending:</strong> Awaiting admin approval
+                  </li>
+                  <li>
+                    • <strong>Active:</strong> Full access granted
+                  </li>
+                  <li>
+                    • <strong>Suspended:</strong> Temporary restriction
+                  </li>
+                  <li>
+                    • <strong>Expired:</strong> Account has expired
+                  </li>
+                  <li>
+                    • <strong>Inactive:</strong> Account deactivated
+                  </li>
                 </ul>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">
-                  Account Actions
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-orange-600 dark:text-orange-400">Account Actions</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Update profile information</li>
                   <li>• Change password and security settings</li>
@@ -266,19 +261,15 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           <CardContent>
             <div className="space-y-4">
               <div className="p-4 bg-amber-50 dark:bg-amber-950/20 rounded-lg border border-amber-200 dark:border-amber-800">
-                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">
-                  Service Availability
-                </h3>
+                <h3 className="font-semibold text-amber-800 dark:text-amber-200 mb-2">Service Availability</h3>
                 <p className="text-amber-700 dark:text-amber-300 text-sm">
-                  We strive to maintain 99.9% uptime, but we cannot guarantee uninterrupted service. 
-                  We may perform maintenance, updates, or experience technical issues.
+                  We strive to maintain 99.9% uptime, but we cannot guarantee uninterrupted service. We may perform
+                  maintenance, updates, or experience technical issues.
                 </p>
               </div>
-              
+
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-amber-600 dark:text-amber-400">
-                  Usage Limitations
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-amber-600 dark:text-amber-400">Usage Limitations</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Reasonable usage limits may apply to prevent abuse</li>
                   <li>• Rate limiting for API endpoints</li>
@@ -301,9 +292,7 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           <CardContent>
             <div className="grid md:grid-cols-2 gap-6">
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">
-                  Termination by You
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">Termination by You</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• You may close your account at any time</li>
                   <li>• Contact support to request deletion</li>
@@ -312,9 +301,7 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
                 </ul>
               </div>
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">
-                  Termination by Us
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-red-600 dark:text-red-400">Termination by Us</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Violation of these Terms</li>
                   <li>• Fraudulent or illegal activity</li>
@@ -337,19 +324,15 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           <CardContent>
             <div className="space-y-4">
               <div className="p-4 bg-gray-50 dark:bg-gray-950/20 rounded-lg border border-gray-200 dark:border-gray-800">
-                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">
-                  Service Disclaimer
-                </h3>
+                <h3 className="font-semibold text-gray-800 dark:text-gray-200 mb-2">Service Disclaimer</h3>
                 <p className="text-gray-700 dark:text-gray-300 text-sm">
-                  Our services are provided "as is" without warranties of any kind. We do not guarantee 
-                  the accuracy, reliability, or suitability of generated content for any specific purpose.
+                  Our services are provided "as is" without warranties of any kind. We do not guarantee the accuracy,
+                  reliability, or suitability of generated content for any specific purpose.
                 </p>
               </div>
-              
+
               <div>
-                <h3 className="text-lg font-semibold mb-3 text-gray-600 dark:text-gray-400">
-                  Limitation of Liability
-                </h3>
+                <h3 className="text-lg font-semibold mb-3 text-gray-600 dark:text-gray-400">Limitation of Liability</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• We are not liable for indirect or consequential damages</li>
                   <li>• Total liability is limited to the amount paid for services</li>
@@ -371,9 +354,8 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
           </CardHeader>
           <CardContent>
             <p className="text-muted-foreground leading-relaxed">
-              We may update these Terms from time to time. We will notify users of significant changes 
-              via email or through our platform. Continued use of our services after changes constitutes 
-              acceptance of the new Terms.
+              We may update these Terms from time to time. We will notify users of significant changes via email or
+              through our platform. Continued use of our services after changes constitutes acceptance of the new Terms.
             </p>
           </CardContent>
         </Card>
@@ -391,10 +373,18 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
               If you have any questions about these Terms of Service, please contact us:
             </p>
             <div className="space-y-2">
-              <p><strong>Email:</strong> legal@ugenpro.com</p>
-              <p><strong>Support:</strong> support@ugenpro.com</p>
-              <p><strong>Website:</strong> https://ugenpro.com</p>
-              <p><strong>Response Time:</strong> Within 48 hours</p>
+              <p>
+                <strong>Email:</strong> legal@ugenpro.com
+              </p>
+              <p>
+                <strong>Support:</strong> support@ugenpro.com
+              </p>
+              <p>
+                <strong>Website:</strong> https://ugenpro.com
+              </p>
+              <p>
+                <strong>Response Time:</strong> Within 48 hours
+              </p>
             </div>
           </CardContent>
         </Card>
@@ -402,9 +392,9 @@ const TermsOfServicePage = memo(function TermsOfServicePage() {
         {/* Footer */}
         <div className="text-center mt-8 pt-6 border-t border-border">
           <p className="text-sm text-muted-foreground">
-            These Terms of Service are effective as of {new Date().toLocaleDateString()} and govern 
-            your use of UGen Pro services. By using our platform, you acknowledge that you have read, 
-            understood, and agree to be bound by these terms.
+            These Terms of Service are effective as of {new Date().toLocaleDateString()} and govern your use of UGen Pro
+            services. By using our platform, you acknowledge that you have read, understood, and agree to be bound by
+            these terms.
           </p>
         </div>
       </div>

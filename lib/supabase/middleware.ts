@@ -87,8 +87,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   if (user && !isPublicRoute) {
-    // Don't check status if already on status-related pages (avoid redirect loops)
-    const statusPages = ["/premium-tools", "/account-error", "/account-blocked"]
+    const statusPages = ["/premium-tools", "/account-error", "/account-blocked", "/premium-tools/orders"]
     const isOnStatusPage = statusPages.some((page) => request.nextUrl.pathname.startsWith(page))
 
     if (!isOnStatusPage) {

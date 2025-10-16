@@ -36,7 +36,7 @@ const tools = [
 export default function ToolsPage() {
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-purple-900/20 dark:to-slate-900">
+      <div className="min-h-screen bg-white dark:bg-slate-900">
         <div className="p-6 max-w-7xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold mb-2">Your Tools</h1>

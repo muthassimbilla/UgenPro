@@ -25,7 +25,8 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     "/reset-password",
   ]
   const isAuthRoute = authRoutes.includes(pathname)
-  const isNoLayoutRoute = noLayoutRoutes.includes(pathname) || pathname.startsWith("/adminbilla")
+  const isNoLayoutRoute =
+    noLayoutRoutes.includes(pathname) || pathname.startsWith("/adminbilla") || pathname.startsWith("/premium-tools")
 
   if (!isAuthRoute && loading) {
     return <LoadingOverlay message="Initializing UGen Pro" fullScreen />

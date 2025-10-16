@@ -85,7 +85,7 @@ export default function AccountBlockedPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Main Card */}
         <div className={`${config.bgLight} ${config.borderColor} border rounded-2xl p-8 shadow-lg`}>
