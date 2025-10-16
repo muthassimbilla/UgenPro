@@ -168,6 +168,7 @@ export default function GeneratorControls({
             <Input
               id="quantity"
               type="number"
+              min="0"
               max="1000"
               value={quantity === 0 ? "" : quantity}
               onChange={(e) => {
@@ -175,7 +176,24 @@ export default function GeneratorControls({
                 if (value === "") {
                   setQuantity(0)
                 } else {
-                  setQuantity(Number.parseInt(value) || 0)
+                  const numValue = Number.parseInt(value) || 0
+                  setQuantity(Math.max(0, Math.min(numValue, 1000)))
+                }
+              }}
+              onInput={(e) => {
+                const input = e.target as HTMLInputElement
+                const numValue = Number.parseInt(input.value) || 0
+                if (numValue > 1000) {
+                  input.value = "1000"
+                  setQuantity(1000)
+                }
+              }}
+              onBlur={(e) => {
+                const numValue = Number.parseInt(e.target.value) || 0
+                if (numValue > 1000) {
+                  setQuantity(1000)
+                } else if (numValue < 0) {
+                  setQuantity(0)
                 }
               }}
               className="bg-white/70 dark:bg-slate-700/70 backdrop-blur-sm border border-white/40 dark:border-slate-600/40 shadow-lg"
