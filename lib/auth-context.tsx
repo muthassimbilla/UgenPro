@@ -142,10 +142,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [initialCheckComplete])
 
-  // The status checker was trying to verify authentication on the server, but cookies are not being set properly
-  // Users can still use the app normally as client-side authentication works fine
-  // TODO: Fix Supabase SSR cookie configuration to enable server-side authentication
-
   const value: AuthContextType = {
     user,
     loading,

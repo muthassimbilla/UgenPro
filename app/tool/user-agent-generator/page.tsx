@@ -662,7 +662,7 @@ export default function UserAgentGenerator() {
       const userAgent =
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${deviceCode}; ${language}; ${instagramUniqueId})`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; ${instagramUniqueId})`
 
       return userAgent
     } catch (error) {
