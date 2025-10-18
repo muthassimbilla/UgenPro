@@ -30,34 +30,25 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
   useEffect(() => {
     const video = videoRef.current
     if (!video) {
-      console.log("[v0] Video ref not available")
       return
     }
 
-    console.log("[v0] Video source:", src)
-    console.log("[v0] Video element created, readyState:", video.readyState)
-
     const attemptAutoplay = async () => {
-      console.log("[v0] Attempting autoplay...")
       try {
         setIsLoading(true)
         video.muted = false
         await video.play()
-        console.log("[v0] Autoplay with sound successful")
         setIsPlaying(true)
         setIsMuted(false)
         setIsLoading(false)
       } catch (error) {
-        console.log("[v0] Autoplay with sound failed, trying muted:", error)
         try {
           video.muted = true
           setIsMuted(true)
           await video.play()
-          console.log("[v0] Muted autoplay successful")
           setIsPlaying(true)
           setIsLoading(false)
         } catch (mutedError) {
-          console.error("[v0] All autoplay attempts failed:", mutedError)
           setIsPlaying(false)
           setIsLoading(false)
         }
@@ -65,35 +56,24 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
     }
 
     const handleLoadStart = () => {
-      console.log("[v0] Video load started")
       setIsLoading(true)
       setHasError(false)
     }
 
     const handleLoadedMetadata = () => {
-      console.log("[v0] Video metadata loaded")
       setDuration(video.duration)
     }
 
     const handleLoadedData = () => {
-      console.log("[v0] Video data loaded")
       setIsLoading(false)
     }
 
     const handleCanPlay = () => {
-      console.log("[v0] Video can play, readyState:", video.readyState)
       setIsLoading(false)
       attemptAutoplay()
     }
 
     const handleError = (e: Event) => {
-      console.error("[v0] Video error:", e)
-      console.error("[v0] Video error details:", {
-        error: video.error,
-        networkState: video.networkState,
-        readyState: video.readyState,
-        src: video.src,
-      })
       setHasError(true)
       setIsLoading(false)
     }
@@ -118,7 +98,15 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
     video.addEventListener("timeupdate", handleTimeUpdate)
     video.addEventListener("progress", handleProgress)
 
-    video.load()
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => {
+        video.load()
+      })
+    } else {
+      setTimeout(() => {
+        video.load()
+      }, 100)
+    }
 
     return () => {
       video.removeEventListener("loadstart", handleLoadStart)
@@ -186,14 +174,12 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
       if (isPlaying) {
         videoRef.current.pause()
         setIsPlaying(false)
-        console.log("[v0] Video paused")
       } else {
         await videoRef.current.play()
         setIsPlaying(true)
-        console.log("[v0] Video playing")
       }
     } catch (error) {
-      console.error("[v0] Play/pause error:", error)
+      console.error("Play/pause error:", error)
     }
     resetControlsTimeout()
   }
@@ -202,7 +188,6 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
     if (!videoRef.current) return
     videoRef.current.muted = !isMuted
     setIsMuted(!isMuted)
-    console.log("[v0] Mute toggled:", !isMuted)
     resetControlsTimeout()
   }
 
@@ -220,7 +205,6 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
         } else if ((containerRef.current as any).msRequestFullscreen) {
           await (containerRef.current as any).msRequestFullscreen()
         }
-        console.log("[v0] Entered fullscreen")
       } else {
         if (document.exitFullscreen) {
           await document.exitFullscreen()
@@ -231,10 +215,9 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
         } else if ((document as any).msExitFullscreen) {
           await (document as any).msExitFullscreen()
         }
-        console.log("[v0] Exited fullscreen")
       }
     } catch (error) {
-      console.error("[v0] Fullscreen error:", error)
+      console.error("Fullscreen error:", error)
     }
     resetControlsTimeout()
   }
@@ -281,7 +264,7 @@ export function DemoVideoPlayer({ src, title, className }: DemoVideoPlayerProps)
         ref={videoRef}
         className="w-full h-full object-contain"
         playsInline
-        preload="auto"
+        preload="metadata"
         onClick={handleVideoClick}
         onPlay={() => {
           setIsPlaying(true)

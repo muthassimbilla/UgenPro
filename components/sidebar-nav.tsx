@@ -4,14 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { cn } from "@/lib/utils"
-import { Home, Layers, ChevronDown, Smartphone, MapPin, Mail, LogOut, ShoppingBag } from "lucide-react"
+import { Home, Layers, ChevronDown, Smartphone, MapPin, Mail, LogOut } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 import { useAuth } from "@/lib/auth-context"
 import { Button } from "@/components/ui/button"
 
 const navigation = [
   { name: "Home", href: "/tool", icon: Home, count: null },
-  { name: "Orders", href: "/dashboard/orders", icon: ShoppingBag, count: null },
   { name: "Tools", href: "/tool", icon: Layers, count: 3, hasDropdown: true },
 ]
 
@@ -149,7 +148,7 @@ export function SidebarNav() {
           onClick={handleLogout}
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-slate-600 dark:text-slate-300 hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-600 dark:hover:text-red-400"
+          className="w-full justify-start gap-2 text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/20 hover:bg-red-100 dark:hover:bg-red-900/30 hover:text-red-700 dark:hover:text-red-300 border border-red-200 dark:border-red-800"
         >
           <LogOut className="h-4 w-4" />
           <span>Logout</span>

@@ -2,7 +2,7 @@
 
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog"
 import type { Tool } from "@/lib/tools-config"
-import { useEffect } from "react"
+import { useEffect, useState } from "react"
 import { DemoVideoPlayer } from "@/components/demo-video-player"
 import { X } from "lucide-react"
 
@@ -13,6 +13,8 @@ interface ToolModalProps {
 }
 
 export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
+  const [isVideoReady, setIsVideoReady] = useState(false)
+
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape" && isOpen) {
@@ -37,6 +39,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
         tool_name: tool.name,
       })
     }
+    setIsVideoReady(isOpen)
   }, [isOpen, tool])
 
   if (!tool) return null
@@ -53,7 +56,7 @@ export function ToolModal({ tool, isOpen, onClose }: ToolModalProps) {
           <X className="w-5 h-5 text-white group-hover:rotate-90 transition-transform duration-300" />
         </button>
         <div className="relative w-full h-full">
-          {tool.demoVideo && (
+          {tool.demoVideo && isVideoReady && (
             <DemoVideoPlayer src={tool.demoVideo} title={`${tool.name} Demo`} className="w-full h-full" />
           )}
         </div>
