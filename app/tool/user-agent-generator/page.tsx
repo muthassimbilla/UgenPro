@@ -631,9 +631,108 @@ export default function UserAgentGenerator() {
         : device.resolutions.split(",").map((r) => r.trim())
       const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
 
-      const matchingDpis = resolutionDpis.filter((rd) => rd.resolution === resolution)
-      const dpiOptions = matchingDpis.length > 0 ? matchingDpis[0].dpis.map((d) => `${d}dpi`) : ["420dpi"]
-      const dpi = dpiOptions[Math.floor(Math.random() * dpiOptions.length)]
+      if (!device.dpi_values || (Array.isArray(device.dpi_values) && device.dpi_values.length === 0)) {
+        throw new Error(`No DPI values found for ${device.model || "Unknown"}. Please add DPI values in admin panel.`)
+      }
+
+      const dpiValues = Array.isArray(device.dpi_values)
+        ? device.dpi_values
+        : device.dpi_values.split(",").map((d) => d.trim())
+      const dpi = `${dpiValues[Math.floor(Math.random() * dpiValues.length)]}dpi`
+
+      const language = getWeightedRandomLanguage(languagePercentages)
+
+      const instagramVersion = instagramVersions[Math.floor(Math.random() * instagramVersions.length)]
+      const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)]
+
+      const instagramVersionString =
+        instagramVersion.version || instagramVersion.app_version || instagramVersion.toString()
+      const chromeVersionString = chromeVersion.version || chromeVersion.chrome_version || chromeVersion.toString()
+
+      const chipset = device.chipset
+      const deviceCode = device.code || device.device_codename
+
+      // If chipset is missing, throw error
+      if (!chipset) {
+        throw new Error(`No chipset found for ${device.model || "Unknown"}. Please add chipset in admin panel.`)
+      }
+
+      // If device code is missing, throw error
+      if (!deviceCode) {
+        throw new Error(`No device code found for ${device.model || "Unknown"}. Please add device code in admin panel.`)
+      }
+
+      const instagramUniqueId = instagramVersion.unique_id || instagramVersion.version_code || "123456789"
+
+      const userAgent =
+        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
+        `AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${chipset}; ${deviceCode}; ${language}; ${instagramUniqueId})`
+
+      return userAgent
+    } catch (error) {
+      console.error("Error generating Samsung Instagram user agent:", error)
+      return null
+    }
+  }
+
+  const generateSamsungInstagramUserAgent = async (
+    specificModel = null,
+    cachedBuildNumbers = null,
+    cachedDevices = null,
+  ) => {
+    try {
+      if (!androidDeviceModels.length || !androidAppVersions.length) {
+        throw new Error("Device models or app versions not loaded")
+      }
+
+      const languageConfig = configurations.languages
+      if (!languageConfig) {
+        throw new Error("Language configuration not found in database. Please configure languages in admin panel.")
+      }
+
+      let languagePercentages: { [key: string]: number }
+      try {
+        languagePercentages = typeof languageConfig === "string" ? JSON.parse(languageConfig) : languageConfig
+      } catch (error) {
+        throw new Error("Invalid language configuration format in database")
+      }
+
+      const device = specificModel || androidDeviceModels[Math.floor(Math.random() * androidDeviceModels.length)]
+
+      if (!device) {
+        throw new Error("No device selected")
+      }
+
+      if (!device.dpi_values || (Array.isArray(device.dpi_values) && device.dpi_values.length === 0)) {
+        throw new Error(`No DPI values found for ${device.model || "Unknown"}. Please add DPI values in admin panel.`)
+      }
+
+      const androidVersion = device.android_version || 13
+      const versionPair = `${androidVersion}/13`
+
+      const matchingBuildNumbers = (cachedBuildNumbers || androidBuildNumbers).filter(
+        (bn) => bn.device_id === device.id && bn.android_version === androidVersion,
+      )
+
+      if (matchingBuildNumbers.length === 0) {
+        throw new Error(
+          `No build numbers found for Samsung device with Android version ${androidVersion}. Please add build numbers in admin panel.`,
+        )
+      }
+
+      const selectedBuildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
+      const buildNumber = selectedBuildNumber.build_number
+
+      const resolutions = Array.isArray(device.resolutions)
+        ? device.resolutions
+        : device.resolutions.split(",").map((r) => r.trim())
+      const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
+
+      const dpiValues = Array.isArray(device.dpi_values)
+        ? device.dpi_values
+        : device.dpi_values.split(",").map((d) => d.trim())
+      const dpi = `${dpiValues[Math.floor(Math.random() * dpiValues.length)]}dpi`
 
       const language = getWeightedRandomLanguage(languagePercentages)
 
@@ -1052,41 +1151,30 @@ export default function UserAgentGenerator() {
     }
   }
 
-  const generatePixelInstagramUserAgent = async (specificModel = null, cachedDevices = null) => {
+  const generatePixelInstagramUserAgent = async (
+    specificModel = null,
+    cachedBuildNumbers = null,
+    cachedDevices = null,
+  ) => {
     try {
-      console.log("[v0] Generating Pixel Instagram user agent")
-
-      const deviceModels = cachedDevices || pixelInstagramDeviceModels
-
-      if (!deviceModels || deviceModels.length === 0) {
-        console.log("[v0] No Pixel Instagram device models available")
-        throw new Error("No Pixel Instagram device models available")
+      if (!pixelInstagramDeviceModels.length || !pixelInstagramVersions.length) {
+        throw new Error("Pixel Instagram devices or versions not loaded")
       }
 
-      if (!pixelInstagramVersions || pixelInstagramVersions.length === 0) {
-        console.log("[v0] No Pixel Instagram versions available")
-        throw new Error("No Pixel Instagram versions available")
+      const device =
+        specificModel || pixelInstagramDeviceModels[Math.floor(Math.random() * pixelInstagramDeviceModels.length)]
+
+      if (!device) {
+        throw new Error("No Pixel device selected")
       }
 
-      if (!pixelInstagramChromeVersions || pixelInstagramChromeVersions.length === 0) {
-        console.log("[v0] No Pixel Instagram Chrome versions available")
-        throw new Error("No Pixel Instagram Chrome versions available")
+      if (!device.dpi_values || (Array.isArray(device.dpi_values) && device.dpi_values.length === 0)) {
+        throw new Error(`No DPI values found for ${device.model || "Unknown"}. Please add DPI values in admin panel.`)
       }
 
       if (!pixelInstagramResolutionDpis || pixelInstagramResolutionDpis.length === 0) {
         console.log("[v0] No Pixel Instagram resolution DPIs available")
         throw new Error("No Pixel Instagram resolution DPIs available")
-      }
-
-      let device
-      if (specificModel && specificModel !== "random") {
-        device = deviceModels.find((d) => (d.model || d.model_name || d.device_model) === specificModel)
-        if (!device) {
-          console.log(`[v0] Specific model ${specificModel} not found, using random`)
-          device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
-        }
-      } else {
-        device = deviceModels[Math.floor(Math.random() * deviceModels.length)]
       }
 
       const version = pixelInstagramVersions[Math.floor(Math.random() * pixelInstagramVersions.length)]
@@ -1101,15 +1189,15 @@ export default function UserAgentGenerator() {
       // Pick a random resolution from device's capabilities
       const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
 
-      // Match the selected resolution to get appropriate DPIs
-      const matchingDpis = pixelInstagramResolutionDpis.filter((rd) => rd.resolution === resolution)
-      const dpiOptions = matchingDpis.length > 0 ? matchingDpis[0].dpis.map((d) => `${d}dpi`) : ["420dpi"]
-      const dpi = dpiOptions[Math.floor(Math.random() * dpiOptions.length)]
+      const dpiValues = Array.isArray(device.dpi_values)
+        ? device.dpi_values
+        : device.dpi_values.split(",").map((d) => d.trim())
+      const dpi = `${dpiValues[Math.floor(Math.random() * dpiValues.length)]}dpi`
 
       console.log("[v0] Selected device:", device)
       console.log("[v0] Device resolutions:", resolutions)
       console.log("[v0] Selected resolution:", resolution)
-      console.log("[v0] Matching DPIs:", dpiOptions)
+      console.log("[v0] Device DPI values:", dpiValues)
       console.log("[v0] Selected DPI:", dpi)
       console.log("[v0] Selected version:", version)
       console.log("[v0] Selected chrome version:", chromeVersion)
@@ -1698,58 +1786,6 @@ export default function UserAgentGenerator() {
     setTimeout(() => setCopiedIndex(null), 2000)
   }, [])
 
-  // Removed unused startTransition import
-  // Removed unused copyAllUserAgents and downloadUserAgents functions
-  // Removed unused handleGenerate function
-  // Removed unused copyToClipboard function
-  // Removed unused handleHistoryDownload and handleHistoryCopy functions
-  // Removed unused addToBlacklist function
-  // Removed unused handleDownload and handleCopyAll functions
-  // Removed unused accessKey state
-  // Removed unused currentHistoryId state
-  // Removed unused generationProgress state
-  // Removed unused isLoadingHistory state
-  // Removed unused connectionError state
-  // Removed unused modal state
-  // Removed unused progressModal state
-  // Removed unused dataState state
-  // Removed unused allCopied state
-  // Removed unused copiedIndex state
-  // Removed unused pixelFacebookDeviceModels state
-  // Removed unused pixelFacebookBuildNumbers state
-  // Removed unused pixelFacebookAppVersions state
-  // Removed unused pixelInstagramDeviceModels state
-  // Removed unused pixelInstagramVersions state
-  // Removed unused pixelInstagramChromeVersions state
-  // Removed unused pixelInstagramResolutionDpis state
-  // Removed unused deviceType state
-  // Removed unused supabaseModules state
-  // Removed unused isDataLoaded state
-  // Removed unused loadSupabaseModules function
-  // Removed unused loadData function
-  // Removed unused loadHistory function
-  // Removed unused showModal function
-  // Removed unused showProgressModal function
-  // Removed unused hideProgressModal function
-  // Removed unused parseIOSVersion function
-  // Removed unused compareVersions function
-  // Removed unused getRandomElement function
-  // Removed unused extractModelIdentifier function
-  // Removed unused getApiLevel function
-  // Removed unused generateAndroidInstagramUserAgent function
-  // Removed unused generateSamsungFacebookUserAgent function
-  // Removed unused generateAndroidUserAgent function
-  // Removed unused getWeightedRandomLanguage function
-  // Removed unused generatePixelUserAgent function
-  // Removed unused generatePixelInstagramUserAgent function
-  // Removed unused generateUserAgent function
-
-  // Added a beautiful header section
-  // const headerStyle = {
-  //   background: "linear-gradient(to right, #6366F1, #8B5CFE, #3B82F6)",
-  //   color: "white",
-  // }
-
   return (
     <div className="min-h-screen bg-white dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -1816,14 +1852,6 @@ export default function UserAgentGenerator() {
                         </div>
                       ))}
                     </div>
-                    {userAgents.length > 5 && (
-                      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg">
-                        <p className="text-sm text-blue-700 dark:text-blue-300 text-center">
-                          📋 {userAgents.length - 5} more user agents have been generated. Use "Copy All" or "Download"
-                          to view all.
-                        </p>
-                      </div>
-                    )}
                   </CardContent>
                 </Card>
               )}
@@ -1831,134 +1859,6 @@ export default function UserAgentGenerator() {
           )}
         </div>
       </div>
-
-      {/* Progress Modal */}
-      {progressModal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full mx-4 overflow-hidden transform transition-all duration-300 scale-100">
-            <div
-              className={`px-6 py-4 ${
-                progressModal.type === "success"
-                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
-                  : progressModal.type === "error"
-                    ? "bg-gradient-to-r from-red-500 to-rose-500"
-                    : progressModal.type === "warning"
-                      ? "bg-gradient-to-r from-yellow-500 to-orange-500"
-                      : "bg-gradient-to-r from-indigo-500 to-blue-500"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold text-white">{progressModal.title}</h3>
-                {(progressModal.type === "success" ||
-                  progressModal.type === "error" ||
-                  progressModal.type === "warning") && (
-                  <button
-                    onClick={hideProgressModal}
-                    className="text-white hover:text-gray-200 transition-colors p-1 rounded-full hover:bg-white/20"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-            </div>
-
-            <div className="p-6">
-              <div className="mb-4">
-                <div className="w-full bg-slate-200 dark:bg-slate-700 rounded-full h-4 mb-3 overflow-hidden">
-                  <div
-                    className={`h-4 rounded-full transition-all duration-500 ease-out ${
-                      progressModal.type === "success"
-                        ? "bg-gradient-to-r from-green-400 to-emerald-500"
-                        : progressModal.type === "error"
-                          ? "bg-gradient-to-r from-red-400 to-rose-500"
-                          : progressModal.type === "warning"
-                            ? "bg-gradient-to-r from-yellow-400 to-orange-500"
-                            : "bg-gradient-to-r from-indigo-400 to-blue-500"
-                    }`}
-                    style={{ width: `${progressModal.progress}%` }}
-                  ></div>
-                </div>
-                <div className="text-center text-sm font-medium text-slate-600 dark:text-slate-400">
-                  {progressModal.progress}%
-                </div>
-              </div>
-
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
-                <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
-                  {progressModal.message}
-                </div>
-              </div>
-
-              {progressModal.showCancel && (
-                <div className="flex justify-center">
-                  <Button
-                    onClick={handleCancelGeneration}
-                    variant="outline"
-                    size="sm"
-                    className="px-6 py-2 font-medium bg-transparent"
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Regular Modal */}
-      {modal.isOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-slate-700 max-w-md w-full mx-4 overflow-hidden transform transition-all duration-300 scale-100">
-            <div
-              className={`px-6 py-4 ${
-                modal.type === "success"
-                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
-                  : modal.type === "error"
-                    ? "bg-gradient-to-r from-red-500 to-rose-500"
-                    : modal.type === "warning"
-                      ? "bg-gradient-to-r from-yellow-500 to-orange-500"
-                      : "bg-gradient-to-r from-indigo-500 to-blue-500"
-              }`}
-            >
-              <h3 className="text-xl font-bold text-white">{modal.title}</h3>
-            </div>
-
-            <div className="p-6">
-              <div className="bg-slate-50 dark:bg-slate-700/50 rounded-lg p-4 mb-4">
-                <div className="text-sm text-slate-700 dark:text-slate-300 whitespace-pre-line leading-relaxed">
-                  {modal.message}
-                </div>
-              </div>
-
-              <div className="flex justify-center gap-3">
-                {modal.showCancel && (
-                  <Button
-                    onClick={() => setModal((prev) => ({ ...prev, isOpen: false }))}
-                    variant="outline"
-                    size="sm"
-                    className="px-6 py-2 font-medium"
-                  >
-                    Cancel
-                  </Button>
-                )}
-                <Button
-                  onClick={() => {
-                    modal.onConfirm()
-                    setModal((prev) => ({ ...prev, isOpen: false }))
-                  }}
-                  size="sm"
-                  className="px-6 py-2 font-medium"
-                >
-                  OK
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   )
 }
