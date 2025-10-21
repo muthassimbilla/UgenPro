@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react"
 import { useState, useEffect, startTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Copy, Download, Check } from "lucide-react"
+import { Copy, Download } from "lucide-react"
 import dynamic from "next/dynamic"
 import type { GenerationHistory } from "@/lib/supabase" // Declared the variable here
 
@@ -46,7 +46,7 @@ const loadSupabaseModules = async () => {
       PixelFacebookDeviceModel: module.PixelFacebookDeviceModel,
       PixelFacebookBuildNumber: module.PixelFacebookBuildNumber,
       PixelFacebookAppVersion: module.PixelFacebookAppVersion,
-      PixelInstagramDeviceModel: module.InstagramDeviceModel,
+      PixelInstagramDeviceModel: module.PixelInstagramDeviceModel,
       PixelInstagramVersion: module.InstagramVersion,
       PixelInstagramChromeVersion: module.ChromeVersion,
       PixelInstagramResolutionDpi: module.ResolutionDpi,
@@ -1937,14 +1937,6 @@ export default function UserAgentGenerator() {
                           className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                         >
                           <code className="text-sm text-slate-700 dark:text-slate-300 break-all">{ua}</code>
-                          <Button
-                            variant="ghost"
-                            size="iconXs"
-                            onClick={() => copyToClipboard(ua, index)}
-                            className="ml-2 text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300"
-                          >
-                            {copiedIndex === index ? <Check className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
-                          </Button>
                         </div>
                       ))}
                     </div>
@@ -1955,30 +1947,8 @@ export default function UserAgentGenerator() {
           )}
         </div>
       </div>
-      <CustomModal
-        isOpen={modal.isOpen}
-        title={modal.title}
-        message={modal.message}
-        type={modal.type}
-        onConfirm={() => {
-          modal.onConfirm()
-          setModal((prev) => ({ ...prev, isOpen: false }))
-        }}
-        showCancel={modal.showCancel}
-        confirmText={modal.confirmText}
-        cancelText={modal.cancelText}
-        onCancel={() => setModal((prev) => ({ ...prev, isOpen: false }))}
-        isLoading={modal.isLoading}
-      />
-      <ProgressModal
-        isOpen={progressModal.isOpen}
-        title={progressModal.title}
-        message={progressModal.message}
-        progress={progressModal.progress}
-        type={progressModal.type}
-        showCancel={progressModal.showCancel}
-        onCancel={handleCancelGeneration}
-      />
+      <CustomModal modal={modal} setModal={setModal} />
+      <ProgressModal modal={progressModal} setModal={setProgressModal} onCancel={handleCancelGeneration} />
     </div>
   )
 }
