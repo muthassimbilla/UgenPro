@@ -5,7 +5,7 @@ import { useCallback, useRef } from "react"
 import { useState, useEffect, startTransition } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
-import { Copy, Download } from "lucide-react"
+import { Copy, Download, Check } from "lucide-react" // Added Check icon
 import dynamic from "next/dynamic"
 import type { GenerationHistory } from "@/lib/supabase" // Declared the variable here
 
@@ -98,9 +98,6 @@ export default function UserAgentGenerator() {
     type: "info",
     onConfirm: () => {},
     showCancel: false,
-    confirmText: "Confirm",
-    cancelText: "Cancel",
-    isLoading: false,
   })
 
   // Progress Modal state
@@ -196,31 +193,16 @@ export default function UserAgentGenerator() {
     }
   }, [])
 
-  const showModal = useCallback(
-    (
+  const showModal = useCallback((title, message, type = "info", onConfirm = () => {}, showCancel = false) => {
+    setModal({
+      isOpen: true,
       title,
       message,
-      type = "info",
-      onConfirm = () => {},
-      showCancel = false,
-      confirmText = "Confirm",
-      cancelText = "Cancel",
-      isLoading = false,
-    ) => {
-      setModal({
-        isOpen: true,
-        title,
-        message,
-        type,
-        onConfirm,
-        showCancel,
-        confirmText,
-        cancelText,
-        isLoading,
-      })
-    },
-    [],
-  )
+      type,
+      onConfirm,
+      showCancel,
+    })
+  }, [])
 
   const showProgressModal = useCallback((title, message, progress = 0, type = "info", showCancel = false) => {
     setProgressModal({
@@ -549,7 +531,7 @@ export default function UserAgentGenerator() {
       "15": "35",
       "16": "36",
     }
-    return apiLevels[version] || "35" // Latest API level as fallback
+    return apiLevels[version]
   }
 
   const generateAndroidInstagramUserAgent = async (
@@ -617,29 +599,13 @@ export default function UserAgentGenerator() {
         instagramBuildNumbers = (await InstagramBuildNumber?.list()) || []
       }
 
-      let matchingBuildNumbers = instagramBuildNumbers.filter((bn) => bn.android_version === androidVersion)
+      const matchingBuildNumbers = instagramBuildNumbers.filter((bn) => bn.android_version === androidVersion)
 
       if (matchingBuildNumbers.length === 0) {
-        const androidVersionNum = Number.parseFloat(androidVersion)
-        matchingBuildNumbers = instagramBuildNumbers.filter((bn) => {
-          const bnVersion = Number.parseFloat(bn.android_version)
-          return Math.abs(bnVersion - androidVersionNum) <= 2
-        })
-
-        if (matchingBuildNumbers.length === 0) {
-          matchingBuildNumbers = instagramBuildNumbers.filter((bn) => bn.is_active !== false)
-        }
-
-        if (matchingBuildNumbers.length === 0) {
-          matchingBuildNumbers = instagramBuildNumbers
-        }
+        console.log(`[v0] No exact match found for Android version ${androidVersion} - returning null`)
+        return null
       }
-
-      if (matchingBuildNumbers.length === 0) {
-        throw new Error(
-          `No build numbers found for Samsung device with Android version ${androidVersion}. Please add build numbers in admin panel.`,
-        )
-      }
+      // </CHANGE>
 
       const selectedBuildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
       const buildNumber = selectedBuildNumber.build_number
@@ -680,20 +646,21 @@ export default function UserAgentGenerator() {
         throw new Error(`No device code found for ${device.model || "Unknown"}. Please add device code in admin panel.`)
       }
 
-      const baseUniqueId = instagramVersion.unique_id || instagramVersion.version_code || "312001103"
-      const baseUniqueIdStr = baseUniqueId.toString()
+      const instagramUniqueId = instagramVersion.unique_id || instagramVersion.version_code
 
-      // Keep first digits fixed, randomize last 5 digits
-      const fixedPrefix = baseUniqueIdStr.length > 5 ? baseUniqueIdStr.slice(0, -5) : baseUniqueIdStr
-      const randomSuffix = Math.floor(Math.random() * 100000)
-        .toString()
-        .padStart(5, "0")
-      const instagramUniqueId = fixedPrefix + randomSuffix
+      let randomizedInstagramUniqueId = instagramUniqueId
+      if (instagramUniqueId && instagramUniqueId.toString().length > 5) {
+        const fixedPart = instagramUniqueId.toString().slice(0, -5)
+        const randomPart = Math.floor(Math.random() * 100000)
+          .toString()
+          .padStart(5, "0")
+        randomizedInstagramUniqueId = fixedPart + randomPart
+      }
 
       const userAgent =
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${deviceCode}; ${chipset}; ${language}; ${instagramUniqueId}; IABMV/1)`
+        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${deviceCode}; ${chipset}; ${language}; ${randomizedInstagramUniqueId}; IABMV/1)`
 
       return userAgent
     } catch (error) {
@@ -709,7 +676,8 @@ export default function UserAgentGenerator() {
   ) => {
     try {
       if (!androidDeviceModels.length || !androidAppVersions.length) {
-        throw new Error("Device models or app versions not loaded")
+        console.error("Missing Facebook configuration data")
+        return null
       }
 
       const languageConfig = configurations.languages
@@ -724,74 +692,98 @@ export default function UserAgentGenerator() {
         throw new Error("Invalid language configuration format in database")
       }
 
-      const device = specificModel || androidDeviceModels[Math.floor(Math.random() * androidDeviceModels.length)]
+      const devicePool =
+        cachedDevices || androidDeviceModels.filter((device) => device.manufacturer?.toLowerCase() === "samsung")
 
-      if (!device) {
-        throw new Error("No device selected")
+      if (devicePool.length === 0) {
+        console.log("[v0] No Samsung devices found, using all devices")
       }
 
-      if (!device.dpi_values || (Array.isArray(device.dpi_values) && device.dpi_values.length === 0)) {
-        throw new Error(`No DPI values found for ${device.model || "Unknown"}. Please add DPI values in admin panel.`)
+      let device
+      if (specificModel && specificModel !== "random") {
+        device = devicePool.find((d) => (d.model_name || d.model) === specificModel)
+        if (!device) {
+          console.log(`[v0] Specific model ${specificModel} not found, using random`)
+          device = devicePool[Math.floor(Math.random() * devicePool.length)]
+        }
+      } else {
+        device = devicePool[Math.floor(Math.random() * devicePool.length)]
       }
 
-      const androidVersion = device.android_version || 13
-      const versionPair = `${androidVersion}/13`
+      const androidVersionRaw = device.android_version.toString()
+      const androidVersion = androidVersionRaw.replace(/[^\d.]/g, "") // "Android 12" → "12"
 
-      const matchingBuildNumbers = (cachedBuildNumbers || androidBuildNumbers).filter(
-        (bn) => bn.device_id === device.id && bn.android_version === androidVersion,
+      console.log("[v0] ===== Samsung Facebook Build Number Selection Debug =====")
+      console.log("[v0] Selected Samsung device:", device.model_name || device.model)
+      console.log("[v0] Device Android version (raw):", androidVersionRaw, "Type:", typeof androidVersionRaw)
+      console.log("[v0] Device Android version (extracted):", androidVersion, "Type:", typeof androidVersion)
+
+      let samsungBuildNumbers = cachedBuildNumbers
+      if (!samsungBuildNumbers) {
+        const { SamsungInstagramBuildNumber } = supabaseModules
+        samsungBuildNumbers = (await SamsungInstagramBuildNumber?.list()) || []
+      }
+
+      console.log("[v0] Total Samsung build numbers available:", samsungBuildNumbers.length)
+
+      // Log first few build numbers to see their structure
+      if (samsungBuildNumbers.length > 0) {
+        console.log("[v0] Sample build number data (first 3):")
+        samsungBuildNumbers.slice(0, 3).forEach((bn, idx) => {
+          console.log(
+            `[v0]   ${idx + 1}. android_version: "${bn.android_version}" (type: ${typeof bn.android_version}), build_number: "${bn.build_number}"`,
+          )
+        })
+      }
+
+      console.log(
+        "[v0] Available Android versions in Samsung build numbers:",
+        [...new Set(samsungBuildNumbers.map((bn) => bn.android_version))].sort(),
       )
 
+      const matchingBuildNumbers = samsungBuildNumbers.filter((bn) => bn.android_version === androidVersion)
+
+      console.log(`[v0] Found ${matchingBuildNumbers.length} exact Samsung build numbers for Android ${androidVersion}`)
+
       if (matchingBuildNumbers.length === 0) {
-        throw new Error(
-          `No build numbers found for Samsung device with Android version ${androidVersion}. Please add build numbers in admin panel.`,
-        )
+        console.log(`[v0] No exact Samsung build numbers found for Android ${androidVersion} - returning null`)
+        console.log("[v0] ===== End Samsung Facebook Build Number Selection Debug =====")
+        return null
       }
+      // </CHANGE>
 
       const selectedBuildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
       const buildNumber = selectedBuildNumber.build_number
+      console.log(
+        "[v0] Selected Samsung build number:",
+        buildNumber,
+        "for Android version:",
+        selectedBuildNumber.android_version,
+      )
+      console.log("[v0] ===== End Samsung Facebook Build Number Selection Debug =====")
 
-      const resolutions = Array.isArray(device.resolutions)
-        ? device.resolutions
-        : device.resolutions.split(",").map((r) => r.trim())
-      const resolution = resolutions[Math.floor(Math.random() * resolutions.length)]
+      const fbVersions = androidAppVersions.filter((a) => a.app_type === "facebook")
+      const chromeVersions = androidAppVersions.filter((a) => a.app_type === "chrome")
 
-      const dpiValues = Array.isArray(device.dpi_values)
-        ? device.dpi_values
-        : device.dpi_values.split(",").map((d) => d.trim())
-      const dpi = `${dpiValues[Math.floor(Math.random() * dpiValues.length)]}dpi`
+      if (fbVersions.length === 0 || chromeVersions.length === 0) {
+        throw new Error("No Facebook or Chrome versions available")
+      }
 
-      const language = getWeightedRandomLanguage(languagePercentages)
-
-      const instagramVersion = instagramVersions[Math.floor(Math.random() * instagramVersions.length)]
+      const fbVersion = fbVersions[Math.floor(Math.random() * fbVersions.length)]
       const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)]
 
-      const instagramVersionString =
-        instagramVersion.version || instagramVersion.app_version || instagramVersion.toString()
-      const chromeVersionString = chromeVersion.version || chromeVersion.chrome_version || chromeVersion.toString()
-
-      const chipset = device.chipset
-      const deviceCode = device.code || device.device_codename
-
-      // If chipset is missing, throw error
-      if (!chipset) {
-        throw new Error(`No chipset found for ${device.model || "Unknown"}. Please add chipset in admin panel.`)
-      }
-
-      // If device code is missing, throw error
-      if (!deviceCode) {
-        throw new Error(`No device code found for ${device.model || "Unknown"}. Please add device code in admin panel.`)
-      }
-
-      const instagramUniqueId = instagramVersion.unique_id || instagramVersion.version_code || "123456789"
+      const modelIdentifier = extractModelIdentifier(device.model_name)
 
       const userAgent =
-        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${device.model || "Unknown"} Build/${buildNumber}) ` +
-        `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/${chromeVersionString} Mobile Safari/537.36 ` +
-        `Instagram ${instagramVersionString} Android (${versionPair}; ${dpi}; ${resolution}; samsung; ${device.model || "Unknown"}; ${deviceCode}; ${chipset}; ${language}; ${instagramUniqueId}; IABMV/1)`
+        `Mozilla/5.0 (Linux; Android ${androidVersion}; ${modelIdentifier} Build/${buildNumber}) ` +
+        `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
+        `Chrome/${chromeVersion.version} Mobile Safari/537.36 ` +
+        `[FB_IAB/FB4A;FBAV/${fbVersion.version};IABMV/${fbVersion.iabmv};]`
 
+      console.log("[v0] Generated Samsung Facebook user agent successfully")
       return userAgent
     } catch (error) {
-      console.error("Error generating Samsung Instagram user agent:", error)
+      console.error("Error generating Samsung Facebook user agent:", error)
       return null
     }
   }
@@ -839,7 +831,6 @@ export default function UserAgentGenerator() {
 
       const androidVersionRaw = device.android_version.toString()
       const androidVersion = androidVersionRaw.replace(/[^\d.]/g, "") // "Android 12" → "12"
-      // </CHANGE>
 
       console.log("[v0] ===== Samsung Facebook Build Number Selection Debug =====")
       console.log("[v0] Selected Samsung device:", device.model_name || device.model)
@@ -869,71 +860,16 @@ export default function UserAgentGenerator() {
         [...new Set(samsungBuildNumbers.map((bn) => bn.android_version))].sort(),
       )
 
-      // Try exact match with string comparison
-      let matchingBuildNumbers = samsungBuildNumbers.filter((bn) => {
-        const match = bn.android_version === androidVersion
-        if (match) {
-          console.log(
-            `[v0] Exact match found: bn.android_version="${bn.android_version}" === androidVersion="${androidVersion}"`,
-          )
-        }
-        return match
-      })
+      const matchingBuildNumbers = samsungBuildNumbers.filter((bn) => bn.android_version === androidVersion)
 
       console.log(`[v0] Found ${matchingBuildNumbers.length} exact Samsung build numbers for Android ${androidVersion}`)
 
-      // If no exact match, try with type conversion
       if (matchingBuildNumbers.length === 0) {
-        console.log("[v0] No exact match, trying with type conversion...")
-        matchingBuildNumbers = samsungBuildNumbers.filter((bn) => {
-          const bnVersionStr = bn.android_version?.toString()
-          const match = bnVersionStr === androidVersion
-          if (match) {
-            console.log(`[v0] Match with conversion: "${bnVersionStr}" === "${androidVersion}"`)
-          }
-          return match
-        })
-        console.log(`[v0] Found ${matchingBuildNumbers.length} build numbers after type conversion`)
+        console.log(`[v0] No exact Samsung build numbers found for Android ${androidVersion} - returning null`)
+        console.log("[v0] ===== End Samsung Facebook Build Number Selection Debug =====")
+        return null
       }
-
-      if (matchingBuildNumbers.length === 0) {
-        console.log(
-          `[v0] No exact Samsung build numbers for Android ${androidVersion}, trying compatible versions (±2)`,
-        )
-
-        const androidVersionNum = Number.parseFloat(androidVersion)
-        console.log("[v0] Android version as number:", androidVersionNum)
-
-        matchingBuildNumbers = samsungBuildNumbers.filter((bn) => {
-          const bnVersion = Number.parseFloat(bn.android_version)
-          const diff = Math.abs(bnVersion - androidVersionNum)
-          const isCompatible = diff <= 2
-          if (isCompatible) {
-            console.log(`[v0] Compatible version found: ${bn.android_version} (diff: ${diff})`)
-          }
-          return isCompatible
-        })
-
-        console.log(`[v0] Found ${matchingBuildNumbers.length} compatible Samsung build numbers within ±2 versions`)
-      }
-
-      if (matchingBuildNumbers.length === 0) {
-        console.log("[v0] No compatible Samsung build numbers found, trying active build numbers")
-        matchingBuildNumbers = samsungBuildNumbers.filter((bn) => bn.is_active !== false)
-        console.log(`[v0] Found ${matchingBuildNumbers.length} active Samsung build numbers`)
-      }
-
-      if (matchingBuildNumbers.length === 0) {
-        console.log("[v0] No active Samsung build numbers found, using any available build numbers")
-        matchingBuildNumbers = samsungBuildNumbers
-        console.log(`[v0] Using ${matchingBuildNumbers.length} total available build numbers`)
-      }
-
-      if (matchingBuildNumbers.length === 0) {
-        throw new Error(
-          `No Samsung build numbers found for device with Android version ${androidVersion}. Please add build numbers in admin panel.`,
-        )
-      }
+      // </CHANGE>
 
       const selectedBuildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
       const buildNumber = selectedBuildNumber.build_number
@@ -1006,13 +942,14 @@ export default function UserAgentGenerator() {
         }
 
         const androidVersion = device.android_version.toString()
-        let matchingBuildNumbers = buildNumbers.filter((b) => b.android_version === androidVersion)
+        const androidVersionNum = androidVersion.replace(/[^\d.]/g, "")
+        let matchingBuildNumbers = buildNumbers.filter((b) => b.android_version === androidVersionNum)
 
         if (matchingBuildNumbers.length === 0) {
-          const androidVersionNum = Number.parseFloat(androidVersion)
+          const androidVersionNumeric = Number.parseFloat(androidVersionNum)
           matchingBuildNumbers = buildNumbers.filter((bn) => {
             const bnVersion = Number.parseFloat(bn.android_version)
-            return Math.abs(bnVersion - androidVersionNum) <= 2
+            return Math.abs(bnVersion - androidVersionNumeric) <= 2
           })
         }
 
@@ -1025,7 +962,7 @@ export default function UserAgentGenerator() {
         const modelIdentifier = extractModelIdentifier(device.model_name)
 
         const userAgent =
-          `Mozilla/5.0 (Linux; Android ${androidVersion}; ${modelIdentifier} Build/${selectedBuildNumber.build_number}) ` +
+          `Mozilla/5.0 (Linux; Android ${androidVersionNum}; ${modelIdentifier} Build/${selectedBuildNumber.build_number}) ` +
           `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
           `Chrome/${chromeVersion.version} Mobile Safari/537.36`
 
@@ -1060,9 +997,10 @@ export default function UserAgentGenerator() {
 
         const chromeVersion = chromeVersions[Math.floor(Math.random() * chromeVersions.length)]
         const modelIdentifier = device.model_name || device.device_model || "Pixel"
+        const androidVersionNum = (device.android_version || "13").toString().replace(/[^\d.]/g, "")
 
         const userAgent =
-          `Mozilla/5.0 (Linux; Android ${device.android_version || "13"}; ${modelIdentifier} Build/${device.build_number || "TQ3A.230901.001"}) ` +
+          `Mozilla/5.0 (Linux; Android ${androidVersionNum}; ${modelIdentifier} Build/${device.build_number || "TQ3A.230901.001"}) ` +
           `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
           `Chrome/${chromeVersion.version || "136.0.7195.102"} Mobile Safari/537.36`
 
@@ -1095,36 +1033,16 @@ export default function UserAgentGenerator() {
       if (!device) throw new Error("No Android device models available")
 
       const androidVersion = device.android_version.toString()
-      const androidVersionNum = Number.parseFloat(androidVersion)
 
-      // Try exact match first
-      let matchingBuildNumbers = androidBuildNumbers.filter((b) => b.android_version === androidVersion)
+      const matchingBuildNumbers = androidBuildNumbers.filter((b) => b.android_version === androidVersion)
 
-      // If no exact match, try compatible versions (±2)
       if (matchingBuildNumbers.length === 0) {
-        matchingBuildNumbers = androidBuildNumbers.filter((bn) => {
-          const bnVersion = Number.parseFloat(bn.android_version)
-          return Math.abs(bnVersion - androidVersionNum) <= 2
-        })
+        console.log(`[v0] No exact match found for Android version ${androidVersion} - returning null`)
+        return null
       }
-
-      // If still no match, try any active build numbers
-      if (matchingBuildNumbers.length === 0) {
-        matchingBuildNumbers = androidBuildNumbers.filter((bn) => bn.is_active !== false)
-      }
-
-      // Final fallback: use any build number
-      if (matchingBuildNumbers.length === 0) {
-        matchingBuildNumbers = androidBuildNumbers
-      }
-
-      // If still no build numbers at all, throw error
-      if (matchingBuildNumbers.length === 0) {
-        throw new Error(`No build numbers available in database. Please add build numbers in admin panel.`)
-      }
+      // </CHANGE>
 
       const buildNumber = matchingBuildNumbers[Math.floor(Math.random() * matchingBuildNumbers.length)]
-      // </CHANGE>
 
       const fbVersions = androidAppVersions.filter((a) => a.app_type === "facebook")
       const chromeVersions = androidAppVersions.filter((a) => a.app_type === "chrome")
@@ -1299,7 +1217,9 @@ export default function UserAgentGenerator() {
       const manufacturer = device.manufacturer ? `Google/${device.manufacturer}` : "Google/google"
 
       const deviceCodename = device.code || device.device_codename || "panther"
-      const doubleCodename = `${deviceCodename}; ${deviceCodename}`
+
+      // For Pixel devices, we only need the code once in the user agent string
+      const deviceCodeForUA = deviceCodename
 
       const buildNumber =
         device.build_number ||
@@ -1307,14 +1227,33 @@ export default function UserAgentGenerator() {
           throw new Error("No build number found for this device. Please configure build numbers in admin panel.")
         })()
       const androidVersion = device.android_version || 13
-      const apiLevel = getApiLevel(androidVersion.toString()) || "35"
+      const apiLevel = getApiLevel(androidVersion.toString())
+
+      if (!apiLevel) {
+        throw new Error(
+          `No API level found for Android version ${androidVersion}. Please configure API levels in admin panel.`,
+        )
+      }
+
+      const chipset = device.chipset || "N/A"
+
+      const instagramUniqueId = version.version_code || version.unique_id || "312001103"
+      let randomizedInstagramUniqueId = instagramUniqueId
+
+      if (instagramUniqueId && instagramUniqueId.toString().length > 5) {
+        const fixedPart = instagramUniqueId.toString().slice(0, -5)
+        const randomPart = Math.floor(Math.random() * 100000)
+          .toString()
+          .padStart(5, "0")
+        randomizedInstagramUniqueId = fixedPart + randomPart
+      }
 
       const userAgent =
         `Mozilla/5.0 (Linux; Android ${androidVersion}; ${modelIdentifier} Build/${buildNumber}) ` +
         `AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 ` +
         `Chrome/${chromeVersion.version || "136.0.7195.102"} Mobile Safari/537.36 ` +
         `Instagram ${version.version || "312.0.0.37.103"} Android (${apiLevel}/${androidVersion}; ${dpi}; ` +
-        `${resolution}; ${manufacturer}; ${modelIdentifier}; ${doubleCodename}; ${device.locale || "en_US"}; ${version.version_code || version.unique_id || "312001103"}; IABMV/1)`
+        `${resolution}; ${manufacturer}; ${modelIdentifier}; ${deviceCodeForUA}; ${chipset}; ${device.locale || "en_US"}; ${randomizedInstagramUniqueId}; IABMV/1)`
 
       console.log("[v0] Generated Pixel Instagram user agent:", userAgent)
       return userAgent
@@ -1937,6 +1876,18 @@ export default function UserAgentGenerator() {
                           className="p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
                         >
                           <code className="text-sm text-slate-700 dark:text-slate-300 break-all">{ua}</code>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="ml-2 p-1 h-6 w-6 hover:bg-slate-200 dark:hover:bg-slate-600"
+                            onClick={() => copyToClipboard(ua, index)}
+                          >
+                            {copiedIndex === index ? (
+                              <Check className="w-3 h-3 text-green-500" />
+                            ) : (
+                              <Copy className="w-3 h-3 text-slate-500 dark:text-slate-400" />
+                            )}
+                          </Button>
                         </div>
                       ))}
                     </div>
@@ -1947,8 +1898,26 @@ export default function UserAgentGenerator() {
           )}
         </div>
       </div>
-      <CustomModal modal={modal} setModal={setModal} />
-      <ProgressModal modal={progressModal} setModal={setProgressModal} onCancel={handleCancelGeneration} />
+
+      <CustomModal
+        isOpen={modal.isOpen}
+        title={modal.title}
+        message={modal.message}
+        type={modal.type}
+        onConfirm={modal.onConfirm}
+        showCancel={modal.showCancel}
+        onClose={() => setModal((prev) => ({ ...prev, isOpen: false }))}
+      />
+
+      <ProgressModal
+        isOpen={progressModal.isOpen}
+        title={progressModal.title}
+        message={progressModal.message}
+        progress={progressModal.progress}
+        type={progressModal.type}
+        onCancel={handleCancelGeneration}
+        showCancel={progressModal.showCancel}
+      />
     </div>
   )
 }
