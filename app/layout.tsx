@@ -1,6 +1,7 @@
 import type React from "react"
 import type { Metadata, Viewport } from "next"
 import { Inter, Noto_Sans_Bengali } from "next/font/google"
+import { Analytics } from "@vercel/analytics/react"
 import "./globals.css"
 import { ThemeProvider } from "@/components/theme-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -14,6 +15,7 @@ const inter = Inter({
   fallback: ["system-ui", "arial"],
   adjustFontFallback: true,
   variable: "--font-inter",
+  weight: ["400", "500", "600", "700"], // Only load needed weights
 })
 
 const notoSansBengali = Noto_Sans_Bengali({
@@ -23,6 +25,7 @@ const notoSansBengali = Noto_Sans_Bengali({
   fallback: ["system-ui", "arial"],
   adjustFontFallback: true,
   variable: "--font-noto-bengali",
+  weight: ["400", "700"], // Only load needed weights
 })
 
 export const metadata: Metadata = {
@@ -206,6 +209,7 @@ export default function RootLayout({
           >
             <ClientProviders>{children}</ClientProviders>
             <Toaster />
+            <Analytics />
           </ThemeProvider>
         </ChunkLoadErrorHandler>
       </body>

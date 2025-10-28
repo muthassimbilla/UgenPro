@@ -44,51 +44,18 @@ export const UserIPDisplay = memo(function UserIPDisplay() {
 
       let detectedIP = null
 
-      // Try multiple IP detection methods
-      const ipDetectionMethods = [
-        // Method 1: Our API
-        async () => {
-          const response = await fetch("/api/user/current-ip")
-          if (response.ok) {
-            const data = await response.json()
-            if (data.success && data.data?.ip) {
-              return data.data.ip
-            }
+      try {
+        const response = await fetch("https://api.ipify.org?format=json", {
+          signal: AbortSignal.timeout(5000), // 5 second timeout
+        })
+        if (response.ok) {
+          const data = await response.json()
+          if (data.ip && data.ip !== "::1" && data.ip !== "127.0.0.1") {
+            detectedIP = data.ip
           }
-          return null
-        },
-        // Method 2: ipify.org
-        async () => {
-          const response = await fetch("https://api.ipify.org?format=json")
-          if (response.ok) {
-            const data = await response.json()
-            return data.ip
-          }
-          return null
-        },
-        // Method 3: ipapi.co
-        async () => {
-          const response = await fetch("https://ipapi.co/ip/")
-          if (response.ok) {
-            const text = await response.text()
-            return text.trim()
-          }
-          return null
-        },
-      ]
-
-      // Try each method until one succeeds
-      for (const method of ipDetectionMethods) {
-        try {
-          const ip = await method()
-          if (ip && ip !== "::1" && ip !== "127.0.0.1" && ip !== "unknown" && ip.length > 0) {
-            detectedIP = ip
-            break
-          }
-        } catch (error) {
-          console.warn("IP detection method failed:", error)
-          continue
         }
+      } catch (error) {
+        console.warn("IP detection failed:", error)
       }
 
       if (detectedIP) {
@@ -214,7 +181,7 @@ export const UserIPDisplay = memo(function UserIPDisplay() {
                       toast({
                         title: "Error",
                         description: "Failed to copy IP address",
-                        variant: "destructive"
+                        variant: "destructive",
                       })
                     }
                   }}

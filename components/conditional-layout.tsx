@@ -23,6 +23,9 @@ export default function ConditionalLayout({ children }: ConditionalLayoutProps) 
     "/adminbilla/login",
     "/forgot-password",
     "/reset-password",
+    "/about",
+    "/privacy-policy",
+    "/terms-of-service",
   ]
   const isAuthRoute = authRoutes.includes(pathname)
   const isNoLayoutRoute =

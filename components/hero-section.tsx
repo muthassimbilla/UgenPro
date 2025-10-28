@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowRight, Sparkles, Zap, Users } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { memo, useCallback } from "react"
+import Link from "next/link"
 
 export const HeroSection = memo(function HeroSection() {
   const router = useRouter()
@@ -72,6 +73,15 @@ export const HeroSection = memo(function HeroSection() {
               >
                 Explore Tools
               </Button>
+              <Link href="/about">
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="w-full sm:w-auto text-base sm:text-lg px-6 sm:px-8 py-5 sm:py-6 glass hover:glass-strong border-border/50 hover:border-primary/30 rounded-xl font-semibold hover:scale-105 transition-all duration-300 bg-transparent"
+                >
+                  Learn More
+                </Button>
+              </Link>
             </div>
 
             <div className="flex flex-wrap gap-4 sm:gap-6 justify-center pt-4 sm:pt-6">

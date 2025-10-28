@@ -41,10 +41,11 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
   }
 
   const navItems = [
-    { id: "hero", label: "Home" },
-    { id: "tools", label: "Tools" },
-    { id: "pricing", label: "Pricing" },
-    { id: "contact", label: "Contact" },
+    { id: "hero", label: "Home", href: "/" },
+    { id: "tools", label: "Tools", href: "/#tools" },
+    { id: "pricing", label: "Pricing", href: "/#pricing" },
+    { id: "contact", label: "Contact", href: "/#contact" },
+    { id: "about", label: "About", href: "/about" },
   ]
 
   return (
@@ -59,23 +60,37 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
 
         {/* Desktop Navigation */}
         <div className="hidden lg:flex items-center gap-2">
-          {navItems.map((item) => (
-            <a
-              key={item.id}
-              href={`#${item.id}`}
-              onClick={(e) => handleSmoothScroll(e, item.id)}
-              className={`px-5 py-2.5 text-sm font-semibold transition-all rounded-xl relative overflow-hidden group ${
-                activeSection === item.id
-                  ? "text-primary bg-primary/10 shadow-glow border border-primary/20"
-                  : "text-muted-foreground hover:text-foreground hover:bg-card/50 hover:shadow-sm border border-transparent hover:border-border/50"
-              }`}
-            >
-              <span className="relative z-10">{item.label}</span>
-              {activeSection === item.id && (
-                <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-50 rounded-xl" />
-              )}
-            </a>
-          ))}
+          {navItems.map((item) =>
+            item.href ? (
+              <Link
+                key={item.id}
+                href={item.href}
+                className={`px-5 py-2.5 text-sm font-semibold transition-all rounded-xl relative overflow-hidden group ${
+                  activeSection === item.id
+                    ? "text-primary bg-primary/10 shadow-glow border border-primary/20"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/50 hover:shadow-sm border border-transparent hover:border-border/50"
+                }`}
+              >
+                <span className="relative z-10">{item.label}</span>
+              </Link>
+            ) : (
+              <a
+                key={item.id}
+                href={`#${item.id}`}
+                onClick={(e) => handleSmoothScroll(e, item.id)}
+                className={`px-5 py-2.5 text-sm font-semibold transition-all rounded-xl relative overflow-hidden group ${
+                  activeSection === item.id
+                    ? "text-primary bg-primary/10 shadow-glow border border-primary/20"
+                    : "text-muted-foreground hover:text-foreground hover:bg-card/50 hover:shadow-sm border border-transparent hover:border-border/50"
+                }`}
+              >
+                <span className="relative z-10">{item.label}</span>
+                {activeSection === item.id && (
+                  <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-accent/5 opacity-50 rounded-xl" />
+                )}
+              </a>
+            ),
+          )}
         </div>
 
         {/* Right controls */}
@@ -133,20 +148,35 @@ export function Navigation({ activeSection = "hero" }: NavigationProps) {
               </button>
             </div>
             <div className="px-4 py-4 space-y-2">
-              {navItems.map((item) => (
-                <a
-                  key={item.id}
-                  href={`#${item.id}`}
-                  onClick={(e) => handleSmoothScroll(e, item.id)}
-                  className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
-                    activeSection === item.id
-                      ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
-                      : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
-                  }`}
-                >
-                  {item.label}
-                </a>
-              ))}
+              {navItems.map((item) =>
+                item.href ? (
+                  <Link
+                    key={item.id}
+                    href={item.href}
+                    onClick={() => setMobileMenuOpen(false)}
+                    className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
+                      activeSection === item.id
+                        ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
+                        : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
+                    }`}
+                  >
+                    {item.label}
+                  </Link>
+                ) : (
+                  <a
+                    key={item.id}
+                    href={`#${item.id}`}
+                    onClick={(e) => handleSmoothScroll(e, item.id)}
+                    className={`block px-5 py-4 rounded-2xl text-sm font-semibold transition-all ${
+                      activeSection === item.id
+                        ? "bg-primary/10 text-primary border border-primary/30 shadow-glow"
+                        : "text-muted-foreground hover:bg-card/50 hover:text-foreground border border-transparent hover:border-border/50"
+                    }`}
+                  >
+                    {item.label}
+                  </a>
+                ),
+              )}
               <div className="pt-4 flex flex-col gap-3">
                 <Link href="/login" className="block">
                   <Button
